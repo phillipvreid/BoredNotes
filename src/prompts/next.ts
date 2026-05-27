@@ -29,12 +29,15 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
         : null,
   });
 
+  // If all criteria knock out every prompt (rare: user has been writing a lot),
+  // fall back to the unfiltered pool. selectPrompt will still try to apply
+  // category/depth variety, and has its own internal fallback to any prompt.
   const allFallback = await getEligiblePrompts(db, {});
   const pool = eligible.length > 0 ? eligible : allFallback;
   const chosenLibraryPrompt = selectPrompt(pool, recentCategories, recentDepths);
 
   const callCount = parseInt((await getSetting(db, 'prompt_call_count')) ?? '0', 10);
-  const useAi = callCount % AI_FREQUENCY === AI_FREQUENCY - 1;
+  const useAi = callCount % AI_FREQUENCY === AI_FREQUENCY - 1; // true on call 3, 7, 11, ...
   await setSetting(db, 'prompt_call_count', String(callCount + 1));
 
   let finalText = chosenLibraryPrompt.text;
