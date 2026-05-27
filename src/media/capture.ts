@@ -1,0 +1,66 @@
+import * as ImagePicker from 'expo-image-picker';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
+
+const MEDIA_DIR = `${FileSystem.documentDirectory}bn_media/`;
+
+async function ensureMediaDir(): Promise<void> {
+  const info = await FileSystem.getInfoAsync(MEDIA_DIR);
+  if (!info.exists) await FileSystem.makeDirectoryAsync(MEDIA_DIR, { intermediates: true });
+}
+
+export async function pickPhoto(): Promise<string | null> {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== 'granted') return null;
+
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    quality: 0.8,
+    allowsEditing: false,
+  });
+  if (result.canceled || !result.assets[0]) return null;
+
+  await ensureMediaDir();
+  const src = result.assets[0].uri;
+  const dest = `${MEDIA_DIR}photo_${Date.now()}.jpg`;
+  await FileSystem.copyAsync({ from: src, to: dest });
+  return dest;
+}
+
+export async function takePhoto(): Promise<string | null> {
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  if (status !== 'granted') return null;
+
+  const result = await ImagePicker.launchCameraAsync({
+    quality: 0.8,
+    allowsEditing: false,
+  });
+  if (result.canceled || !result.assets[0]) return null;
+
+  await ensureMediaDir();
+  const src = result.assets[0].uri;
+  const dest = `${MEDIA_DIR}photo_${Date.now()}.jpg`;
+  await FileSystem.copyAsync({ from: src, to: dest });
+  return dest;
+}
+
+export async function startVoiceRecording(): Promise<Audio.Recording> {
+  await Audio.requestPermissionsAsync();
+  await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+  const { recording } = await Audio.Recording.createAsync(
+    Audio.RecordingOptionsPresets.HIGH_QUALITY
+  );
+  return recording;
+}
+
+export async function stopVoiceRecording(recording: Audio.Recording): Promise<string | null> {
+  await recording.stopAndUnloadAsync();
+  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+  const uri = recording.getURI();
+  if (!uri) return null;
+
+  await ensureMediaDir();
+  const dest = `${MEDIA_DIR}voice_${Date.now()}.m4a`;
+  await FileSystem.moveAsync({ from: uri, to: dest });
+  return dest;
+}
