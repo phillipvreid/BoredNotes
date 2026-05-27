@@ -16,7 +16,7 @@ export async function requestLocationPermission(): Promise<boolean> {
 
 export async function captureLocation(): Promise<CapturedLocation | null> {
   try {
-    const { status } = await Location.getForegroundPermissionsAsync();
+    const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return null;
 
     const loc = await Location.getCurrentPositionAsync({

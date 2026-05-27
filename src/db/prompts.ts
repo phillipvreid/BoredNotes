@@ -55,7 +55,7 @@ export async function getEligiblePrompts(
 
 export async function markPromptUsed(db: SQLiteDatabase, id: number): Promise<void> {
   await db.runAsync(
-    "UPDATE prompts SET last_used_at = datetime('now') WHERE id = ?",
+    "UPDATE prompts SET last_used_at = datetime('now', 'localtime') WHERE id = ?",
     [id]
   );
 }

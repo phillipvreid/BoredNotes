@@ -56,9 +56,13 @@ export default function RespondScreen() {
       setIsRecording(false);
       if (uri) setVoiceUri(uri);
     } else {
-      const rec = await startVoiceRecording();
-      setRecording(rec);
-      setIsRecording(true);
+      try {
+        const rec = await startVoiceRecording();
+        setRecording(rec);
+        setIsRecording(true);
+      } catch {
+        Alert.alert('Microphone access needed', 'Please allow microphone access in Settings to record voice memos.');
+      }
     }
   }
 

@@ -45,7 +45,8 @@ export async function takePhoto(): Promise<string | null> {
 }
 
 export async function startVoiceRecording(): Promise<Audio.Recording> {
-  await Audio.requestPermissionsAsync();
+  const { status } = await Audio.requestPermissionsAsync();
+  if (status !== 'granted') throw new Error('Microphone permission denied');
   await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
   const { recording } = await Audio.Recording.createAsync(
     Audio.RecordingOptionsPresets.HIGH_QUALITY

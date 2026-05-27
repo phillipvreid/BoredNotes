@@ -3,7 +3,7 @@ export const CREATE_TABLES_SQL = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     prompt_text TEXT NOT NULL,
     response_text TEXT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT (datetime('now')),
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
     location_label TEXT,
     location_lat REAL,
     location_lng REAL
@@ -14,7 +14,7 @@ export const CREATE_TABLES_SQL = `
     entry_id INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
     type TEXT NOT NULL CHECK (type IN ('photo', 'voice')),
     file_path TEXT NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT (datetime('now'))
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
   );
 
   CREATE TABLE IF NOT EXISTS prompts (
