@@ -1,5 +1,5 @@
 import * as ImagePicker from 'expo-image-picker';
-import { Audio } from 'expo-av';
+import { AudioRecorder, setAudioModeAsync, requestRecordingPermissionsAsync } from 'expo-audio';
 import * as FileSystem from 'expo-file-system';
 
 const MEDIA_DIR = `${FileSystem.documentDirectory}bn_media/`;
@@ -44,22 +44,34 @@ export async function takePhoto(): Promise<string | null> {
   return dest;
 }
 
-export async function startVoiceRecording(): Promise<Audio.Recording> {
-  const { status } = await Audio.requestPermissionsAsync();
-  if (status !== 'granted') throw new Error('Microphone permission denied');
-  await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-  const { recording } = await Audio.Recording.createAsync(
-    Audio.RecordingOptionsPresets.HIGH_QUALITY
-  );
-  return recording;
+let _recorder: AudioRecorder | null = null;
+
+export async function startVoiceRecording(): Promise<void> {
+  const { granted } = await requestRecordingPermissionsAsync();
+  if (!granted) throw new Error('Microphone permission denied');
+
+  await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+
+  _recorder = new AudioRecorder({
+    isMeteringEnabled: false,
+    android: { extension: '.m4a', outputFormat: 'mpeg4', audioEncoder: 'aac', sampleRate: 44100, numberOfChannels: 2, bitRate: 128000 },
+    ios: { extension: '.m4a', outputFormat: 'mpeg4', audioQuality: 96, sampleRate: 44100, numberOfChannels: 2, bitRate: 128000, linearPCMBitDepth: 16, linearPCMIsBigEndian: false, linearPCMIsFloat: false },
+    web: { mimeType: 'audio/webm', bitsPerSecond: 128000 },
+  });
+  await _recorder.prepareToRecordAsync();
+  _recorder.record();
 }
 
-export async function stopVoiceRecording(recording: Audio.Recording): Promise<string | null> {
-  await recording.stopAndUnloadAsync();
-  await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-  const uri = recording.getURI();
+export async function stopVoiceRecording(): Promise<string | null> {
+  if (!_recorder) return null;
+
+  await _recorder.stop();
+  const uri = _recorder.uri;
+  _recorder = null;
+
   if (!uri) return null;
 
+  await setAudioModeAsync({ allowsRecording: false });
   await ensureMediaDir();
   const dest = `${MEDIA_DIR}voice_${Date.now()}.m4a`;
   await FileSystem.moveAsync({ from: uri, to: dest });

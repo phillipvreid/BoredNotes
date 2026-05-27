@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
+import { AudioPlayer, createAudioPlayer } from 'expo-audio';
 import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
@@ -19,7 +19,7 @@ export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [player, setPlayer] = useState<AudioPlayer | null>(null);
   const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function EntryDetailScreen() {
       setEntry(e);
       if (e) setMedia(await getMediaForEntry(db, e.id));
     })();
-    return () => { sound?.unloadAsync(); };
+    return () => { player?.remove(); };
   }, [id]);
 
   const photo = media.find(m => m.type === 'photo');
@@ -37,21 +37,19 @@ export default function EntryDetailScreen() {
 
   async function togglePlayback() {
     if (!voice) return;
-    if (playing && sound) {
-      await sound.pauseAsync();
+    if (playing && player) {
+      player.pause();
       setPlaying(false);
-    } else if (sound) {
-      await sound.playAsync();
+    } else if (player) {
+      player.play();
       setPlaying(true);
     } else {
-      const { sound: s } = await Audio.Sound.createAsync(
-        { uri: voice.file_path },
-        { shouldPlay: true }
-      );
-      s.setOnPlaybackStatusUpdate(status => {
-        if (status.isLoaded && status.didJustFinish) setPlaying(false);
+      const p = createAudioPlayer({ uri: voice.file_path });
+      p.addListener('playbackStatusUpdate', (status: any) => {
+        if (status.didJustFinish) setPlaying(false);
       });
-      setSound(s);
+      p.play();
+      setPlayer(p);
       setPlaying(true);
     }
   }

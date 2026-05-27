@@ -4,7 +4,6 @@ import {
   ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Audio } from 'expo-av';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
@@ -18,7 +17,6 @@ export default function RespondScreen() {
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [voiceUri, setVoiceUri] = useState<string | null>(null);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [prompt, setPrompt] = useState<string>('');
@@ -50,15 +48,13 @@ export default function RespondScreen() {
   }
 
   async function handleToggleRecording() {
-    if (isRecording && recording) {
-      const uri = await stopVoiceRecording(recording);
-      setRecording(null);
+    if (isRecording) {
+      const uri = await stopVoiceRecording();
       setIsRecording(false);
       if (uri) setVoiceUri(uri);
     } else {
       try {
-        const rec = await startVoiceRecording();
-        setRecording(rec);
+        await startVoiceRecording();
         setIsRecording(true);
       } catch {
         Alert.alert('Microphone access needed', 'Please allow microphone access in Settings to record voice memos.');
