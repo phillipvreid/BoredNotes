@@ -4,6 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { getDb } from '../src/db/database';
 import { getCurrentPrompt, getNextPrompt } from '../src/prompts/next';
+import { getSetting } from '../src/db/settings';
 import { useTheme } from '../src/theme/ThemeContext';
 import type { CurrentPrompt } from '../src/types';
 
@@ -11,6 +12,7 @@ export default function HomeScreen() {
   const { colors, accent } = useTheme();
   const [prompt, setPrompt] = useState<CurrentPrompt | null>(null);
   const [loading, setLoading] = useState(true);
+  const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
 
   useFocusEffect(
     useCallback(() => {
@@ -20,6 +22,8 @@ export default function HomeScreen() {
         let current = await getCurrentPrompt(db);
         if (!current) current = await getNextPrompt(db);
         setPrompt(current);
+        const mode = await getSetting(db, 'respond_mode');
+        setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
         setLoading(false);
       })();
     }, [])
@@ -55,9 +59,21 @@ export default function HomeScreen() {
             <ActivityIndicator color={accent.labelColor} />
           ) : (
             <>
-              <Text style={[styles.promptLabel, { color: accent.labelColor }]}>Today's prompt</Text>
-              <Text style={[styles.promptText, { color: colors.textPrimary }]}>{prompt?.text}</Text>
-              <Text style={[styles.tapHint, { color: colors.textMuted }]}>Tap to respond →</Text>
+              <Text style={[styles.promptLabel, { color: accent.labelColor }]}>
+                {respondMode === 'freeform' ? "Today's entry" : "Today's prompt"}
+              </Text>
+              {respondMode === 'freeform' ? (
+                <Text style={[styles.promptText, { color: colors.textMuted }]}>
+                  {"What's on your mind…"}
+                </Text>
+              ) : (
+                <Text style={[styles.promptText, { color: colors.textPrimary }]}>
+                  {prompt?.text}
+                </Text>
+              )}
+              <Text style={[styles.tapHint, { color: colors.textMuted }]}>
+                {respondMode === 'freeform' ? 'Tap to write →' : 'Tap to respond →'}
+              </Text>
             </>
           )}
         </TouchableOpacity>
