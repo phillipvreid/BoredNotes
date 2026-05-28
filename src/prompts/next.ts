@@ -40,10 +40,12 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   const useAi = callCount % AI_FREQUENCY === AI_FREQUENCY - 1; // true on call 3, 7, 11, ...
   await setSetting(db, 'prompt_call_count', String(callCount + 1));
 
+  const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
+
   let finalText = chosenLibraryPrompt.text;
   const finalCategory = chosenLibraryPrompt.category;
 
-  if (useAi && API_KEY) {
+  if (!offlineMode && useAi && API_KEY) {
     const recentTopics = recentEntries.slice(0, 3).map(e =>
       e.response_text.slice(0, 40).replace(/\n/g, ' ')
     );
