@@ -14,6 +14,7 @@ const version = Constants.expoConfig?.version ?? '1.0.0';
 export default function SettingsScreen() {
   const { colors, accent, isDark, setAccent, setDarkMode } = useTheme();
   const [offlineMode, setOfflineMode] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -26,6 +27,7 @@ export default function SettingsScreen() {
   }, []);
 
   async function handleOfflineToggle(value: boolean) {
+    setToggling(true);
     try {
       const db = await getDb();
       await setSetting(db, 'offline_mode', String(value));
@@ -33,6 +35,8 @@ export default function SettingsScreen() {
       setOfflineMode(value);
     } catch {
       setOfflineMode(prev => prev);
+    } finally {
+      setToggling(false);
     }
   }
 
@@ -86,6 +90,7 @@ export default function SettingsScreen() {
             value={offlineMode}
             onValueChange={handleOfflineToggle}
             trackColor={{ true: accent.buttonColor }}
+            disabled={toggling}
           />
         </View>
 
