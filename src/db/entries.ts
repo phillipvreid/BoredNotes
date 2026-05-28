@@ -7,18 +7,20 @@ export interface CreateEntryInput {
   location_label?: string;
   location_lat?: number;
   location_lng?: number;
+  entry_mode?: 'prompted' | 'freeform';
 }
 
 export async function createEntry(db: SQLiteDatabase, input: CreateEntryInput): Promise<number> {
   const result = await db.runAsync(
-    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng, entry_mode)
+     VALUES (?, ?, ?, ?, ?, ?)`,
     [
       input.prompt_text,
       input.response_text,
       input.location_label ?? null,
       input.location_lat ?? null,
       input.location_lng ?? null,
+      input.entry_mode ?? 'prompted',
     ]
   );
   return result.lastInsertRowId;
