@@ -68,9 +68,9 @@ export default function TimelineScreen() {
         <Text style={[styles.title, { color: colors.textPrimary }]}>Timeline</Text>
 
         <View style={styles.monthNav}>
-          <TouchableOpacity onPress={prevMonth}><Text style={styles.navArrow}>‹</Text></TouchableOpacity>
+          <TouchableOpacity onPress={prevMonth}><Text style={[styles.navArrow, { color: colors.textSecondary }]}>‹</Text></TouchableOpacity>
           <Text style={[styles.monthLabel, { color: colors.textPrimary }]}>{MONTH_NAMES[month]} {year}</Text>
-          <TouchableOpacity onPress={nextMonth}><Text style={styles.navArrow}>›</Text></TouchableOpacity>
+          <TouchableOpacity onPress={nextMonth}><Text style={[styles.navArrow, { color: colors.textSecondary }]}>›</Text></TouchableOpacity>
         </View>
 
         <View style={styles.grid}>
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   backTxt: { fontSize: 15 },
   title: { fontSize: 28, fontWeight: '700' },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  navArrow: { fontSize: 28, color: '#555', paddingHorizontal: 12 },
+  navArrow: { fontSize: 28, paddingHorizontal: 12 },
   monthLabel: { fontSize: 17, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },

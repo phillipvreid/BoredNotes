@@ -85,7 +85,7 @@ export default function ShareCardScreen() {
               style={[styles.templateChip, { backgroundColor: templateId === t.id ? accent.buttonColor : colors.surface }]}
               onPress={() => setTemplateId(t.id)}
             >
-              <View style={[styles.templateSwatch, { backgroundColor: t.bg }]} />
+              <View style={[styles.templateSwatch, { backgroundColor: t.bg, borderColor: colors.border }]} />
               <Text style={[styles.templateLabel, { color: colors.textSecondary }]}>{t.label}</Text>
             </TouchableOpacity>
           ))}
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
   templateScroll: { flexGrow: 0 },
   templateChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginRight: 10 },
-  templateSwatch: { width: 16, height: 16, borderRadius: 4, borderWidth: 1, borderColor: '#ddd' },
+  templateSwatch: { width: 16, height: 16, borderRadius: 4, borderWidth: 1 },
   templateLabel: { fontSize: 13 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   toggleLabel: { fontSize: 15 },
