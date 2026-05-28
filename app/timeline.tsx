@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } fr
 import { router } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { getDatesWithEntries, getEntriesForDate } from '../src/db/entries';
+import { useTheme } from '../src/theme/ThemeContext';
 import type { Entry } from '../src/types';
 
 function getDaysInMonth(year: number, month: number): number {
@@ -16,6 +17,7 @@ function getFirstDayOfMonth(year: number, month: number): number {
 const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 export default function TimelineScreen() {
+  const { colors, accent } = useTheme();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -58,22 +60,22 @@ export default function TimelineScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.backTxt}>← Back</Text>
+          <Text style={[styles.backTxt, { color: colors.textSecondary }]}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Timeline</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Timeline</Text>
 
         <View style={styles.monthNav}>
           <TouchableOpacity onPress={prevMonth}><Text style={styles.navArrow}>‹</Text></TouchableOpacity>
-          <Text style={styles.monthLabel}>{MONTH_NAMES[month]} {year}</Text>
+          <Text style={[styles.monthLabel, { color: colors.textPrimary }]}>{MONTH_NAMES[month]} {year}</Text>
           <TouchableOpacity onPress={nextMonth}><Text style={styles.navArrow}>›</Text></TouchableOpacity>
         </View>
 
         <View style={styles.grid}>
           {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-            <Text key={d} style={styles.dayHeader}>{d}</Text>
+            <Text key={d} style={[styles.dayHeader, { color: colors.textMuted }]}>{d}</Text>
           ))}
           {cells.map((day, i) => {
             if (!day) return <View key={`e${i}`} style={styles.cell} />;
@@ -83,14 +85,14 @@ export default function TimelineScreen() {
             return (
               <TouchableOpacity
                 key={dateStr}
-                style={[styles.cell, isSelected && styles.selectedCell]}
+                style={[styles.cell, isSelected && { backgroundColor: accent.buttonColor, borderRadius: 8 }]}
                 onPress={() => hasEntry && handleDayPress(dateStr)}
                 disabled={!hasEntry}
               >
-                <Text style={[styles.dayNum, !hasEntry && styles.emptyDay, isSelected && styles.selectedDayNum]}>
+                <Text style={[styles.dayNum, { color: colors.textPrimary }, !hasEntry && { color: colors.textMuted }, isSelected && styles.selectedDayNum]}>
                   {day}
                 </Text>
-                {hasEntry && <View style={[styles.dot, isSelected && styles.selectedDot]} />}
+                {hasEntry && <View style={[styles.dot, { backgroundColor: accent.labelColor }, isSelected && styles.selectedDot]} />}
               </TouchableOpacity>
             );
           })}
@@ -99,11 +101,17 @@ export default function TimelineScreen() {
         {selectedDate && dayEntries.map(entry => (
           <TouchableOpacity
             key={entry.id}
-            style={styles.entryCard}
+            style={[styles.entryCard, {
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.cardBorder,
+              shadowColor: colors.shadowColor,
+              shadowOpacity: colors.shadowOpacity,
+            }]}
             onPress={() => router.push(`/entry/${entry.id}`)}
           >
-            <Text style={styles.entryPrompt}>{entry.prompt_text}</Text>
-            <Text style={styles.entryResponse} numberOfLines={3}>{entry.response_text}</Text>
+            <Text style={[styles.entryPrompt, { color: colors.textMuted }]}>{entry.prompt_text}</Text>
+            <Text style={[styles.entryResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -112,24 +120,22 @@ export default function TimelineScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1 },
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   back: { paddingVertical: 4 },
-  backTxt: { color: '#888', fontSize: 15 },
-  title: { fontSize: 28, fontWeight: '700', color: '#1a1a1a' },
+  backTxt: { fontSize: 15 },
+  title: { fontSize: 28, fontWeight: '700' },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navArrow: { fontSize: 28, color: '#555', paddingHorizontal: 12 },
-  monthLabel: { fontSize: 17, fontWeight: '600', color: '#222' },
+  monthLabel: { fontSize: 17, fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   cell: { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  selectedCell: { backgroundColor: '#1a1a1a', borderRadius: 8 },
-  dayHeader: { width: '14.28%', textAlign: 'center', fontSize: 11, color: '#aaa', paddingVertical: 6 },
-  dayNum: { fontSize: 14, color: '#333' },
-  emptyDay: { color: '#ccc' },
+  dayHeader: { width: '14.28%', textAlign: 'center', fontSize: 11, paddingVertical: 6 },
+  dayNum: { fontSize: 14 },
   selectedDayNum: { color: '#fff' },
-  dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: '#555' },
+  dot: { width: 4, height: 4, borderRadius: 2 },
   selectedDot: { backgroundColor: '#fff' },
-  entryCard: { backgroundColor: '#f8f8f8', borderRadius: 12, padding: 16, gap: 6 },
-  entryPrompt: { fontSize: 11, color: '#aaa', fontStyle: 'italic' },
-  entryResponse: { fontSize: 15, color: '#333', lineHeight: 22 },
+  entryCard: { borderRadius: 12, padding: 16, gap: 6, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
+  entryPrompt: { fontSize: 11, fontStyle: 'italic' },
+  entryResponse: { fontSize: 15, lineHeight: 22 },
 });
