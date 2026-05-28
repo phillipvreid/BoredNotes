@@ -7,5 +7,10 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   if (_db) return _db;
   _db = await SQLite.openDatabaseAsync('borednotes.db');
   await _db.execAsync(CREATE_TABLES_SQL);
+  try {
+    await _db.execAsync(
+      `ALTER TABLE entries ADD COLUMN entry_mode TEXT NOT NULL DEFAULT 'prompted'`
+    );
+  } catch {}
   return _db;
 }
