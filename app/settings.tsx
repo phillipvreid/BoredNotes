@@ -40,6 +40,28 @@ export default function SettingsScreen() {
     }
   }
 
+  const [isFreeform, setIsFreeform] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const db = await getDb();
+        const mode = await getSetting(db, 'respond_mode');
+        setIsFreeform(mode === 'freeform');
+      } catch {}
+    })();
+  }, []);
+
+  async function handleFreeformToggle(value: boolean) {
+    setIsFreeform(value);
+    try {
+      const db = await getDb();
+      await setSetting(db, 'respond_mode', value ? 'freeform' : 'prompted');
+    } catch {
+      setIsFreeform(!value);
+    }
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -94,6 +116,21 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Writing section */}
+        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>WRITING</Text>
+
+        <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
+          <View style={styles.rowTextBlock}>
+            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Freeform mode</Text>
+            <Text style={[styles.rowSubLabel, { color: colors.textMuted }]}>Write without a prompt</Text>
+          </View>
+          <Switch
+            value={isFreeform}
+            onValueChange={handleFreeformToggle}
+            trackColor={{ true: accent.buttonColor }}
+          />
+        </View>
+
         {/* About section */}
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>ABOUT</Text>
 
@@ -121,6 +158,8 @@ const styles = StyleSheet.create({
   rowLabel: { fontSize: 15 },
   rowSubtitle: { fontSize: 12, marginTop: 2 },
   rowValue: { fontSize: 15 },
+  rowTextBlock: { flex: 1 },
+  rowSubLabel: { fontSize: 12, marginTop: 2 },
   swatches: { flexDirection: 'row', gap: 10 },
   swatch: {
     width: 28, height: 28, borderRadius: 14,
