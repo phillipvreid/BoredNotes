@@ -10,8 +10,10 @@ import { createMedia } from '../src/db/media';
 import { getNextPrompt, getCurrentPrompt } from '../src/prompts/next';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
 import { pickPhoto, takePhoto, startVoiceRecording, stopVoiceRecording } from '../src/media/capture';
+import { useTheme } from '../src/theme/ThemeContext';
 
 export default function RespondScreen() {
+  const { colors, accent } = useTheme();
   const [response, setResponse] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -77,14 +79,11 @@ export default function RespondScreen() {
         location_lat: locationCoords?.lat,
         location_lng: locationCoords?.lng,
       });
-
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
       }
-
       if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
       if (voiceUri) await createMedia(db, entryId, 'voice', voiceUri);
-
       await getNextPrompt(db);
       router.back();
     } catch {
@@ -94,19 +93,19 @@ export default function RespondScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-            <Text style={styles.closeTxt}>✕</Text>
+            <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
           </TouchableOpacity>
 
-          <Text style={styles.prompt}>{prompt}</Text>
+          <Text style={[styles.prompt, { color: colors.textPrimary }]}>{prompt}</Text>
 
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.textPrimary, borderBottomColor: colors.border }]}
             placeholder="What's on your mind…"
-            placeholderTextColor="#bbb"
+            placeholderTextColor={colors.textMuted}
             multiline
             autoFocus
             value={response}
@@ -124,7 +123,7 @@ export default function RespondScreen() {
 
           {voiceUri && !isRecording && (
             <View style={styles.voiceBadge}>
-              <Text style={styles.voiceTxt}>🎙 Voice memo attached</Text>
+              <Text style={[styles.voiceTxt, { color: colors.textSecondary }]}>🎙 Voice memo attached</Text>
               <TouchableOpacity onPress={() => setVoiceUri(null)}>
                 <Text style={styles.removeTxt}>Remove</Text>
               </TouchableOpacity>
@@ -133,33 +132,44 @@ export default function RespondScreen() {
 
           <View style={styles.metaRow}>
             <TouchableOpacity onPress={handleAddLocation}>
-              <Text style={styles.metaBtnTxt}>{locationLabel ? `📍 ${locationLabel}` : '📍 Add place'}</Text>
+              <Text style={[styles.metaBtnTxt, { color: colors.textSecondary }]}>
+                {locationLabel ? `📍 ${locationLabel}` : '📍 Add place'}
+              </Text>
             </TouchableOpacity>
             {locationLabel !== '' && (
               <TextInput
-                style={styles.locationInput}
+                style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
                 value={locationLabel}
                 onChangeText={setLocationLabel}
                 placeholder="Edit place name"
-                placeholderTextColor="#bbb"
+                placeholderTextColor={colors.textMuted}
               />
             )}
           </View>
 
           <View style={styles.attachRow}>
-            <TouchableOpacity onPress={handlePickPhoto} style={styles.attachBtn}>
-              <Text style={styles.attachTxt}>🖼 Photo</Text>
+            <TouchableOpacity
+              onPress={handlePickPhoto}
+              style={[styles.attachBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>🖼 Photo</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleTakePhoto} style={styles.attachBtn}>
-              <Text style={styles.attachTxt}>📷 Camera</Text>
+            <TouchableOpacity
+              onPress={handleTakePhoto}
+              style={[styles.attachBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>📷 Camera</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleToggleRecording} style={[styles.attachBtn, isRecording && styles.recording]}>
-              <Text style={styles.attachTxt}>{isRecording ? '⏹ Stop' : '🎙 Record'}</Text>
+            <TouchableOpacity
+              onPress={handleToggleRecording}
+              style={[styles.attachBtn, { backgroundColor: isRecording ? '#fee2e2' : colors.surface, borderColor: colors.border }]}
+            >
+              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>{isRecording ? '⏹ Stop' : '🎙 Record'}</Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            style={[styles.submitBtn, (!response.trim() || submitting) && styles.submitDisabled]}
+            style={[styles.submitBtn, { backgroundColor: (!response.trim() || submitting) ? colors.border : accent.buttonColor }]}
             onPress={handleSubmit}
             disabled={!response.trim() || submitting}
           >
@@ -172,25 +182,23 @@ export default function RespondScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1 },
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   closeBtn: { alignSelf: 'flex-end', padding: 4 },
-  closeTxt: { fontSize: 18, color: '#aaa' },
-  prompt: { fontSize: 20, color: '#1a1a1a', lineHeight: 28, fontWeight: '400', marginTop: 8 },
-  input: { fontSize: 16, color: '#222', lineHeight: 24, minHeight: 160, textAlignVertical: 'top', borderBottomWidth: 1, borderBottomColor: '#eee', paddingBottom: 12 },
+  closeTxt: { fontSize: 18 },
+  prompt: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic', marginTop: 8 },
+  input: { fontSize: 16, lineHeight: 26, minHeight: 160, textAlignVertical: 'top', borderBottomWidth: 1, paddingBottom: 12, fontFamily: 'Georgia', fontStyle: 'italic' },
   photoPreview: { gap: 6 },
   photoImg: { width: '100%', height: 180, borderRadius: 8 },
   voiceBadge: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  voiceTxt: { color: '#555' },
+  voiceTxt: {},
   removeTxt: { color: '#f87171', fontSize: 13 },
   metaRow: { gap: 6 },
-  metaBtnTxt: { color: '#888', fontSize: 14 },
-  locationInput: { fontSize: 14, color: '#333', borderBottomWidth: 1, borderBottomColor: '#eee', paddingVertical: 4 },
+  metaBtnTxt: { fontSize: 14 },
+  locationInput: { fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
   attachRow: { flexDirection: 'row', gap: 10 },
-  attachBtn: { flex: 1, backgroundColor: '#f4f4f4', borderRadius: 8, paddingVertical: 10, alignItems: 'center' },
-  recording: { backgroundColor: '#fee2e2' },
-  attachTxt: { fontSize: 13, color: '#555' },
-  submitBtn: { backgroundColor: '#1a1a1a', borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
-  submitDisabled: { backgroundColor: '#ccc' },
+  attachBtn: { flex: 1, borderRadius: 8, borderWidth: 1, paddingVertical: 10, alignItems: 'center' },
+  attachTxt: { fontSize: 13 },
+  submitBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   submitTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
