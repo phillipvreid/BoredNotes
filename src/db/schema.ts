@@ -7,7 +7,7 @@ export const CREATE_TABLES_SQL = `
     location_label TEXT,
     location_lat REAL,
     location_lng REAL,
-    entry_mode TEXT NOT NULL DEFAULT 'prompted'
+    entry_mode TEXT NOT NULL DEFAULT 'prompted' CHECK (entry_mode IN ('prompted', 'freeform'))
   );
 
   CREATE TABLE IF NOT EXISTS media (
