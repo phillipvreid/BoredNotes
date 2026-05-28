@@ -15,27 +15,37 @@ export const ACCENTS: AccentSwatch[] = [
 export const DEFAULT_ACCENT_ID = 'sage';
 
 export const lightPalette = {
-  bg: '#fafaf9',
-  surface: '#ffffff',
-  border: '#e8e5e0',
+  bg: '#fafaf9' as const,
+  surface: '#ffffff' as const,
+  border: '#e8e5e0' as const,
   cardBorder: 'transparent' as const,
-  textPrimary: '#1a1a1a',
-  textSecondary: '#888888',
-  textMuted: '#bbbbbb',
-  shadowColor: '#000000',
+  textPrimary: '#1a1a1a' as const,
+  textSecondary: '#888888' as const,
+  textMuted: '#bbbbbb' as const,
+  shadowColor: '#000000' as const,
   shadowOpacity: 0.07,
-};
+} as const;
 
 export const darkPalette = {
-  bg: '#141412',
-  surface: '#1f1f1c',
-  border: '#2e2e2a',
+  bg: '#141412' as const,
+  surface: '#1f1f1c' as const,
+  border: '#2e2e2a' as const,
   cardBorder: '#2e2e2a' as const,
-  textPrimary: '#e8e5e0',
-  textSecondary: '#888888',
-  textMuted: '#555555',
-  shadowColor: '#000000',
+  textPrimary: '#e8e5e0' as const,
+  textSecondary: '#888888' as const,
+  textMuted: '#555555' as const,
+  shadowColor: '#000000' as const,
   shadowOpacity: 0,
-};
+} as const;
 
-export type Palette = typeof lightPalette;
+export type Palette = {
+  bg: string;
+  surface: string;
+  border: string;
+  cardBorder: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  shadowColor: string;
+  shadowOpacity: number;
+};
