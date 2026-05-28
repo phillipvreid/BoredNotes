@@ -16,18 +16,24 @@ export default function SettingsScreen() {
   const [offlineMode, setOfflineMode] = useState(false);
 
   useEffect(() => {
+    let active = true;
     (async () => {
       const db = await getDb();
       const val = await getSetting(db, 'offline_mode');
-      setOfflineMode(val === 'true');
+      if (active) setOfflineMode(val === 'true');
     })();
+    return () => { active = false; };
   }, []);
 
   async function handleOfflineToggle(value: boolean) {
-    const db = await getDb();
-    await setSetting(db, 'offline_mode', String(value));
-    await getNextPrompt(db);
-    setOfflineMode(value);
+    try {
+      const db = await getDb();
+      await setSetting(db, 'offline_mode', String(value));
+      await getNextPrompt(db);
+      setOfflineMode(value);
+    } catch {
+      setOfflineMode(prev => prev);
+    }
   }
 
   return (
