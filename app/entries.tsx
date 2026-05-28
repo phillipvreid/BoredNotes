@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, SafeAreaView, TextI
 import { router, useFocusEffect } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { getAllEntries, searchEntries } from '../src/db/entries';
+import { useTheme } from '../src/theme/ThemeContext';
 import type { Entry } from '../src/types';
 
 function formatDate(iso: string): string {
@@ -21,13 +22,12 @@ function groupByDate(entries: Entry[]): { date: string; items: Entry[] }[] {
 }
 
 export default function EntriesScreen() {
+  const { colors, accent } = useTheme();
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
 
   useFocusEffect(
-    useCallback(() => {
-      loadEntries('');
-    }, [])
+    useCallback(() => { loadEntries(''); }, [])
   );
 
   async function loadEntries(q: string) {
@@ -44,17 +44,17 @@ export default function EntriesScreen() {
   const grouped = groupByDate(entries);
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <View style={styles.container}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.backTxt}>← Back</Text>
+          <Text style={[styles.backTxt, { color: colors.textSecondary }]}>← Back</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Entries</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Entries</Text>
 
         <TextInput
-          style={styles.search}
+          style={[styles.search, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
           placeholder="Search…"
-          placeholderTextColor="#bbb"
+          placeholderTextColor={colors.textMuted}
           value={query}
           onChangeText={handleSearch}
           clearButtonMode="while-editing"
@@ -65,24 +65,31 @@ export default function EntriesScreen() {
           keyExtractor={g => g.date}
           renderItem={({ item: group }) => (
             <View style={styles.group}>
-              <Text style={styles.dateHeader}>{formatDate(group.date)}</Text>
+              <Text style={[styles.dateHeader, { color: colors.textMuted }]}>{formatDate(group.date)}</Text>
               {group.items.map(entry => (
                 <TouchableOpacity
                   key={entry.id}
-                  style={styles.card}
+                  style={[styles.card, {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.cardBorder,
+                    shadowColor: colors.shadowColor,
+                    shadowOpacity: colors.shadowOpacity,
+                  }]}
                   onPress={() => router.push(`/entry/${entry.id}`)}
                 >
-                  <Text style={styles.cardPrompt} numberOfLines={1}>{entry.prompt_text}</Text>
-                  <Text style={styles.cardResponse} numberOfLines={3}>{entry.response_text}</Text>
+                  <Text style={[styles.cardPrompt, { color: accent.labelColor }]} numberOfLines={1}>{entry.prompt_text}</Text>
+                  <Text style={[styles.cardResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
                   {entry.location_label && (
-                    <Text style={styles.cardMeta}>📍 {entry.location_label}</Text>
+                    <Text style={[styles.cardMeta, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>
                   )}
                 </TouchableOpacity>
               ))}
             </View>
           )}
           ListEmptyComponent={
-            <Text style={styles.empty}>{query ? 'No entries match your search.' : 'No entries yet. Respond to a prompt!'}</Text>
+            <Text style={[styles.empty, { color: colors.textMuted }]}>
+              {query ? 'No entries match your search.' : 'No entries yet. Respond to a prompt!'}
+            </Text>
           }
           showsVerticalScrollIndicator={false}
         />
@@ -92,17 +99,17 @@ export default function EntriesScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1 },
   container: { flex: 1, padding: 20, gap: 12 },
   back: { paddingVertical: 4 },
-  backTxt: { color: '#888', fontSize: 15 },
-  title: { fontSize: 28, fontWeight: '700', color: '#1a1a1a' },
-  search: { backgroundColor: '#f4f4f4', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15, color: '#222' },
+  backTxt: { fontSize: 15 },
+  title: { fontSize: 28, fontWeight: '700' },
+  search: { borderRadius: 10, borderWidth: 1, paddingHorizontal: 14, paddingVertical: 10, fontSize: 15 },
   group: { gap: 10, marginBottom: 24 },
-  dateHeader: { fontSize: 13, fontWeight: '600', color: '#aaa', textTransform: 'uppercase', letterSpacing: 0.5 },
-  card: { backgroundColor: '#f8f8f8', borderRadius: 12, padding: 16, gap: 6 },
-  cardPrompt: { fontSize: 11, color: '#aaa', fontStyle: 'italic' },
-  cardResponse: { fontSize: 15, color: '#333', lineHeight: 22 },
-  cardMeta: { fontSize: 11, color: '#bbb' },
-  empty: { color: '#aaa', textAlign: 'center', marginTop: 60, fontSize: 15 },
+  dateHeader: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 0.5 },
+  card: { borderRadius: 12, padding: 16, gap: 6, borderWidth: 1, shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
+  cardPrompt: { fontSize: 11, fontStyle: 'italic' },
+  cardResponse: { fontSize: 15, lineHeight: 22, fontFamily: 'Georgia', fontStyle: 'italic' },
+  cardMeta: { fontSize: 11 },
+  empty: { textAlign: 'center', marginTop: 60, fontSize: 15 },
 });
