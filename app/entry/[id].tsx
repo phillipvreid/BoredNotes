@@ -70,7 +70,9 @@ export default function EntryDetailScreen() {
           <Text style={[styles.location, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>
         )}
 
-        <Text style={[styles.prompt, { color: colors.textSecondary }]}>{entry.prompt_text}</Text>
+        {entry.entry_mode !== 'freeform' && (
+          <Text style={[styles.prompt, { color: colors.textSecondary }]}>{entry.prompt_text}</Text>
+        )}
 
         {photo && (
           <Image source={{ uri: photo.file_path }} style={styles.photo} resizeMode="cover" />
