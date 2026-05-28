@@ -6,7 +6,8 @@ export const CREATE_TABLES_SQL = `
     created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime')),
     location_label TEXT,
     location_lat REAL,
-    location_lng REAL
+    location_lng REAL,
+    entry_mode TEXT NOT NULL DEFAULT 'prompted'
   );
 
   CREATE TABLE IF NOT EXISTS media (

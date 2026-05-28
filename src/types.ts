@@ -10,6 +10,7 @@ export interface Entry {
   location_label: string | null;
   location_lat: number | null;
   location_lng: number | null;
+  entry_mode: 'prompted' | 'freeform';
 }
 
 export interface MediaItem {
