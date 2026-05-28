@@ -30,7 +30,7 @@ export const darkPalette = {
   bg: '#141412',
   surface: '#1f1f1c',
   border: '#2e2e2a',
-  cardBorder: '#2e2e2a',
+  cardBorder: '#2e2e2a' as const,
   textPrimary: '#e8e5e0',
   textSecondary: '#888888',
   textMuted: '#555555',
