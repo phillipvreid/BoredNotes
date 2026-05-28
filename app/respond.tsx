@@ -8,6 +8,7 @@ import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
 import { getNextPrompt, getCurrentPrompt } from '../src/prompts/next';
+import { getSetting } from '../src/db/settings';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
 import { pickPhoto, takePhoto, startVoiceRecording, stopVoiceRecording } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
@@ -22,12 +23,15 @@ export default function RespondScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [prompt, setPrompt] = useState<string>('');
+  const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
 
   useEffect(() => {
     (async () => {
       const db = await getDb();
       const current = await getCurrentPrompt(db);
       setPrompt(current?.text ?? '');
+      const mode = await getSetting(db, 'respond_mode');
+      setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
     })();
   }, []);
 
@@ -73,11 +77,12 @@ export default function RespondScreen() {
     try {
       const db = await getDb();
       const entryId = await createEntry(db, {
-        prompt_text: prompt,
+        prompt_text: respondMode === 'freeform' ? '' : prompt,
         response_text: response.trim(),
         location_label: locationLabel || undefined,
         location_lat: locationCoords?.lat,
         location_lng: locationCoords?.lng,
+        entry_mode: respondMode,
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
@@ -100,7 +105,9 @@ export default function RespondScreen() {
             <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
           </TouchableOpacity>
 
-          <Text style={[styles.prompt, { color: colors.textPrimary }]}>{prompt}</Text>
+          {respondMode === 'prompted' && (
+            <Text style={[styles.prompt, { color: colors.textPrimary }]}>{prompt}</Text>
+          )}
 
           <TextInput
             style={[styles.input, { color: colors.textPrimary, borderBottomColor: colors.border }]}
@@ -111,6 +118,10 @@ export default function RespondScreen() {
             value={response}
             onChangeText={setResponse}
           />
+
+          {respondMode === 'freeform' && (
+            <Text style={[styles.freeformHint, { color: colors.textMuted }]}>writing freely</Text>
+          )}
 
           {photoUri && (
             <View style={styles.photoPreview}>
@@ -201,4 +212,5 @@ const styles = StyleSheet.create({
   attachTxt: { fontSize: 13 },
   submitBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   submitTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  freeformHint: { fontSize: 12, fontStyle: 'italic', textAlign: 'right', marginTop: -8 },
 });
