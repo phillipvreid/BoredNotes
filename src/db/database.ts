@@ -11,6 +11,8 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
     await _db.execAsync(
       `ALTER TABLE entries ADD COLUMN entry_mode TEXT NOT NULL DEFAULT 'prompted'`
     );
-  } catch {}
+  } catch (e: any) {
+    if (!String(e?.message ?? '').includes('duplicate column name')) throw e;
+  }
   return _db;
 }

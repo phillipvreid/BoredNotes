@@ -110,7 +110,9 @@ export default function TimelineScreen() {
             }]}
             onPress={() => router.push(`/entry/${entry.id}`)}
           >
-            <Text style={[styles.entryPrompt, { color: colors.textMuted }]}>{entry.prompt_text}</Text>
+            {entry.entry_mode !== 'freeform' && (
+              <Text style={[styles.entryPrompt, { color: colors.textMuted }]}>{entry.prompt_text}</Text>
+            )}
             <Text style={[styles.entryResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
           </TouchableOpacity>
         ))}

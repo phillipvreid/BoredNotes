@@ -77,7 +77,9 @@ export default function EntriesScreen() {
                   }]}
                   onPress={() => router.push(`/entry/${entry.id}`)}
                 >
-                  <Text style={[styles.cardPrompt, { color: accent.labelColor }]} numberOfLines={1}>{entry.prompt_text}</Text>
+                  {entry.entry_mode !== 'freeform' && (
+                    <Text style={[styles.cardPrompt, { color: accent.labelColor }]} numberOfLines={1}>{entry.prompt_text}</Text>
+                  )}
                   <Text style={[styles.cardResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
                   {entry.location_label && (
                     <Text style={[styles.cardMeta, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>

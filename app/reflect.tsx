@@ -76,7 +76,9 @@ export default function ReflectScreen() {
               onPress={() => router.push(`/entry/${entry.id}`)}
             >
               <Text style={[styles.yearBadge, { color: accent.labelColor }]}>{entry.created_at.slice(0, 4)}</Text>
-              <Text style={[styles.cardPrompt, { color: colors.textSecondary }]} numberOfLines={1}>{entry.prompt_text}</Text>
+              {entry.entry_mode !== 'freeform' && (
+                <Text style={[styles.cardPrompt, { color: colors.textSecondary }]} numberOfLines={1}>{entry.prompt_text}</Text>
+              )}
               <Text style={[styles.cardResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
             </TouchableOpacity>
           ))
@@ -110,7 +112,9 @@ export default function ReflectScreen() {
             onPress={() => router.push(`/entry/${entry.id}`)}
           >
             <Text style={[styles.cardDate, { color: colors.textMuted }]}>{entry.created_at.slice(0, 10)}</Text>
-            <Text style={[styles.cardPrompt, { color: colors.textSecondary }]} numberOfLines={1}>{entry.prompt_text}</Text>
+            {entry.entry_mode !== 'freeform' && (
+              <Text style={[styles.cardPrompt, { color: colors.textSecondary }]} numberOfLines={1}>{entry.prompt_text}</Text>
+            )}
             <Text style={[styles.cardResponse, { color: colors.textPrimary }]} numberOfLines={3}>{entry.response_text}</Text>
           </TouchableOpacity>
         ))}
