@@ -28,9 +28,11 @@ export const ShareCard = React.forwardRef<View, ShareCardProps>(
           )}
           <View style={styles.body}>
             <Text style={[styles.appLabel, { color: template.metaColor }]}>BORED NOTES</Text>
-            <Text style={[styles.prompt, { color: template.promptColor, fontStyle: isSerif ? 'italic' : 'normal' }]}>
-              {`"${promptText}"`}
-            </Text>
+            {!!promptText && (
+              <Text style={[styles.prompt, { color: template.promptColor, fontStyle: isSerif ? 'italic' : 'normal' }]}>
+                {`"${promptText}"`}
+              </Text>
+            )}
             {photoUri && (
               <Image source={{ uri: photoUri }} style={styles.photo} resizeMode="cover" />
             )}
