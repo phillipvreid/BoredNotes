@@ -8,9 +8,11 @@ import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
 import { ShareCard } from '../../src/share/renderer';
 import { TEMPLATES, DEFAULT_TEMPLATE_ID } from '../../src/share/templates';
+import { useTheme } from '../../src/theme/ThemeContext';
 import type { Entry, MediaItem } from '../../src/types';
 
 export default function ShareCardScreen() {
+  const { colors, accent } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const cardRef = useRef<View>(null);
   const [entry, setEntry] = useState<Entry | null>(null);
@@ -54,12 +56,12 @@ export default function ShareCardScreen() {
   });
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => router.back()} style={styles.close}>
-          <Text style={styles.closeTxt}>✕</Text>
+          <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Share</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Share</Text>
 
         <View style={styles.preview}>
           <ShareCard
@@ -75,33 +77,33 @@ export default function ShareCardScreen() {
           />
         </View>
 
-        <Text style={styles.label}>Template</Text>
+        <Text style={[styles.label, { color: colors.textMuted }]}>Template</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templateScroll}>
           {TEMPLATES.map(t => (
             <TouchableOpacity
               key={t.id}
-              style={[styles.templateChip, templateId === t.id && styles.templateChipActive]}
+              style={[styles.templateChip, { backgroundColor: templateId === t.id ? accent.buttonColor : colors.surface }]}
               onPress={() => setTemplateId(t.id)}
             >
               <View style={[styles.templateSwatch, { backgroundColor: t.bg }]} />
-              <Text style={styles.templateLabel}>{t.label}</Text>
+              <Text style={[styles.templateLabel, { color: colors.textSecondary }]}>{t.label}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
 
         <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Show date</Text>
+          <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>Show date</Text>
           <Switch value={showDate} onValueChange={setShowDate} />
         </View>
         {entry.location_label && (
           <View style={styles.toggleRow}>
-            <Text style={styles.toggleLabel}>Show location</Text>
+            <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>Show location</Text>
             <Switch value={showLocation} onValueChange={setShowLocation} />
           </View>
         )}
 
         <TouchableOpacity
-          style={[styles.shareBtn, sharing && styles.shareBtnDisabled]}
+          style={[styles.shareBtn, { backgroundColor: sharing ? colors.border : accent.buttonColor }]}
           onPress={handleShare}
           disabled={sharing}
         >
@@ -113,21 +115,19 @@ export default function ShareCardScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1 },
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   close: { alignSelf: 'flex-end' },
-  closeTxt: { fontSize: 18, color: '#aaa' },
-  title: { fontSize: 24, fontWeight: '700', color: '#1a1a1a' },
+  closeTxt: { fontSize: 18 },
+  title: { fontSize: 24, fontWeight: '700' },
   preview: { alignItems: 'center', paddingVertical: 8 },
-  label: { fontSize: 13, fontWeight: '600', color: '#aaa', textTransform: 'uppercase', letterSpacing: 1 },
+  label: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
   templateScroll: { flexGrow: 0 },
-  templateChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, backgroundColor: '#f4f4f4', marginRight: 10 },
-  templateChipActive: { backgroundColor: '#1a1a1a' },
+  templateChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginRight: 10 },
   templateSwatch: { width: 16, height: 16, borderRadius: 4, borderWidth: 1, borderColor: '#ddd' },
-  templateLabel: { fontSize: 13, color: '#444' },
+  templateLabel: { fontSize: 13 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  toggleLabel: { fontSize: 15, color: '#333' },
-  shareBtn: { backgroundColor: '#1a1a1a', borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
-  shareBtnDisabled: { backgroundColor: '#ccc' },
+  toggleLabel: { fontSize: 15 },
+  shareBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
   shareTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });
