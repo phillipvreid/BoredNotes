@@ -1,14 +1,44 @@
+import { useEffect, useState } from 'react';
 import { View, Text, Switch, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useTheme } from '../src/theme/ThemeContext';
 import { ACCENTS } from '../src/theme/tokens';
+import { getDb } from '../src/db/database';
+import { getSetting, setSetting } from '../src/db/settings';
+import { getNextPrompt } from '../src/prompts/next';
 
 const version = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
   const { colors, accent, isDark, setAccent, setDarkMode } = useTheme();
+  const [offlineMode, setOfflineMode] = useState(false);
+  const [toggling, setToggling] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const db = await getDb();
+      const val = await getSetting(db, 'offline_mode');
+      if (active) setOfflineMode(val === 'true');
+    })();
+    return () => { active = false; };
+  }, []);
+
+  async function handleOfflineToggle(value: boolean) {
+    setToggling(true);
+    try {
+      const db = await getDb();
+      await setSetting(db, 'offline_mode', String(value));
+      await getNextPrompt(db);
+      setOfflineMode(value);
+    } catch {
+      setOfflineMode(prev => prev);
+    } finally {
+      setToggling(false);
+    }
+  }
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
@@ -48,6 +78,22 @@ export default function SettingsScreen() {
           />
         </View>
 
+        {/* Prompts section */}
+        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>PROMPTS</Text>
+
+        <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Offline Mode</Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>Use built-in prompts only, no AI</Text>
+          </View>
+          <Switch
+            value={offlineMode}
+            onValueChange={handleOfflineToggle}
+            trackColor={{ true: accent.buttonColor }}
+            disabled={toggling}
+          />
+        </View>
+
         {/* About section */}
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>ABOUT</Text>
 
@@ -73,6 +119,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
   },
   rowLabel: { fontSize: 15 },
+  rowSubtitle: { fontSize: 12, marginTop: 2 },
   rowValue: { fontSize: 15 },
   swatches: { flexDirection: 'row', gap: 10 },
   swatch: {
