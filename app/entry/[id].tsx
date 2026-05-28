@@ -5,6 +5,7 @@ import { AudioPlayer, createAudioPlayer } from 'expo-audio';
 import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
+import { useTheme } from '../../src/theme/ThemeContext';
 import type { Entry, MediaItem } from '../../src/types';
 
 function formatDateTime(iso: string): string {
@@ -16,6 +17,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function EntryDetailScreen() {
+  const { colors, accent } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -57,33 +59,38 @@ export default function EntryDetailScreen() {
   if (!entry) return null;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.container}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.backTxt}>← Back</Text>
+          <Text style={[styles.backTxt, { color: colors.textSecondary }]}>← Back</Text>
         </TouchableOpacity>
 
-        <Text style={styles.dateTime}>{formatDateTime(entry.created_at)}</Text>
+        <Text style={[styles.dateTime, { color: colors.textMuted }]}>{formatDateTime(entry.created_at)}</Text>
         {entry.location_label && (
-          <Text style={styles.location}>📍 {entry.location_label}</Text>
+          <Text style={[styles.location, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>
         )}
 
-        <Text style={styles.prompt}>{entry.prompt_text}</Text>
+        <Text style={[styles.prompt, { color: colors.textSecondary }]}>{entry.prompt_text}</Text>
 
         {photo && (
           <Image source={{ uri: photo.file_path }} style={styles.photo} resizeMode="cover" />
         )}
 
-        <Text style={styles.response}>{entry.response_text}</Text>
+        <Text style={[styles.response, { color: colors.textPrimary }]}>{entry.response_text}</Text>
 
         {voice && (
-          <TouchableOpacity style={styles.voiceBtn} onPress={togglePlayback}>
-            <Text style={styles.voiceTxt}>{playing ? '⏸ Pause voice memo' : '▶ Play voice memo'}</Text>
+          <TouchableOpacity
+            style={[styles.voiceBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            onPress={togglePlayback}
+          >
+            <Text style={[styles.voiceTxt, { color: colors.textSecondary }]}>
+              {playing ? '⏸ Pause voice memo' : '▶ Play voice memo'}
+            </Text>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity
-          style={styles.shareBtn}
+          style={[styles.shareBtn, { backgroundColor: accent.buttonColor }]}
           onPress={() => router.push(`/share/${entry.id}`)}
         >
           <Text style={styles.shareTxt}>Share this entry</Text>
@@ -94,17 +101,17 @@ export default function EntryDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#fff' },
+  safe: { flex: 1 },
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   back: { paddingVertical: 4 },
-  backTxt: { color: '#888', fontSize: 15 },
-  dateTime: { fontSize: 13, color: '#aaa' },
-  location: { fontSize: 13, color: '#aaa' },
-  prompt: { fontSize: 16, color: '#888', fontStyle: 'italic', lineHeight: 24 },
+  backTxt: { fontSize: 15 },
+  dateTime: { fontSize: 13 },
+  location: { fontSize: 13 },
+  prompt: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic', lineHeight: 24 },
   photo: { width: '100%', height: 220, borderRadius: 12 },
-  response: { fontSize: 18, color: '#1a1a1a', lineHeight: 28 },
-  voiceBtn: { backgroundColor: '#f4f4f4', borderRadius: 10, paddingVertical: 12, alignItems: 'center' },
-  voiceTxt: { color: '#555', fontSize: 15 },
-  shareBtn: { backgroundColor: '#1a1a1a', borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  response: { fontSize: 18, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
+  voiceBtn: { borderRadius: 10, borderWidth: 1, paddingVertical: 12, alignItems: 'center' },
+  voiceTxt: { fontSize: 15 },
+  shareBtn: { borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
   shareTxt: { color: '#fff', fontSize: 15, fontWeight: '600' },
 });
