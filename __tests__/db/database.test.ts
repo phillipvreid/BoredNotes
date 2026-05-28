@@ -10,7 +10,6 @@ describe('getDb', () => {
     let db: any;
     jest.isolateModules(() => {
       const sqlite = require('expo-sqlite');
-      db = sqlite.openDatabaseAsync.mockResolvedValue;
       // Override the mock so we can capture the db used inside the isolated module
       const mockDb = {
         execAsync: jest.fn().mockResolvedValue(undefined),
