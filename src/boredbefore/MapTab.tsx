@@ -17,13 +17,14 @@ function isPinned(e: Entry): e is PinnedEntry {
   return e.location_lat !== null && e.location_lng !== null;
 }
 
+let clusterFocused = false;
+
 export function MapTab() {
   const { colors, accent } = useTheme();
   const mapRef = useRef<MapView>(null);
   const savedRegion = useRef<Region | null>(null);
   const [pins, setPins] = useState<PinnedEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const clusterFocused = useRef(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -37,14 +38,14 @@ export function MapTab() {
   );
 
   useEffect(() => {
-    if (loaded && !clusterFocused.current && pins.length > 0 && mapRef.current) {
+    if (loaded && !clusterFocused && pins.length > 0 && mapRef.current) {
       const region = findDenseCluster(
         pins.map(p => ({ lat: p.location_lat, lng: p.location_lng }))
       );
       if (region) {
         mapRef.current.animateToRegion(region, 600);
       }
-      clusterFocused.current = true;
+      clusterFocused = true;
     }
   }, [pins, loaded]);
 
@@ -87,16 +88,16 @@ export function MapTab() {
           >
             <Callout onPress={() => router.push(`/entry/${entry.id}`)}>
               <View style={styles.callout}>
-                <Text style={styles.calloutDate}>
+                <Text style={[styles.calloutDate, { color: colors.textMuted }]}>
                   {new Date(entry.created_at).toLocaleDateString('en-US', {
                     month: 'short', day: 'numeric', year: 'numeric',
                   })}
                   {entry.location_label ? `  ·  ${entry.location_label}` : ''}
                 </Text>
-                <Text style={styles.calloutSnippet} numberOfLines={2}>
+                <Text style={[styles.calloutSnippet, { color: colors.textPrimary }]} numberOfLines={2}>
                   {entry.response_text}
                 </Text>
-                <Text style={styles.calloutCta}>Open entry →</Text>
+                <Text style={[styles.calloutCta, { color: accent.buttonColor }]}>Open entry →</Text>
               </View>
             </Callout>
           </Marker>
@@ -118,9 +119,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Georgia', fontStyle: 'italic', fontSize: 13,
   },
   callout: { width: 220, padding: 8, gap: 4 },
-  calloutDate: { fontSize: 11, color: '#9b8fa0' },
-  calloutSnippet: { fontSize: 13, fontFamily: 'Georgia', fontStyle: 'italic', color: '#2d2b2e' },
-  calloutCta: { fontSize: 12, color: '#8b7aad', fontWeight: '600', marginTop: 2 },
+  calloutDate: { fontSize: 11 },
+  calloutSnippet: { fontSize: 13, fontFamily: 'Georgia', fontStyle: 'italic' },
+  calloutCta: { fontSize: 12, fontWeight: '600', marginTop: 2 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
   emptyText: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic' },
   emptyHint: { fontSize: 13, textAlign: 'center' },
