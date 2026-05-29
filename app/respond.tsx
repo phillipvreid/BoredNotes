@@ -32,6 +32,16 @@ export default function RespondScreen() {
       setPrompt(current?.text ?? '');
       const mode = await getSetting(db, 'respond_mode');
       setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
+      const shouldAutoLocate = (await getSetting(db, 'auto_location')) === 'true';
+      if (shouldAutoLocate) {
+        try {
+          const loc = await captureLocation();
+          if (loc) {
+            setLocationLabel(loc.label ?? '');
+            setLocationCoords({ lat: loc.lat, lng: loc.lng });
+          }
+        } catch {}
+      }
     })();
   }, []);
 
@@ -142,11 +152,18 @@ export default function RespondScreen() {
           )}
 
           <View style={styles.metaRow}>
-            <TouchableOpacity onPress={handleAddLocation}>
-              <Text style={[styles.metaBtnTxt, { color: colors.textSecondary }]}>
-                {locationLabel ? `📍 ${locationLabel}` : '📍 Add place'}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.locationRow}>
+              <TouchableOpacity onPress={handleAddLocation}>
+                <Text style={[styles.metaBtnTxt, { color: colors.textSecondary }]}>
+                  {locationLabel ? `📍 ${locationLabel}` : '📍 Add place'}
+                </Text>
+              </TouchableOpacity>
+              {locationLabel !== '' && (
+                <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }}>
+                  <Text style={styles.removeTxt}>✕</Text>
+                </TouchableOpacity>
+              )}
+            </View>
             {locationLabel !== '' && (
               <TextInput
                 style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
@@ -205,6 +222,7 @@ const styles = StyleSheet.create({
   voiceTxt: {},
   removeTxt: { color: '#f87171', fontSize: 13 },
   metaRow: { gap: 6 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   metaBtnTxt: { fontSize: 14 },
   locationInput: { fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
   attachRow: { flexDirection: 'row', gap: 10 },

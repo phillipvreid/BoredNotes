@@ -62,6 +62,28 @@ export default function SettingsScreen() {
     }
   }
 
+  const [autoLocation, setAutoLocation] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const db = await getDb();
+        const val = await getSetting(db, 'auto_location');
+        setAutoLocation(val === 'true');
+      } catch {}
+    })();
+  }, []);
+
+  async function handleAutoLocationToggle(value: boolean) {
+    setAutoLocation(value);
+    try {
+      const db = await getDb();
+      await setSetting(db, 'auto_location', String(value));
+    } catch {
+      setAutoLocation(!value);
+    }
+  }
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -127,6 +149,21 @@ export default function SettingsScreen() {
           <Switch
             value={isFreeform}
             onValueChange={handleFreeformToggle}
+            trackColor={{ true: accent.buttonColor }}
+          />
+        </View>
+
+        {/* Location section */}
+        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>LOCATION</Text>
+
+        <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
+          <View style={styles.rowTextBlock}>
+            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Auto-location</Text>
+            <Text style={[styles.rowSubLabel, { color: colors.textMuted }]}>Capture your location automatically when writing</Text>
+          </View>
+          <Switch
+            value={autoLocation}
+            onValueChange={handleAutoLocationToggle}
             trackColor={{ true: accent.buttonColor }}
           />
         </View>
