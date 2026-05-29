@@ -31,7 +31,14 @@ export default function BoredBeforeScreen() {
           {TABS.map(tab => (
             <TouchableOpacity
               key={tab}
-              style={[styles.tabBtn, activeTab === tab && styles.tabBtnActive]}
+              style={[
+                styles.tabBtn,
+                activeTab === tab && {
+                  backgroundColor: isDark ? 'rgba(60,60,60,0.9)' : 'rgba(255,255,255,0.9)',
+                  shadowColor: '#000', shadowOpacity: 0.08,
+                  shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
+                },
+              ]}
               onPress={() => setActiveTab(tab)}
             >
               <Text style={[
@@ -61,11 +68,6 @@ const styles = StyleSheet.create({
   tabBarBlur: { marginHorizontal: 16, marginBottom: 8, borderRadius: 20, overflow: 'hidden' },
   tabBarInner: { flexDirection: 'row', padding: 4 },
   tabBtn: { flex: 1, paddingVertical: 8, borderRadius: 16, alignItems: 'center' },
-  tabBtnActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000', shadowOpacity: 0.08,
-    shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
-  },
   tabLabel: { fontSize: 14, fontWeight: '500' },
   content: { flex: 1 },
 });

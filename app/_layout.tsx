@@ -32,9 +32,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="respond" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="timeline" />
-        <Stack.Screen name="entries" />
-        <Stack.Screen name="reflect" />
+        <Stack.Screen name="boredbefore" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="entry/[id]" />
         <Stack.Screen name="share/[id]" options={{ presentation: 'modal' }} />

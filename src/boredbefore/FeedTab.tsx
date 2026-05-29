@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity,
   StyleSheet, TextInput,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { getDb } from '../db/database';
 import { getAllEntries, searchEntries } from '../db/entries';
 import { useTheme } from '../theme/ThemeContext';
@@ -31,7 +31,12 @@ export function FeedTab() {
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
 
-  useEffect(() => { loadEntries(''); }, []);
+  useFocusEffect(
+    useCallback(() => {
+      setQuery('');
+      loadEntries('');
+    }, [])
+  );
 
   async function loadEntries(q: string) {
     const db = await getDb();
