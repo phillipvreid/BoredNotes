@@ -78,30 +78,21 @@ export default function HomeScreen() {
           )}
         </TouchableOpacity>
 
-        {/* Tile row */}
-        <View style={styles.tileRow}>
-          <TouchableOpacity
-            style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}
-            onPress={() => router.push('/timeline')}
-          >
-            <Feather name="calendar" size={22} color={colors.textSecondary} />
-            <Text style={[styles.tileLabel, { color: colors.textSecondary }]}>Timeline</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}
-            onPress={() => router.push('/entries')}
-          >
-            <Feather name="file-text" size={22} color={colors.textSecondary} />
-            <Text style={[styles.tileLabel, { color: colors.textSecondary }]}>Entries</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.tile, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}
-            onPress={() => router.push('/reflect')}
-          >
-            <Feather name="sun" size={22} color={colors.textSecondary} />
-            <Text style={[styles.tileLabel, { color: colors.textSecondary }]}>Reflect</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[styles.boredBeforeTile, {
+            backgroundColor: colors.surface,
+            borderColor: colors.cardBorder,
+            shadowColor: colors.shadowColor,
+            shadowOpacity: colors.shadowOpacity,
+          }]}
+          onPress={() => router.push('/boredbefore')}
+        >
+          <Feather name="clock" size={22} color={colors.textSecondary} />
+          <View>
+            <Text style={[styles.boredBeforeTitle, { color: colors.textPrimary }]}>BoredBefore</Text>
+            <Text style={[styles.boredBeforeSubtitle, { color: colors.textMuted }]}>look into your bored past</Text>
+          </View>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -121,11 +112,11 @@ const styles = StyleSheet.create({
   promptLabel: { fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
   promptText: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
   tapHint: { fontSize: 13, marginTop: 8 },
-  tileRow: { flexDirection: 'row', gap: 12, paddingBottom: 8 },
-  tile: {
-    flex: 1, borderRadius: 12, paddingVertical: 18,
-    alignItems: 'center', gap: 8, borderWidth: 1,
+  boredBeforeTile: {
+    flexDirection: 'row', alignItems: 'center', gap: 14,
+    borderRadius: 12, padding: 18, borderWidth: 1,
     shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
   },
-  tileLabel: { fontSize: 12, fontWeight: '500' },
+  boredBeforeTitle: { fontSize: 15, fontWeight: '600' },
+  boredBeforeSubtitle: { fontSize: 12, marginTop: 2 },
 });
