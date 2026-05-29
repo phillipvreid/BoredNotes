@@ -12,16 +12,12 @@ export interface MapRegion {
 
 const CELL_SIZE = 0.5;
 
-function roundToNearestCell(value: number, cellSize: number): string {
-  return (Math.round(value / cellSize) * cellSize).toString();
-}
-
 export function findDenseCluster(pins: LatLng[]): MapRegion | null {
   if (pins.length === 0) return null;
 
   const counts = new Map<string, number>();
   for (const { lat, lng } of pins) {
-    const key = `${roundToNearestCell(lat, CELL_SIZE)},${roundToNearestCell(lng, CELL_SIZE)}`;
+    const key = `${Math.floor(lat / CELL_SIZE)},${Math.floor(lng / CELL_SIZE)}`;
     counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 
@@ -31,13 +27,13 @@ export function findDenseCluster(pins: LatLng[]): MapRegion | null {
     if (count > bestCount) { bestCount = count; bestKey = key; }
   }
 
-  const [latStr, lngStr] = bestKey.split(',');
-  const latitude = parseFloat(latStr);
-  const longitude = parseFloat(lngStr);
+  const [rowStr, colStr] = bestKey.split(',');
+  const row = parseInt(rowStr, 10);
+  const col = parseInt(colStr, 10);
 
   return {
-    latitude,
-    longitude,
+    latitude: (row + 0.5) * CELL_SIZE,
+    longitude: (col + 0.5) * CELL_SIZE,
     latitudeDelta: CELL_SIZE,
     longitudeDelta: CELL_SIZE,
   };

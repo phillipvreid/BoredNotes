@@ -6,10 +6,10 @@ describe('findDenseCluster', () => {
   });
 
   it('centres on the single pin when only one exists', () => {
-    const result = findDenseCluster([{ lat: 37.7, lng: -122.42 }]);
+    const result = findDenseCluster([{ lat: 37.7749, lng: -122.4194 }]);
     expect(result).not.toBeNull();
-    expect(result!.latitude).toBeCloseTo(37.5, 1);
-    expect(result!.longitude).toBeCloseTo(-122.5, 1);
+    expect(result!.latitude).toBeCloseTo(37.75, 1);
+    expect(result!.longitude).toBeCloseTo(-122.25, 1);
   });
 
   it('picks the denser cluster when pins span two cities', () => {
