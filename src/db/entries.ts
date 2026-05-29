@@ -90,3 +90,11 @@ export async function updateEntryLocation(
 ): Promise<void> {
   await db.runAsync('UPDATE entries SET location_label = ? WHERE id = ?', [label, id]);
 }
+
+export async function getYearsWithEntries(db: SQLiteDatabase): Promise<number[]> {
+  const rows = await db.getAllAsync<{ y: string }>(
+    `SELECT DISTINCT strftime('%Y', created_at) as y FROM entries ORDER BY y DESC`,
+    []
+  );
+  return rows.map(r => parseInt(r.y, 10));
+}

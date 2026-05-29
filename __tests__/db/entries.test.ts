@@ -1,4 +1,4 @@
-import { createEntry } from '../../src/db/entries';
+import { createEntry, getYearsWithEntries } from '../../src/db/entries';
 import { openDatabaseAsync } from 'expo-sqlite';
 
 describe('createEntry', () => {
@@ -45,5 +45,28 @@ describe('createEntry', () => {
   it('returns the new entry id', async () => {
     const id = await createEntry(db, { prompt_text: 'p', response_text: 'r' });
     expect(id).toBe(42);
+  });
+});
+
+describe('getYearsWithEntries', () => {
+  let db: any;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    db = await openDatabaseAsync('test.db');
+  });
+
+  it('returns distinct years in descending order', async () => {
+    db.getAllAsync.mockResolvedValueOnce([
+      { y: '2026' }, { y: '2025' }, { y: '2024' },
+    ]);
+    const result = await getYearsWithEntries(db);
+    expect(result).toEqual([2026, 2025, 2024]);
+  });
+
+  it('returns empty array when no entries exist', async () => {
+    db.getAllAsync.mockResolvedValueOnce([]);
+    const result = await getYearsWithEntries(db);
+    expect(result).toEqual([]);
   });
 });
