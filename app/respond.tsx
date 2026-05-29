@@ -24,7 +24,6 @@ export default function RespondScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [prompt, setPrompt] = useState<string>('');
   const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
-  const [autoLocation, setAutoLocation] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -33,15 +32,15 @@ export default function RespondScreen() {
       setPrompt(current?.text ?? '');
       const mode = await getSetting(db, 'respond_mode');
       setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
-      const autoLoc = await getSetting(db, 'auto_location');
-      const shouldAutoLocate = autoLoc === 'true';
-      setAutoLocation(shouldAutoLocate);
+      const shouldAutoLocate = (await getSetting(db, 'auto_location')) === 'true';
       if (shouldAutoLocate) {
-        const loc = await captureLocation();
-        if (loc) {
-          setLocationLabel(loc.label ?? '');
-          setLocationCoords({ lat: loc.lat, lng: loc.lng });
-        }
+        try {
+          const loc = await captureLocation();
+          if (loc) {
+            setLocationLabel(loc.label ?? '');
+            setLocationCoords({ lat: loc.lat, lng: loc.lng });
+          }
+        } catch {}
       }
     })();
   }, []);
@@ -161,7 +160,7 @@ export default function RespondScreen() {
               </TouchableOpacity>
               {locationLabel !== '' && (
                 <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }}>
-                  <Text style={[styles.removeTxt]}>✕</Text>
+                  <Text style={styles.removeTxt}>✕</Text>
                 </TouchableOpacity>
               )}
             </View>
