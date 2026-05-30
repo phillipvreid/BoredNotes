@@ -3,7 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
 } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
@@ -25,11 +25,20 @@ export default function RespondScreen() {
   const [prompt, setPrompt] = useState<string>('');
   const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
 
+  const { promptText, promptCategory } = useLocalSearchParams<{
+    promptText?: string;
+    promptCategory?: string;
+  }>();
+
   useEffect(() => {
     (async () => {
       const db = await getDb();
-      const current = await getCurrentPrompt(db);
-      setPrompt(current?.text ?? '');
+      if (promptText && promptCategory) {
+        setPrompt(promptText);
+      } else {
+        const current = await getCurrentPrompt(db);
+        setPrompt(current?.text ?? '');
+      }
       const mode = await getSetting(db, 'respond_mode');
       setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
       const shouldAutoLocate = (await getSetting(db, 'auto_location')) === 'true';
