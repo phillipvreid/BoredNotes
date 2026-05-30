@@ -12,7 +12,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.yourname.borednotes",
+      "bundleIdentifier": "com.borednotes.app",
       "infoPlist": {
         "NSCameraUsageDescription": "BoredNotes uses the camera to attach photos to your entries.",
         "NSPhotoLibraryUsageDescription": "BoredNotes accesses your photo library to attach images to entries.",
@@ -21,7 +21,7 @@
       }
     },
     "android": {
-      "package": "com.yourname.borednotes"
+      "package": "com.borednotes.app"
     },
     "web": {},
     "plugins": [
@@ -29,6 +29,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "afd82c89-84ff-4ae9-89b3-3a316f936cde"
+      }
     }
   }
 }
