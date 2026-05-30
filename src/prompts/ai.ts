@@ -1,12 +1,21 @@
 import type { PromptCategory } from '../types';
+import type { PromptContext } from '../context/types';
 
 export interface AiPromptInput {
   category: PromptCategory;
   depth: 1 | 2 | 3;
   recentTopics: string[];
+  context?: PromptContext;
 }
 
 const TIMEOUT_MS = 2000;
+
+function buildContextLine(ctx: PromptContext): string {
+  if (ctx.locationLabel && ctx.weatherCondition && ctx.temperatureCelsius !== null) {
+    return `It's a ${ctx.weatherCondition} ${ctx.dayOfWeek} ${ctx.timeOfDay} in ${ctx.locationLabel}, ${ctx.temperatureCelsius}°C.`;
+  }
+  return `It's a ${ctx.dayOfWeek} ${ctx.timeOfDay} in ${ctx.season}.`;
+}
 
 export async function generateAiPrompt(
   input: AiPromptInput,
@@ -16,13 +25,14 @@ export async function generateAiPrompt(
   const topicsLine = input.recentTopics.length > 0
     ? `Recent topics the user has responded to: ${input.recentTopics.join(', ')}.`
     : '';
+  const contextLine = input.context ? buildContextLine(input.context) + ' ' : '';
 
   const body = JSON.stringify({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 80,
     messages: [{
       role: 'user',
-      content: `Generate one ${depthLabel} journaling prompt in the "${input.category}" category. ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
+      content: `${contextLine}Generate one ${depthLabel} journaling prompt in the "${input.category}" category. ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
     }],
   });
 
