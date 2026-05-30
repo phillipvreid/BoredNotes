@@ -5,7 +5,7 @@ import { getRecentEntries } from '../db/entries';
 import { getEligiblePrompts } from '../db/prompts';
 import { selectPrompt } from './selection';
 import { generateAiPrompt } from './ai';
-import { getCurrentPrompt } from './next';
+import { getCurrentPrompt, getNextPrompt } from './next';
 import { gatherContext } from '../context/gather';
 
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
@@ -14,7 +14,7 @@ const THROTTLE_MS = 60 * 60 * 1000;
 export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
   if (offlineMode) {
-    return (await getCurrentPrompt(db)) ?? { text: '', category: 'reflective' };
+    return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
   const lastGenAt = await getSetting(db, 'contextual_prompt_generated_at');
@@ -25,6 +25,10 @@ export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPr
       const category = await getSetting(db, 'contextual_prompt_category') as PromptCategory | null;
       if (text && category) return { text, category };
     }
+  }
+
+  if (!API_KEY) {
+    return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
   try {
@@ -69,5 +73,5 @@ export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPr
     // fall through to DB fallback
   }
 
-  return (await getCurrentPrompt(db)) ?? { text: '', category: 'reflective' };
+  return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
 }
