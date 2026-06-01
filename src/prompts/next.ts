@@ -43,6 +43,7 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
 
   let finalText = chosenLibraryPrompt.text;
+  let finalSource: 'ai' | 'library' = 'library';
   const finalCategory = chosenLibraryPrompt.category;
 
   if (!offlineMode && useAi && API_KEY) {
@@ -53,7 +54,10 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
       { category: finalCategory, depth: chosenLibraryPrompt.depth, recentTopics },
       API_KEY
     );
-    if (aiText) finalText = aiText;
+    if (aiText) {
+      finalText = aiText;
+      finalSource = 'ai';
+    }
   }
 
   await markPromptUsed(db, chosenLibraryPrompt.id);
@@ -65,13 +69,15 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
 
   await setSetting(db, 'current_prompt_text', finalText);
   await setSetting(db, 'current_prompt_category', finalCategory);
+  await setSetting(db, 'current_prompt_source', finalSource);
 
-  return { text: finalText, category: finalCategory };
+  return { text: finalText, category: finalCategory, source: finalSource };
 }
 
 export async function getCurrentPrompt(db: SQLiteDatabase): Promise<CurrentPrompt | null> {
   const text = await getSetting(db, 'current_prompt_text');
   const category = await getSetting(db, 'current_prompt_category') as PromptCategory | null;
   if (!text || !category) return null;
-  return { text, category };
+  const source = (await getSetting(db, 'current_prompt_source') as 'ai' | 'library') ?? 'library';
+  return { text, category, source };
 }

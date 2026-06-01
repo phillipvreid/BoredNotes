@@ -52,6 +52,7 @@ describe('getNextPrompt', () => {
     expect(mockGenerateAiPrompt).not.toHaveBeenCalled();
     expect(result.text).toBe(samplePrompt.text);
     expect(result.category).toBe(samplePrompt.category);
+    expect(result.source).toBe('library');           // NEW
   });
 
   it('calls AI when offline_mode is false and conditions are met', async () => {
@@ -66,5 +67,6 @@ describe('getNextPrompt', () => {
 
     expect(mockGenerateAiPrompt).toHaveBeenCalledTimes(1);
     expect(result.text).toBe('AI-generated question');
+    expect(result.source).toBe('ai');                // NEW
   });
 });
