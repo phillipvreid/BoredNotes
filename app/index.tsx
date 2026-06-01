@@ -18,11 +18,14 @@ export default function HomeScreen() {
   async function handleRefresh() {
     setRefreshing(true);
     setContextualPromptLoading(true);
-    const db = await getDb();
-    const fresh = await forceRefreshContextualPrompt(db);
-    setPrompt(fresh);
-    setContextualPromptLoading(false);
-    setRefreshing(false);
+    try {
+      const db = await getDb();
+      const fresh = await forceRefreshContextualPrompt(db);
+      setPrompt(fresh);
+    } finally {
+      setContextualPromptLoading(false);
+      setRefreshing(false);
+    }
   }
 
   useFocusEffect(
