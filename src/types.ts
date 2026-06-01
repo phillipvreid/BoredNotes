@@ -33,6 +33,7 @@ export interface Prompt {
 export interface CurrentPrompt {
   text: string;
   category: PromptCategory;
+  source: 'ai' | 'library';
 }
 
 export interface EntryWithMedia extends Entry {
