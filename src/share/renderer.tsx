@@ -27,7 +27,7 @@ export const ShareCard = React.forwardRef<View, ShareCardProps>(
             <View style={[styles.sidebar, { backgroundColor: template.accentColor }]} />
           )}
           <View style={styles.body}>
-            <Text style={[styles.appLabel, { color: template.metaColor }]}>BORED NOTES</Text>
+            <Text style={[styles.appLabel, { color: template.metaColor }]}>BOREDNOTES</Text>
             {!!promptText && (
               <Text style={[styles.prompt, { color: template.promptColor, fontStyle: isSerif ? 'italic' : 'normal' }]}>
                 {`"${promptText}"`}

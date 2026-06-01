@@ -78,7 +78,6 @@ export function CalendarTab() {
 
   function handleYearSelect(y: number) {
     setYear(y);
-    setMonth(0);
     setShowYearPicker(false);
   }
 
@@ -97,7 +96,7 @@ export function CalendarTab() {
         <TouchableOpacity onPress={() => setShowYearPicker(v => !v)}>
           <Text style={[styles.monthLabel, { color: colors.textPrimary }]}>
             {MONTH_NAMES[month]}{' '}
-            <Text style={{ color: accent.buttonColor }}>{year} ↕</Text>
+            <Text style={{ color: accent.buttonColor }}>{year}</Text>
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={nextMonth}>
