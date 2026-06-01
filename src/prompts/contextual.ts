@@ -11,19 +11,27 @@ import { gatherContext } from '../context/gather';
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
 const THROTTLE_MS = 60 * 60 * 1000;
 
-export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
+async function _getContextualPrompt(
+  db: SQLiteDatabase,
+  skipThrottle: boolean,
+): Promise<CurrentPrompt> {
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
   if (offlineMode) {
     return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
-  const lastGenAt = await getSetting(db, 'contextual_prompt_generated_at');
-  if (lastGenAt) {
-    const elapsed = Date.now() - new Date(lastGenAt).getTime();
-    if (elapsed < THROTTLE_MS) {
-      const text = await getSetting(db, 'contextual_prompt_text');
-      const category = await getSetting(db, 'contextual_prompt_category') as PromptCategory | null;
-      if (text && category) return { text, category };
+  if (!skipThrottle) {
+    const lastGenAt = await getSetting(db, 'contextual_prompt_generated_at');
+    if (lastGenAt) {
+      const elapsed = Date.now() - new Date(lastGenAt).getTime();
+      if (elapsed < THROTTLE_MS) {
+        const text = await getSetting(db, 'contextual_prompt_text');
+        const category = await getSetting(db, 'contextual_prompt_category') as PromptCategory | null;
+        if (text && category) {
+          const source = (await getSetting(db, 'contextual_prompt_source') as 'ai' | 'library') ?? 'ai';
+          return { text, category, source };
+        }
+      }
     }
   }
 
@@ -67,11 +75,21 @@ export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPr
       await setSetting(db, 'contextual_prompt_text', aiText);
       await setSetting(db, 'contextual_prompt_category', selected.category);
       await setSetting(db, 'contextual_prompt_generated_at', new Date().toISOString());
-      return { text: aiText, category: selected.category };
+      await setSetting(db, 'contextual_prompt_source', 'ai');
+      return { text: aiText, category: selected.category, source: 'ai' };
     }
   } catch {
     // fall through to DB fallback
   }
 
   return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
+}
+
+export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
+  return _getContextualPrompt(db, false);
+}
+
+export async function forceRefreshContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
+  await setSetting(db, 'contextual_prompt_generated_at', '');
+  return _getContextualPrompt(db, true);
 }

@@ -1,7 +1,7 @@
 jest.mock('../../src/prompts/ai');
 jest.mock('../../src/context/gather');
 
-import { getContextualPrompt } from '../../src/prompts/contextual';
+import { getContextualPrompt, forceRefreshContextualPrompt } from '../../src/prompts/contextual';
 import { generateAiPrompt } from '../../src/prompts/ai';
 import { gatherContext } from '../../src/context/gather';
 
@@ -24,6 +24,8 @@ function makeMockDb(settingOverrides: Record<string, string> = {}) {
     contextual_prompt_generated_at: '',
     contextual_prompt_text: '',
     contextual_prompt_category: '',
+    contextual_prompt_source: '',
+    current_prompt_source: 'library',
     recent_categories: '[]',
     recent_depths: '[]',
     current_prompt_text: 'Fallback prompt',
@@ -33,12 +35,12 @@ function makeMockDb(settingOverrides: Record<string, string> = {}) {
   return {
     getFirstAsync: jest.fn().mockImplementation(async (_sql: string, params: string[]) => {
       const key = params[0];
-      return settings[key] !== undefined ? { value: settings[key] } : null;
+      return settings[key] !== undefined && settings[key] !== '' ? { value: settings[key] } : null;
     }),
     getAllAsync: jest.fn()
-      .mockResolvedValueOnce([])             // getRecentEntries
-      .mockResolvedValueOnce([samplePrompt]) // getEligiblePrompts (filtered)
-      .mockResolvedValueOnce([samplePrompt]),// getEligiblePrompts (fallback)
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([samplePrompt])
+      .mockResolvedValueOnce([samplePrompt]),
     runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
     execAsync: jest.fn(),
     withTransactionAsync: jest.fn().mockImplementation(async (fn: () => Promise<void>) => fn()),
@@ -59,6 +61,7 @@ describe('getContextualPrompt', () => {
 
     expect(result.text).toBe('What small joy surprised you this morning?');
     expect(result.category).toBe('reflective');
+    expect(result.source).toBe('ai');
   });
 
   it('falls back to DB prompt when generateAiPrompt returns null', async () => {
@@ -69,6 +72,7 @@ describe('getContextualPrompt', () => {
 
     expect(result.text).toBe('Fallback prompt');
     expect(result.category).toBe('reflective');
+    expect(result.source).toBe('library');
   });
 
   it('returns cached contextual prompt when within the 1-hour throttle', async () => {
@@ -77,12 +81,14 @@ describe('getContextualPrompt', () => {
       contextual_prompt_generated_at: recentTimestamp,
       contextual_prompt_text: 'Cached contextual prompt',
       contextual_prompt_category: 'personal',
+      contextual_prompt_source: 'ai',
     });
 
     const result = await getContextualPrompt(db as any);
 
     expect(result.text).toBe('Cached contextual prompt');
     expect(result.category).toBe('personal');
+    expect(result.source).toBe('ai');
     expect(mockGenerateAiPrompt).not.toHaveBeenCalled();
     expect(mockGatherContext).not.toHaveBeenCalled();
   });
@@ -93,7 +99,32 @@ describe('getContextualPrompt', () => {
     const result = await getContextualPrompt(db as any);
 
     expect(result.text).toBe('Fallback prompt');
+    expect(result.source).toBe('library');
     expect(mockGenerateAiPrompt).not.toHaveBeenCalled();
     expect(mockGatherContext).not.toHaveBeenCalled();
+  });
+});
+
+describe('forceRefreshContextualPrompt', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockGatherContext.mockResolvedValue(lightContext);
+  });
+
+  it('bypasses the throttle and returns a fresh AI prompt', async () => {
+    const recentTimestamp = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    const db = makeMockDb({
+      contextual_prompt_generated_at: recentTimestamp,
+      contextual_prompt_text: 'Stale cached prompt',
+      contextual_prompt_category: 'personal',
+      contextual_prompt_source: 'ai',
+    });
+    mockGenerateAiPrompt.mockResolvedValue('Brand new AI prompt');
+
+    const result = await forceRefreshContextualPrompt(db as any);
+
+    expect(result.text).toBe('Brand new AI prompt');
+    expect(result.source).toBe('ai');
+    expect(mockGenerateAiPrompt).toHaveBeenCalledTimes(1);
   });
 });
