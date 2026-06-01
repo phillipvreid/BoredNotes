@@ -102,7 +102,7 @@ export default function HomeScreen() {
         >
           <Feather name="clock" size={22} color={colors.textSecondary} />
           <View>
-            <Text style={[styles.boredBeforeTitle, { color: colors.textPrimary }]}>BoredBefore</Text>
+            <Text style={[styles.boredBeforeTitle, { color: accent.labelColor }]}>BoredBefore</Text>
             <Text style={[styles.boredBeforeSubtitle, { color: colors.textMuted }]}>look into your bored past</Text>
           </View>
         </TouchableOpacity>

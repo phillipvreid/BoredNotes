@@ -115,8 +115,9 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
   mapLabel: {
-    position: 'absolute', top: 12, alignSelf: 'center',
+    textAlign: 'center',
     fontFamily: 'Georgia', fontStyle: 'italic', fontSize: 13,
+    paddingVertical: 8,
   },
   callout: { width: 220, padding: 8, gap: 4 },
   calloutDate: { fontSize: 11 },
