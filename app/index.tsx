@@ -4,7 +4,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { getDb } from '../src/db/database';
 import { getSetting } from '../src/db/settings';
-import { getContextualPrompt } from '../src/prompts/contextual';
+import { getContextualPrompt, forceRefreshContextualPrompt } from '../src/prompts/contextual';
 import { useTheme } from '../src/theme/ThemeContext';
 import type { CurrentPrompt } from '../src/types';
 
@@ -13,6 +13,17 @@ export default function HomeScreen() {
   const [prompt, setPrompt] = useState<CurrentPrompt | null>(null);
   const [contextualPromptLoading, setContextualPromptLoading] = useState(true);
   const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
+  const [refreshing, setRefreshing] = useState(false);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    setContextualPromptLoading(true);
+    const db = await getDb();
+    const fresh = await forceRefreshContextualPrompt(db);
+    setPrompt(fresh);
+    setContextualPromptLoading(false);
+    setRefreshing(false);
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -72,9 +83,22 @@ export default function HomeScreen() {
             <Text style={[styles.loadingText, { color: colors.textMuted }]}>…</Text>
           ) : (
             <>
-              <Text style={[styles.promptLabel, { color: accent.labelColor }]}>
-                {respondMode === 'freeform' ? "Today's entry" : "Today's prompt"}
-              </Text>
+              <View style={styles.promptHeader}>
+                <Text style={[styles.promptLabel, { color: accent.labelColor }]}>
+                  {respondMode === 'freeform' ? "Today's entry" : "Today's prompt"}
+                </Text>
+                {respondMode !== 'freeform' && prompt?.source === 'ai' && (
+                  <View style={[styles.aiBadge, { backgroundColor: accent.buttonColor + '20' }]}>
+                    <Text style={[styles.aiBadgeText, { color: accent.buttonColor }]}>AI</Text>
+                  </View>
+                )}
+                <View style={{ flex: 1 }} />
+                {respondMode !== 'freeform' && (
+                  <TouchableOpacity onPress={handleRefresh} disabled={refreshing} hitSlop={8}>
+                    <Feather name="refresh-cw" size={14} color={colors.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
               {respondMode === 'freeform' ? (
                 <Text style={[styles.promptText, { color: colors.textMuted }]}>
                   {"What's on your mind…"}
@@ -133,4 +157,7 @@ const styles = StyleSheet.create({
   },
   boredBeforeTitle: { fontSize: 15, fontWeight: '600' },
   boredBeforeSubtitle: { fontSize: 12, marginTop: 2 },
+  promptHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  aiBadge: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1 },
+  aiBadgeText: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
 });
