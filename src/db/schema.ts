@@ -32,5 +32,4 @@ export const CREATE_TABLES_SQL = `
     value TEXT NOT NULL
   );
 
-  PRAGMA foreign_keys = ON;
 `;
