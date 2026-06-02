@@ -8,6 +8,7 @@ import { ACCENTS } from '../src/theme/tokens';
 import { getDb } from '../src/db/database';
 import { getSetting, setSetting } from '../src/db/settings';
 import { getNextPrompt } from '../src/prompts/next';
+import { exportEntriesToCsv } from '../src/export/share';
 
 const version = Constants.expoConfig?.version ?? '1.0.0';
 
@@ -82,6 +83,13 @@ export default function SettingsScreen() {
     } catch {
       setAutoLocation(!value);
     }
+  }
+
+  async function handleExport() {
+    try {
+      const db = await getDb();
+      await exportEntriesToCsv(db);
+    } catch {}
   }
 
   return (
@@ -167,6 +175,17 @@ export default function SettingsScreen() {
             trackColor={{ true: accent.buttonColor }}
           />
         </View>
+
+        {/* Data section */}
+        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>DATA</Text>
+
+        <TouchableOpacity
+          style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}
+          onPress={handleExport}
+        >
+          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Export notes</Text>
+          <Text style={[styles.rowValue, { color: accent.buttonColor }]}>CSV →</Text>
+        </TouchableOpacity>
 
         {/* About section */}
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>ABOUT</Text>
