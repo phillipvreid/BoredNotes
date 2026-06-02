@@ -53,7 +53,9 @@
       "@testing-library/jest-native/extend-expect"
     ],
     "moduleNameMapper": {
-      "^expo-sqlite$": "<rootDir>/__mocks__/expo-sqlite.ts"
+      "^expo-sqlite$": "<rootDir>/__mocks__/expo-sqlite.ts",
+      "^expo-file-system$": "<rootDir>/__mocks__/expo-file-system.ts",
+      "^expo-sharing$": "<rootDir>/__mocks__/expo-sharing.ts"
     }
   },
   "overrides": {
