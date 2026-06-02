@@ -17,12 +17,11 @@ function isPinned(e: Entry): e is PinnedEntry {
   return e.location_lat !== null && e.location_lng !== null;
 }
 
-let clusterFocused = false;
-
 export function MapTab() {
   const { colors, accent } = useTheme();
   const mapRef = useRef<MapView>(null);
   const savedRegion = useRef<Region | null>(null);
+  const clusterFocused = useRef(false);
   const [pins, setPins] = useState<PinnedEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -38,14 +37,14 @@ export function MapTab() {
   );
 
   useEffect(() => {
-    if (loaded && !clusterFocused && pins.length > 0 && mapRef.current) {
+    if (loaded && !clusterFocused.current && pins.length > 0 && mapRef.current) {
       const region = findDenseCluster(
         pins.map(p => ({ lat: p.location_lat, lng: p.location_lng }))
       );
       if (region) {
         mapRef.current.animateToRegion(region, 600);
       }
-      clusterFocused = true;
+      clusterFocused.current = true;
     }
   }, [pins, loaded]);
 
