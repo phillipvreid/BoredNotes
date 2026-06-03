@@ -15,5 +15,22 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   } catch (e: any) {
     if (!String(e?.message ?? '').includes('duplicate column name')) throw e;
   }
+  await _db.execAsync(`
+    CREATE TABLE IF NOT EXISTS places (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      lat REAL NOT NULL,
+      lng REAL NOT NULL,
+      radius_m REAL NOT NULL DEFAULT 100,
+      created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
+  try {
+    await _db.execAsync(
+      `ALTER TABLE entries ADD COLUMN place_id INTEGER REFERENCES places(id) ON DELETE SET NULL`
+    );
+  } catch (e: any) {
+    if (!String(e?.message ?? '').includes('duplicate column name')) throw e;
+  }
   return _db;
 }

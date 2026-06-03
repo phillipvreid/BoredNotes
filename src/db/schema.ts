@@ -1,4 +1,13 @@
 export const CREATE_TABLES_SQL = `
+  CREATE TABLE IF NOT EXISTS places (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    lat REAL NOT NULL,
+    lng REAL NOT NULL,
+    radius_m REAL NOT NULL DEFAULT 100,
+    created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
+  );
+
   CREATE TABLE IF NOT EXISTS entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     prompt_text TEXT NOT NULL,
@@ -7,13 +16,14 @@ export const CREATE_TABLES_SQL = `
     location_label TEXT,
     location_lat REAL,
     location_lng REAL,
-    entry_mode TEXT NOT NULL DEFAULT 'prompted' CHECK (entry_mode IN ('prompted', 'freeform'))
+    entry_mode TEXT NOT NULL DEFAULT 'prompted' CHECK (entry_mode IN ('prompted', 'freeform')),
+    place_id INTEGER REFERENCES places(id) ON DELETE SET NULL
   );
 
   CREATE TABLE IF NOT EXISTS media (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     entry_id INTEGER NOT NULL REFERENCES entries(id) ON DELETE CASCADE,
-    type TEXT NOT NULL CHECK (type IN ('photo')),
+    type TEXT NOT NULL CHECK (type IN ('photo', 'voice')),
     file_path TEXT NOT NULL,
     created_at DATETIME NOT NULL DEFAULT (datetime('now', 'localtime'))
   );

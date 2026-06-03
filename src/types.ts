@@ -1,16 +1,31 @@
 export type PromptCategory = 'observational' | 'reflective' | 'personal' | 'creative';
 export type PromptSource = 'library' | 'custom';
-export type MediaType = 'photo';
+export type MediaType = 'photo' | 'voice';
 
 export interface Entry {
   id: number;
   prompt_text: string;
   response_text: string;
-  created_at: string; // ISO 8601
+  created_at: string;
   location_label: string | null;
   location_lat: number | null;
   location_lng: number | null;
   entry_mode: 'prompted' | 'freeform';
+  place_id: number | null;
+}
+
+export interface PinnedEntry extends Entry {
+  location_lat: number;
+  location_lng: number;
+}
+
+export interface Place {
+  id: number;
+  name: string;
+  lat: number;
+  lng: number;
+  radius_m: number;
+  created_at: string;
 }
 
 export interface MediaItem {
