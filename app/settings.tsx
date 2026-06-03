@@ -178,6 +178,14 @@ export default function SettingsScreen() {
           />
         </View>
 
+        <TouchableOpacity
+          style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}
+          onPress={() => router.push('/saved-locations')}
+        >
+          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Saved locations</Text>
+          <Text style={[styles.rowValue, { color: accent.buttonColor }]}>→</Text>
+        </TouchableOpacity>
+
         {/* Data section */}
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>DATA</Text>
 
