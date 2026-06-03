@@ -14,6 +14,7 @@ import { getSetting } from '../src/db/settings';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
 import { pickPhoto, takePhoto } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
+import { checkEntryAgainstPlaces } from '../src/db/places';
 
 export default function RespondScreen() {
   const { colors, accent } = useTheme();
@@ -120,6 +121,17 @@ export default function RespondScreen() {
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
+      }
+      if (locationCoords) {
+        try {
+          await checkEntryAgainstPlaces(db, {
+            id: entryId,
+            lat: locationCoords.lat,
+            lng: locationCoords.lng,
+          });
+        } catch (e) {
+          console.warn('checkEntryAgainstPlaces failed:', e);
+        }
       }
       if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
       await getNextPrompt(db);

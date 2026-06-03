@@ -10,6 +10,7 @@ const base: Entry = {
   location_label: null,
   location_lat: null,
   location_lng: null,
+  place_id: null,
 };
 
 describe('entriesToCsv', () => {
