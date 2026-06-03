@@ -83,8 +83,8 @@ export function MapTab() {
           <Marker
             key={entry.id}
             coordinate={{ latitude: entry.location_lat, longitude: entry.location_lng }}
-            pinColor={accent.buttonColor}
           >
+            <View style={[styles.dot, { backgroundColor: accent.buttonColor }]} />
             <Callout onPress={() => router.push(`/entry/${entry.id}`)}>
               <View style={styles.callout}>
                 <Text style={[styles.calloutDate, { color: colors.textMuted }]}>
@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
   calloutDate: { fontSize: 11 },
   calloutSnippet: { fontSize: 13, fontFamily: 'Georgia', fontStyle: 'italic' },
   calloutCta: { fontSize: 12, fontWeight: '600', marginTop: 2 },
+  dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: '#fff' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
   emptyText: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic' },
   emptyHint: { fontSize: 13, textAlign: 'center' },

@@ -96,13 +96,13 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
-      <ScrollView contentContainerStyle={styles.container}>
+      <View style={[styles.header, { backgroundColor: colors.bg }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.back}>
           <Text style={[styles.backTxt, { color: colors.textSecondary }]}>← Back</Text>
         </TouchableOpacity>
-
         <Text style={[styles.title, { color: colors.textPrimary }]}>Settings</Text>
-
+      </View>
+      <ScrollView contentContainerStyle={styles.container}>
         {/* Appearance section */}
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>APPEARANCE</Text>
 
@@ -132,8 +132,8 @@ export default function SettingsScreen() {
           />
         </View>
 
-        {/* Prompts section */}
-        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>PROMPTS</Text>
+        {/* Notes section */}
+        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>NOTES</Text>
 
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
           <View style={{ flex: 1 }}>
@@ -147,9 +147,6 @@ export default function SettingsScreen() {
             disabled={toggling}
           />
         </View>
-
-        {/* Writing section */}
-        <Text style={[styles.sectionHead, { color: colors.textMuted }]}>WRITING</Text>
 
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
           <View style={styles.rowTextBlock}>
@@ -203,10 +200,11 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
+  header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
   container: { padding: 20, gap: 8, paddingBottom: 40 },
   back: { paddingVertical: 4, marginBottom: 4 },
   backTxt: { fontSize: 15 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 16 },
+  title: { fontSize: 28, fontWeight: '700', marginBottom: 8 },
   sectionHead: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginTop: 16, marginBottom: 4 },
   row: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
