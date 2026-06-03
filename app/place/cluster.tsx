@@ -30,7 +30,8 @@ export default function ClusterFeedScreen() {
       (async () => {
         const db = await getDb();
         const all = await db.getAllAsync<any>(
-          'SELECT * FROM entries WHERE location_lat IS NOT NULL AND place_id IS NULL ORDER BY created_at DESC',
+          `SELECT e.*, EXISTS(SELECT 1 FROM media m WHERE m.entry_id = e.id AND m.type = 'photo') as has_photo
+           FROM entries e WHERE e.location_lat IS NOT NULL AND e.place_id IS NULL ORDER BY e.created_at DESC`,
           []
         );
         setEntries(

@@ -100,9 +100,9 @@ export function FeedTab() {
                 >
                   {entry.response_text}
                 </Text>
-                {entry.location_label && (
+                {(entry.location_label || !!entry.has_photo) && (
                   <Text style={[styles.cardMeta, { color: colors.textMuted }]}>
-                    📍 {entry.location_label}
+                    {[entry.location_label ? `📍 ${entry.location_label}` : null, entry.has_photo ? '🖼' : null].filter(Boolean).join('  ·  ')}
                   </Text>
                 )}
               </TouchableOpacity>

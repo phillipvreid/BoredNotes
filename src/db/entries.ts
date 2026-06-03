@@ -38,15 +38,20 @@ export async function getRecentEntries(db: SQLiteDatabase, limit: number): Promi
 }
 
 export async function getAllEntries(db: SQLiteDatabase): Promise<Entry[]> {
-  return db.getAllAsync<Entry>('SELECT * FROM entries ORDER BY created_at DESC', []);
+  return db.getAllAsync<Entry>(
+    `SELECT e.*, EXISTS(SELECT 1 FROM media m WHERE m.entry_id = e.id AND m.type = 'photo') as has_photo
+     FROM entries e ORDER BY e.created_at DESC`,
+    []
+  );
 }
 
 export async function searchEntries(db: SQLiteDatabase, query: string): Promise<Entry[]> {
   const term = `%${query}%`;
   return db.getAllAsync<Entry>(
-    `SELECT * FROM entries
-     WHERE response_text LIKE ? OR prompt_text LIKE ? OR location_label LIKE ?
-     ORDER BY created_at DESC`,
+    `SELECT e.*, EXISTS(SELECT 1 FROM media m WHERE m.entry_id = e.id AND m.type = 'photo') as has_photo
+     FROM entries e
+     WHERE e.response_text LIKE ? OR e.prompt_text LIKE ? OR e.location_label LIKE ?
+     ORDER BY e.created_at DESC`,
     [term, term, term]
   );
 }

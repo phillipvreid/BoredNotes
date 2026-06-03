@@ -27,10 +27,11 @@ export function PlaceFeedList({ entries }: Props) {
           onPress={() => router.push(`/entry/${entry.id}`)}
         >
           <Text style={[styles.date, { color: colors.textMuted }]}>
-            {new Date(entry.created_at).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric',
-            })}
-            {entry.entry_mode === 'freeform' ? '  ·  freeform' : ''}
+            {[
+              new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              entry.entry_mode === 'freeform' ? 'freeform' : null,
+              entry.has_photo ? '🖼' : null,
+            ].filter(Boolean).join('  ·  ')}
           </Text>
           <Text style={[styles.snippet, { color: colors.textPrimary }]} numberOfLines={2}>
             {entry.response_text}

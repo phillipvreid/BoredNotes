@@ -12,6 +12,7 @@ export interface Entry {
   location_lng: number | null;
   entry_mode: 'prompted' | 'freeform';
   place_id: number | null;
+  has_photo?: number;
 }
 
 export interface PinnedEntry extends Entry {
