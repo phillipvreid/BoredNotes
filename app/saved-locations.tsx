@@ -157,15 +157,17 @@ export default function SavedLocationsScreen() {
                 </View>
               </View>
             ) : (
-              <TouchableOpacity style={styles.collapsedRow} onPress={() => openEdit(place)}>
-                <View style={{ flex: 1 }}>
+              <View style={styles.collapsedRow}>
+                <TouchableOpacity style={{ flex: 1 }} onPress={() => router.push(`/place/${place.id}`)}>
                   <Text style={[styles.placeName, { color: colors.textPrimary }]}>{place.name}</Text>
                   <Text style={[styles.placeMeta, { color: colors.textMuted }]}>
                     {place.entry_count} notes · {place.radius_m} m radius
                   </Text>
-                </View>
-                <Text style={[styles.editCta, { color: accent.buttonColor }]}>Edit →</Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => openEdit(place)}>
+                  <Text style={[styles.editCta, { color: accent.buttonColor }]}>Edit →</Text>
+                </TouchableOpacity>
+              </View>
             )}
           </View>
         ))}
