@@ -84,6 +84,7 @@ export function MapTab() {
             key={entry.id}
             coordinate={{ latitude: entry.location_lat, longitude: entry.location_lng }}
             tracksViewChanges={false}
+            anchor={{ x: 0.5, y: 0.5 }}
           >
             <View style={styles.dotHitArea}>
               <View style={[styles.dot, { backgroundColor: accent.buttonColor }]} />
