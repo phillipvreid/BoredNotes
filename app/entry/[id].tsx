@@ -6,6 +6,8 @@ import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
 import { useTheme } from '../../src/theme/ThemeContext';
 import type { Entry, MediaItem } from '../../src/types';
+import * as Haptics from 'expo-haptics';
+import { PlaceNameSheet } from '../../src/components/PlaceNameSheet';
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -20,6 +22,8 @@ export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [sheetEntryCount, setSheetEntryCount] = useState(0);
 
   useEffect(() => {
     (async () => {
@@ -43,7 +47,25 @@ export default function EntryDetailScreen() {
 
         <Text style={[styles.dateTime, { color: colors.textMuted }]}>{formatDateTime(entry.created_at)}</Text>
         {entry.location_label && (
-          <Text style={[styles.location, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>
+          <TouchableOpacity
+            delayLongPress={400}
+            onLongPress={async () => {
+              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              let count = 0;
+              if (entry.place_id !== null) {
+                const db = await getDb();
+                const row = await db.getFirstAsync<{ cnt: number }>(
+                  'SELECT COUNT(*) as cnt FROM entries WHERE place_id = ?',
+                  [entry.place_id]
+                );
+                count = row?.cnt ?? 0;
+              }
+              setSheetEntryCount(count);
+              setSheetVisible(true);
+            }}
+          >
+            <Text style={[styles.location, { color: colors.textMuted }]}>📍 {entry.location_label}</Text>
+          </TouchableOpacity>
         )}
 
         {entry.entry_mode !== 'freeform' && (
@@ -62,6 +84,20 @@ export default function EntryDetailScreen() {
         >
           <Text style={styles.shareTxt}>Share this entry</Text>
         </TouchableOpacity>
+        <PlaceNameSheet
+          visible={sheetVisible}
+          placeId={entry.place_id ?? undefined}
+          coordinate={{ lat: entry.location_lat ?? 0, lng: entry.location_lng ?? 0 }}
+          initialName={entry.location_label ?? ''}
+          entryCount={sheetEntryCount}
+          onSaved={async () => {
+            setSheetVisible(false);
+            const db = await getDb();
+            const updated = await getEntry(db, entry.id);
+            if (updated) setEntry(updated);
+          }}
+          onClose={() => setSheetVisible(false)}
+        />
       </ScrollView>
     </SafeAreaView>
   );
