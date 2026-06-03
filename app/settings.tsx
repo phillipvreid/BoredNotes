@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, Switch, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, Switch, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -89,7 +89,9 @@ export default function SettingsScreen() {
     try {
       const db = await getDb();
       await exportEntriesToCsv(db);
-    } catch {}
+    } catch {
+      Alert.alert('Export failed', 'Could not export your notes. Please try again.');
+    }
   }
 
   return (

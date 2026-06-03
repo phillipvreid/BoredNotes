@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { AudioPlayer, createAudioPlayer } from 'expo-audio';
 import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
@@ -21,8 +20,6 @@ export default function EntryDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
-  const [player, setPlayer] = useState<AudioPlayer | null>(null);
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -31,30 +28,9 @@ export default function EntryDetailScreen() {
       setEntry(e);
       if (e) setMedia(await getMediaForEntry(db, e.id));
     })();
-    return () => { player?.remove(); };
   }, [id]);
 
   const photo = media.find(m => m.type === 'photo');
-  const voice = media.find(m => m.type === 'voice');
-
-  async function togglePlayback() {
-    if (!voice) return;
-    if (playing && player) {
-      player.pause();
-      setPlaying(false);
-    } else if (player) {
-      player.play();
-      setPlaying(true);
-    } else {
-      const p = createAudioPlayer({ uri: voice.file_path });
-      p.addListener('playbackStatusUpdate', (status: any) => {
-        if (status.didJustFinish) setPlaying(false);
-      });
-      p.play();
-      setPlayer(p);
-      setPlaying(true);
-    }
-  }
 
   if (!entry) return null;
 
@@ -80,17 +56,6 @@ export default function EntryDetailScreen() {
 
         <Text style={[styles.response, { color: colors.textPrimary }]}>{entry.response_text}</Text>
 
-        {voice && (
-          <TouchableOpacity
-            style={[styles.voiceBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            onPress={togglePlayback}
-          >
-            <Text style={[styles.voiceTxt, { color: colors.textSecondary }]}>
-              {playing ? '⏸ Pause voice memo' : '▶ Play voice memo'}
-            </Text>
-          </TouchableOpacity>
-        )}
-
         <TouchableOpacity
           style={[styles.shareBtn, { backgroundColor: accent.buttonColor }]}
           onPress={() => router.push(`/share/${entry.id}`)}
@@ -112,8 +77,6 @@ const styles = StyleSheet.create({
   prompt: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic', lineHeight: 24 },
   photo: { width: '100%', height: 220, borderRadius: 12 },
   response: { fontSize: 18, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
-  voiceBtn: { borderRadius: 10, borderWidth: 1, paddingVertical: 12, alignItems: 'center' },
-  voiceTxt: { fontSize: 15 },
   shareBtn: { borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
   shareTxt: { color: '#fff', fontSize: 15, fontWeight: '600' },
 });

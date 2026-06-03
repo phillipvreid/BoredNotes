@@ -17,6 +17,7 @@ async function _getContextualPrompt(
 ): Promise<CurrentPrompt> {
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
   if (offlineMode) {
+    if (skipThrottle) return await getNextPrompt(db);
     return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
@@ -82,6 +83,7 @@ async function _getContextualPrompt(
     // fall through to DB fallback
   }
 
+  if (skipThrottle) return await getNextPrompt(db);
   return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
 }
 

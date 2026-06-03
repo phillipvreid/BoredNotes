@@ -1,6 +1,6 @@
 export type PromptCategory = 'observational' | 'reflective' | 'personal' | 'creative';
 export type PromptSource = 'library' | 'custom';
-export type MediaType = 'photo' | 'voice';
+export type MediaType = 'photo';
 
 export interface Entry {
   id: number;
