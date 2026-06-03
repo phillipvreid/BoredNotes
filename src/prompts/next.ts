@@ -74,6 +74,29 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   return { text: finalText, category: finalCategory, source: finalSource };
 }
 
+export async function peekNextLibraryPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
+  const recentEntries = await getRecentEntries(db, 30);
+  const recentCategories = (
+    JSON.parse((await getSetting(db, 'recent_categories')) ?? '[]') as PromptCategory[]
+  );
+  const recentDepths = (
+    JSON.parse((await getSetting(db, 'recent_depths')) ?? '[]') as number[]
+  );
+  const eligible = await getEligiblePrompts(db, {
+    excludeTexts: recentEntries.map(e => e.prompt_text),
+    excludeCategories: recentCategories.slice(-2),
+    excludeDepth:
+      recentDepths.slice(-3).length === 3 &&
+      recentDepths.slice(-3).every(d => d === recentDepths[recentDepths.length - 1])
+        ? recentDepths[recentDepths.length - 1]
+        : null,
+  });
+  const allFallback = await getEligiblePrompts(db, {});
+  const pool = eligible.length > 0 ? eligible : allFallback;
+  const selected = selectPrompt(pool, recentCategories, recentDepths);
+  return { text: selected.text, category: selected.category, source: 'library' };
+}
+
 export async function getCurrentPrompt(db: SQLiteDatabase): Promise<CurrentPrompt | null> {
   const text = await getSetting(db, 'current_prompt_text');
   const category = await getSetting(db, 'current_prompt_category') as PromptCategory | null;

@@ -4,13 +4,15 @@ import {
   ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
 } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { Feather } from '@expo/vector-icons';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
 import { getNextPrompt, getCurrentPrompt } from '../src/prompts/next';
+import { forceRefreshContextualPrompt } from '../src/prompts/contextual';
 import { getSetting } from '../src/db/settings';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
-import { pickPhoto, takePhoto, startVoiceRecording, stopVoiceRecording } from '../src/media/capture';
+import { pickPhoto, takePhoto } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
 
 export default function RespondScreen() {
@@ -19,11 +21,10 @@ export default function RespondScreen() {
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [voiceUri, setVoiceUri] = useState<string | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [prompt, setPrompt] = useState<string>('');
   const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
+  const [refreshingPrompt, setRefreshingPrompt] = useState(false);
 
   const { promptText, promptCategory } = useLocalSearchParams<{
     promptText?: string;
@@ -54,6 +55,19 @@ export default function RespondScreen() {
     })();
   }, []);
 
+  async function handleRefreshPrompt() {
+    setRefreshingPrompt(true);
+    try {
+      const db = await getDb();
+      const fresh = await forceRefreshContextualPrompt(db);
+      setPrompt(fresh.text);
+    } catch {
+      Alert.alert('Could not refresh prompt', 'Please try again.');
+    } finally {
+      setRefreshingPrompt(false);
+    }
+  }
+
   async function handleAddLocation() {
     const loc = await captureLocation();
     if (loc) {
@@ -63,26 +77,27 @@ export default function RespondScreen() {
   }
 
   async function handlePickPhoto() {
-    const uri = await pickPhoto();
-    if (uri) setPhotoUri(uri);
+    try {
+      const uri = await pickPhoto();
+      if (uri) setPhotoUri(uri);
+    } catch (e) {
+      if (e instanceof Error && e.message === 'permission_denied') {
+        Alert.alert('Permission needed', 'Please allow photo library access in Settings to attach photos.');
+      } else {
+        Alert.alert('Photo error', 'Could not attach the photo. Please try again.');
+      }
+    }
   }
 
   async function handleTakePhoto() {
-    const uri = await takePhoto();
-    if (uri) setPhotoUri(uri);
-  }
-
-  async function handleToggleRecording() {
-    if (isRecording) {
-      const uri = await stopVoiceRecording();
-      setIsRecording(false);
-      if (uri) setVoiceUri(uri);
-    } else {
-      try {
-        await startVoiceRecording();
-        setIsRecording(true);
-      } catch {
-        Alert.alert('Microphone access needed', 'Please allow microphone access in Settings to record voice memos.');
+    try {
+      const uri = await takePhoto();
+      if (uri) setPhotoUri(uri);
+    } catch (e) {
+      if (e instanceof Error && e.message === 'permission_denied') {
+        Alert.alert('Permission needed', 'Please allow camera access in Settings to take photos.');
+      } else {
+        Alert.alert('Camera error', 'Could not attach the photo. Please try again.');
       }
     }
   }
@@ -107,7 +122,6 @@ export default function RespondScreen() {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
       }
       if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
-      if (voiceUri) await createMedia(db, entryId, 'voice', voiceUri);
       await getNextPrompt(db);
       router.back();
     } catch {
@@ -125,7 +139,17 @@ export default function RespondScreen() {
           </TouchableOpacity>
 
           {respondMode === 'prompted' && (
-            <Text style={[styles.prompt, { color: colors.textPrimary }]}>{prompt}</Text>
+            <View style={styles.promptRow}>
+              <Text style={[styles.prompt, { color: colors.textPrimary, flex: 1 }]}>{prompt}</Text>
+              <TouchableOpacity
+                onPress={handleRefreshPrompt}
+                disabled={refreshingPrompt}
+                hitSlop={8}
+                style={styles.refreshBtn}
+              >
+                <Feather name="refresh-cw" size={14} color={colors.textMuted} />
+              </TouchableOpacity>
+            </View>
           )}
 
           <TextInput
@@ -147,15 +171,6 @@ export default function RespondScreen() {
               <Image source={{ uri: photoUri }} style={styles.photoImg} />
               <TouchableOpacity onPress={() => setPhotoUri(null)}>
                 <Text style={styles.removeTxt}>Remove photo</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {voiceUri && !isRecording && (
-            <View style={styles.voiceBadge}>
-              <Text style={[styles.voiceTxt, { color: colors.textSecondary }]}>🎙 Voice memo attached</Text>
-              <TouchableOpacity onPress={() => setVoiceUri(null)}>
-                <Text style={styles.removeTxt}>Remove</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -197,12 +212,6 @@ export default function RespondScreen() {
             >
               <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>📷 Camera</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleToggleRecording}
-              style={[styles.attachBtn, { backgroundColor: isRecording ? '#fee2e2' : colors.surface, borderColor: colors.border }]}
-            >
-              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>{isRecording ? '⏹ Stop' : '🎙 Record'}</Text>
-            </TouchableOpacity>
           </View>
 
           <TouchableOpacity
@@ -223,12 +232,12 @@ const styles = StyleSheet.create({
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   closeBtn: { alignSelf: 'flex-end', padding: 4 },
   closeTxt: { fontSize: 18 },
-  prompt: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic', marginTop: 8 },
+  promptRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 8 },
+  prompt: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
+  refreshBtn: { marginTop: 8 },
   input: { fontSize: 16, lineHeight: 26, minHeight: 160, textAlignVertical: 'top', borderBottomWidth: 1, paddingBottom: 12, fontFamily: 'Georgia', fontStyle: 'italic' },
   photoPreview: { gap: 6 },
   photoImg: { width: '100%', height: 180, borderRadius: 8 },
-  voiceBadge: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  voiceTxt: {},
   removeTxt: { color: '#f87171', fontSize: 13 },
   metaRow: { gap: 6 },
   locationRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
