@@ -5,7 +5,7 @@ import { getRecentEntries } from '../db/entries';
 import { getEligiblePrompts } from '../db/prompts';
 import { selectPrompt } from './selection';
 import { generateAiPrompt } from './ai';
-import { getCurrentPrompt, getNextPrompt } from './next';
+import { getCurrentPrompt, getNextPrompt, peekNextLibraryPrompt } from './next';
 import { gatherContext } from '../context/gather';
 
 const API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY ?? '';
@@ -17,7 +17,7 @@ async function _getContextualPrompt(
 ): Promise<CurrentPrompt> {
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
   if (offlineMode) {
-    if (skipThrottle) return await getNextPrompt(db);
+    if (skipThrottle) return await peekNextLibraryPrompt(db);
     return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
@@ -37,6 +37,7 @@ async function _getContextualPrompt(
   }
 
   if (!API_KEY) {
+    if (skipThrottle) return await peekNextLibraryPrompt(db);
     return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
   }
 
@@ -83,7 +84,7 @@ async function _getContextualPrompt(
     // fall through to DB fallback
   }
 
-  if (skipThrottle) return await getNextPrompt(db);
+  if (skipThrottle) return await peekNextLibraryPrompt(db);
   return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
 }
 

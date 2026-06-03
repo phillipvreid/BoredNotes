@@ -61,6 +61,8 @@ export default function RespondScreen() {
       const db = await getDb();
       const fresh = await forceRefreshContextualPrompt(db);
       setPrompt(fresh.text);
+    } catch {
+      Alert.alert('Could not refresh prompt', 'Please try again.');
     } finally {
       setRefreshingPrompt(false);
     }
@@ -78,8 +80,12 @@ export default function RespondScreen() {
     try {
       const uri = await pickPhoto();
       if (uri) setPhotoUri(uri);
-    } catch {
-      Alert.alert('Photo error', 'Could not attach the photo. Please try again.');
+    } catch (e) {
+      if (e instanceof Error && e.message === 'permission_denied') {
+        Alert.alert('Permission needed', 'Please allow photo library access in Settings to attach photos.');
+      } else {
+        Alert.alert('Photo error', 'Could not attach the photo. Please try again.');
+      }
     }
   }
 
@@ -87,8 +93,12 @@ export default function RespondScreen() {
     try {
       const uri = await takePhoto();
       if (uri) setPhotoUri(uri);
-    } catch {
-      Alert.alert('Camera error', 'Could not attach the photo. Please try again.');
+    } catch (e) {
+      if (e instanceof Error && e.message === 'permission_denied') {
+        Alert.alert('Permission needed', 'Please allow camera access in Settings to take photos.');
+      } else {
+        Alert.alert('Camera error', 'Could not attach the photo. Please try again.');
+      }
     }
   }
 

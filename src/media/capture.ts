@@ -10,7 +10,7 @@ async function ensureMediaDir(): Promise<void> {
 
 export async function pickPhoto(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') return null;
+  if (status !== 'granted') throw new Error('permission_denied');
 
   const result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ['images'],
@@ -28,7 +28,7 @@ export async function pickPhoto(): Promise<string | null> {
 
 export async function takePhoto(): Promise<string | null> {
   const { status } = await ImagePicker.requestCameraPermissionsAsync();
-  if (status !== 'granted') return null;
+  if (status !== 'granted') throw new Error('permission_denied');
 
   const result = await ImagePicker.launchCameraAsync({
     quality: 0.8,
