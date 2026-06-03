@@ -33,6 +33,7 @@ describe('getDb', () => {
       const mockDb = {
         execAsync: jest.fn()
           .mockResolvedValueOnce(undefined)           // CREATE_TABLES_SQL succeeds
+          .mockResolvedValueOnce(undefined)           // PRAGMA foreign_keys = ON succeeds
           .mockRejectedValueOnce(new Error('duplicate column name: entry_mode')),
         runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
         getAllAsync: jest.fn().mockResolvedValue([]),
