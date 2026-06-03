@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { router, useFocusEffect } from 'expo-router';
 import { getDb } from '../db/database';
@@ -121,27 +121,31 @@ export function MapTab() {
               : `cluster-${idx}`}
             coordinate={{ latitude: group.lat, longitude: group.lng }}
             tracksViewChanges={false}
-            onPress={() => {
-              if (group.type === 'named') {
-                router.push(`/place/${(group as NamedPlaceGroup).placeId}`);
-              } else {
-                router.push(
-                  `/place/cluster?lat=${group.lat}&lng=${group.lng}&radius=111`
-                );
-              }
-            }}
-            onLongPress={() => openSheetForGroup(group as NamedPlaceGroup | UnnamedClusterGroup)}
           >
-            <View style={[
-              styles.pill,
-              { backgroundColor: group.type === 'named' ? accent.buttonColor : '#888888' },
-            ]}>
-              <Text style={styles.pillText}>
-                {group.type === 'named'
-                  ? `${(group as NamedPlaceGroup).placeName} · ${group.entries.length}`
-                  : `${group.entries.length} notes`}
-              </Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => {
+                if (group.type === 'named') {
+                  router.push(`/place/${(group as NamedPlaceGroup).placeId}`);
+                } else {
+                  router.push(
+                    `/place/cluster?lat=${group.lat}&lng=${group.lng}&radius=160`
+                  );
+                }
+              }}
+              onLongPress={() => openSheetForGroup(group as NamedPlaceGroup | UnnamedClusterGroup)}
+              delayLongPress={400}
+            >
+              <View style={[
+                styles.pill,
+                { backgroundColor: group.type === 'named' ? accent.buttonColor : '#888888' },
+              ]}>
+                <Text style={styles.pillText}>
+                  {group.type === 'named'
+                    ? `${(group as NamedPlaceGroup).placeName} · ${group.entries.length}`
+                    : `${group.entries.length} notes`}
+                </Text>
+              </View>
+            </TouchableOpacity>
           </Marker>
         ))}
 

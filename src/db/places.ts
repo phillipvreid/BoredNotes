@@ -88,10 +88,7 @@ export async function syncPlaceToEntries(db: SQLiteDatabase, place: Place): Prom
         [place.id, place.name, row.id]
       );
     } else if (!withinRadius && isOwnedByThis) {
-      await db.runAsync(
-        'UPDATE entries SET place_id = NULL, location_label = NULL WHERE id = ?',
-        [row.id]
-      );
+      await db.runAsync('UPDATE entries SET place_id = NULL WHERE id = ?', [row.id]);
     }
   }
 }

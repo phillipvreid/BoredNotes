@@ -216,12 +216,12 @@ describe('syncPlaceToEntries', () => {
     ]);
     await syncPlaceToEntries(db, place);
     expect(db.runAsync).toHaveBeenCalledWith(
-      expect.stringContaining('UPDATE entries SET place_id = NULL'),
+      expect.stringContaining('UPDATE entries SET place_id = NULL WHERE id = ?'),
       [12]
     );
-    // Also verify location_label is cleared
+    // place_id is cleared but location_label is preserved (original geocoded label should not be lost)
     const callArg = db.runAsync.mock.calls[0][0] as string;
-    expect(callArg).toContain('location_label = NULL');
+    expect(callArg).not.toContain('location_label');
   });
 
   it('does NOT touch entries owned by a different place', async () => {
