@@ -18,6 +18,9 @@
         "NSPhotoLibraryUsageDescription": "BoredNotes accesses your photo library to attach images to entries.",
         "NSLocationWhenInUseUsageDescription": "BoredNotes can tag your entries with where you wrote them.",
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.developer.default-data-protection": "NSFileProtectionComplete"
       }
     },
     "android": {
