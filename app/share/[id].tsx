@@ -7,7 +7,7 @@ import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
 import { ShareCard } from '../../src/share/renderer';
-import { TEMPLATES, DEFAULT_TEMPLATE_ID } from '../../src/share/templates';
+import { CARD_STYLES, DEFAULT_STYLE_ID, DEFAULT_VARIANT_ID } from '../../src/share/templates';
 import { useTheme } from '../../src/theme/ThemeContext';
 import type { Entry, MediaItem } from '../../src/types';
 
@@ -17,7 +17,8 @@ export default function ShareCardScreen() {
   const cardRef = useRef<View>(null);
   const [entry, setEntry] = useState<Entry | null>(null);
   const [photo, setPhoto] = useState<MediaItem | null>(null);
-  const [templateId, setTemplateId] = useState(DEFAULT_TEMPLATE_ID);
+  const [styleId, setStyleId] = useState(DEFAULT_STYLE_ID);
+  const [variantId, setVariantId] = useState(DEFAULT_VARIANT_ID);
   const [showDate, setShowDate] = useState(true);
   const [showLocation, setShowLocation] = useState(true);
   const [sharing, setSharing] = useState(false);
@@ -47,13 +48,9 @@ export default function ShareCardScreen() {
     }
   }
 
-  const template = TEMPLATES.find(t => t.id === templateId) ?? TEMPLATES[0];
-
   if (!entry) return null;
 
-  const dateStr = new Date(entry.created_at).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
-  });
+  const currentStyle = CARD_STYLES.find(s => s.id === styleId) ?? CARD_STYLES[0];
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
@@ -66,30 +63,60 @@ export default function ShareCardScreen() {
         <View style={styles.preview}>
           <ShareCard
             ref={cardRef}
-            template={template}
+            styleId={styleId}
+            variantId={variantId}
             promptText={entry.prompt_text}
             responseText={entry.response_text}
-            date={dateStr}
+            createdAt={entry.created_at}
             location={entry.location_label}
             photoUri={photo?.file_path ?? null}
             showDate={showDate}
             showLocation={showLocation}
+            entryMode={entry.entry_mode}
           />
         </View>
 
-        <Text style={[styles.label, { color: colors.textMuted }]}>Template</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.templateScroll}>
-          {TEMPLATES.map(t => (
-            <TouchableOpacity
-              key={t.id}
-              style={[styles.templateChip, { backgroundColor: templateId === t.id ? accent.buttonColor : colors.surface }]}
-              onPress={() => setTemplateId(t.id)}
-            >
-              <View style={[styles.templateSwatch, { backgroundColor: t.bg, borderColor: colors.border }]} />
-              <Text style={[styles.templateLabel, { color: colors.textSecondary }]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* Style tabs */}
+        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>Style</Text>
+        <View style={styles.tabRow}>
+          {CARD_STYLES.map(s => {
+            const active = s.id === styleId;
+            return (
+              <TouchableOpacity
+                key={s.id}
+                style={[
+                  styles.tab,
+                  active && { backgroundColor: accent.buttonColor + '22', borderColor: accent.buttonColor + '66' },
+                ]}
+                onPress={() => { setStyleId(s.id); setVariantId(s.variants[0].id); }}
+              >
+                <Text style={[styles.tabLabel, { color: active ? accent.buttonColor : colors.textMuted }]}>
+                  {s.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {/* Colour dots */}
+        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>Colour</Text>
+        <View style={styles.dotsRow}>
+          {currentStyle.variants.map(v => {
+            const active = v.id === variantId;
+            return (
+              <TouchableOpacity key={v.id} onPress={() => setVariantId(v.id)} style={styles.dotWrap}>
+                <View style={[
+                  styles.dot,
+                  { backgroundColor: v.dotGradient[0] },
+                  active && { borderColor: accent.buttonColor, borderWidth: 2.5 },
+                ]} />
+                <Text style={[styles.dotLabel, { color: active ? accent.buttonColor : colors.textMuted }]}>
+                  {v.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
 
         <View style={styles.toggleRow}>
           <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>Show date</Text>
@@ -121,11 +148,14 @@ const styles = StyleSheet.create({
   closeTxt: { fontSize: 18 },
   title: { fontSize: 24, fontWeight: '700' },
   preview: { alignItems: 'center', paddingVertical: 8 },
-  label: { fontSize: 13, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 },
-  templateScroll: { flexGrow: 0 },
-  templateChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, marginRight: 10 },
-  templateSwatch: { width: 16, height: 16, borderRadius: 4, borderWidth: 1 },
-  templateLabel: { fontSize: 13 },
+  pickerLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
+  tabRow: { flexDirection: 'row', gap: 8 },
+  tab: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center', borderWidth: 1.5, borderColor: 'transparent' },
+  tabLabel: { fontSize: 13, fontWeight: '500' },
+  dotsRow: { flexDirection: 'row', gap: 10 },
+  dotWrap: { alignItems: 'center', gap: 6, flex: 1 },
+  dot: { width: 28, height: 28, borderRadius: 14, borderWidth: 2.5, borderColor: 'transparent' },
+  dotLabel: { fontSize: 10 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   toggleLabel: { fontSize: 15 },
   shareBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
