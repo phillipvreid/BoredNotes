@@ -138,7 +138,7 @@ export default function SettingsScreen() {
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Offline Mode</Text>
-            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>Use built-in prompts only, no AI</Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>AI-generated prompts use short snippets from your recent notes for context. Enable offline mode to disable this.</Text>
           </View>
           <Switch
             value={offlineMode}
