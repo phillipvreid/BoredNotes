@@ -17,7 +17,7 @@ No database changes. No CSV export changes. The capture-and-share mechanism is u
 
 **3 style families × 3 colour variants = 9 cards.**
 
-Default selection: **Passport Gold**.
+Default selection: **Passport Gold**. All cards: width 320px, border radius 14px.
 
 ### Style 1 — Passport Stamp
 
@@ -32,7 +32,7 @@ Serif (Georgia). Structured like a passport page: thin gradient topbar, brand + 
    - **Meta row** — `Location` + `Prompt` fields (each: 7.5px uppercase label + 10px value). Omit `Prompt` field on freeform entries. Omit `Location` field when no location.
 3. **MRZ footer** — monospace, 2 lines:
    - Line 1: `P<BNBOREDNOTES<<<<<<<<<<<<<<<<<<<<<<<<`
-   - Line 2: `YYYYMMDD<LOC<<ENTRY<<<<<<<<<<<<<<<<<<<` where LOC = first word of `location_label`, uppercased, truncated to 3 chars (e.g. "Melbourne" → "MEL"). Use `<<<` when no location.
+   - Line 2: `YYYYMMDD<<<ENTRY<<<<<<<<<<<<<<<<<<<<<<` (location is always `<<<` — the MRZ is decorative, not data)
 
 | Variant | bg | Accent gradient | Text | Meta |
 |---|---|---|---|---|
@@ -50,9 +50,9 @@ Stamp circle border and stamp label text use the accent colour at `0.3` and `0.5
 
 ---
 
-### Style 2 — Instant Memory
+### Style 2 — Photo Memory
 
-Serif (Georgia). Polaroid-style: full-bleed photo area at top, response body below, footer with caption and watermark. Feels warm, physical, photographic.
+Serif (Georgia). Polaroid-style: full-bleed photo area at top, response body below, footer with caption and watermark. Designed for entries with photos — the name makes this clear to the user so they know what to expect if they pick it for a photo-less entry.
 
 **Card structure (top to bottom):**
 1. **Photo area** — 150px tall, full card width. If entry has a photo, show it (`resizeMode: cover`). If no photo, show the variant's placeholder gradient (see below) — no text or icon, just the muted background.
@@ -135,7 +135,7 @@ Replaces the existing horizontal template-chip scroll with a 2-level picker.
 - Colour dots are gradient swatches: each shows a `135deg` blend of accent → bg colour.
 - Dot labels update to match the selected style's variant names: Passport → Gold/Copper/Navy; Instant → Warm/B&W/Cool; Signal → Purple/Ember/Teal.
 - Active dot has an accent-coloured border ring.
-- Active tab uses accent-tinted background, accent text, accent border.
+- Active tab uses accent-tinted background, accent text, accent border — all using `accent.buttonColor` from `useTheme()`, consistent with the rest of the app.
 - Card preview updates instantly on any picker or toggle change.
 
 **Toggles:**
@@ -155,11 +155,15 @@ Three files change. Nothing else.
 Replace `ShareTemplate[]` with a `CardStyle[]` structure:
 
 ```ts
+// Typed token interfaces — one per style family, so the compiler catches typos
+export interface PassportTokens { bg: string; border: string; accentStart: string; accentEnd: string; text: string; meta: string; divider: string; mrzBg: string; mrzText: string; }
+export interface PhotoTokens { bg: string; photoGradientStart: string; photoGradientEnd: string; text: string; muted: string; }
+export interface SignalTokens { bg: string; border: string; accent: string; quoteColor: string; text: string; divider: string; dateMuted: string; }
+
 export interface StyleVariant {
   id: string;
   label: string;
-  // colour tokens — component-specific, typed loosely here
-  tokens: Record<string, string>;
+  tokens: PassportTokens | PhotoTokens | SignalTokens;
   // gradient dot colours for the picker [accent, bg]
   dotGradient: [string, string];
 }
@@ -205,7 +209,7 @@ Three focused card components plus a router:
 | Scenario | Handling |
 |---|---|
 | Freeform entry (no prompt) | Omit prompt field from all cards. Passport: no "Prompt" meta item. Instant: no `i-prompt` line. Signal: unaffected (no prompt shown anyway). |
-| No photo (Instant Memory) | Show 150px placeholder area with variant's muted gradient. No placeholder text. |
+| No photo (Photo Memory) | Show 150px placeholder area with variant's muted gradient. No placeholder text. |
 | No location | Omit location from Passport meta row; omit location from Instant caption; omit `📍` line from Signal footer. Location toggle hidden from share screen. |
 | Long response text | Cards are fixed width (320px). Text wraps naturally. No truncation — the card can grow vertically. |
 | Freeform entry mode in Signal date line | Show `· freeform` suffix instead of `· prompted`. Derived from `entry.entry_mode`. |
