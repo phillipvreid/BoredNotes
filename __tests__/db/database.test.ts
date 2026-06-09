@@ -22,8 +22,8 @@ describe('getDb', () => {
       ({ getDb } = require('../../src/db/database'));
     });
     await getDb!();
-    const calls = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
-    expect(calls.some(sql => sql.includes('entry_mode'))).toBe(true);
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('entry_mode'))).toBe(true);
   });
 
   it('silently ignores duplicate column error from migration', async () => {
@@ -81,8 +81,8 @@ describe('places migration', () => {
       ({ getDb } = require('../../src/db/database'));
     });
     await getDb!();
-    const calls = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
-    expect(calls.some(sql => sql.includes('CREATE TABLE IF NOT EXISTS places'))).toBe(true);
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('CREATE TABLE IF NOT EXISTS places'))).toBe(true);
   });
 
   it('adds place_id column on init', async () => {
@@ -101,8 +101,8 @@ describe('places migration', () => {
       ({ getDb } = require('../../src/db/database'));
     });
     await getDb!();
-    const calls = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
-    expect(calls.some(sql => sql.includes('place_id'))).toBe(true);
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('place_id'))).toBe(true);
   });
 
   it('silently ignores duplicate column error for place_id', async () => {
