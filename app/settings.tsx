@@ -41,28 +41,6 @@ export default function SettingsScreen() {
     }
   }
 
-  const [isFreeform, setIsFreeform] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const db = await getDb();
-        const mode = await getSetting(db, 'respond_mode');
-        setIsFreeform(mode === 'freeform');
-      } catch {}
-    })();
-  }, []);
-
-  async function handleFreeformToggle(value: boolean) {
-    setIsFreeform(value);
-    try {
-      const db = await getDb();
-      await setSetting(db, 'respond_mode', value ? 'freeform' : 'prompted');
-    } catch {
-      setIsFreeform(!value);
-    }
-  }
-
   const [autoLocation, setAutoLocation] = useState(false);
 
   useEffect(() => {
@@ -138,25 +116,13 @@ export default function SettingsScreen() {
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Offline Mode</Text>
-            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>AI-generated prompts use short snippets from your recent notes for context. Enable offline mode to disable this.</Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>AI-generated prompts can use short snippets from your recent notes when the Memory option is on. Enable offline mode to disable AI prompts entirely.</Text>
           </View>
           <Switch
             value={offlineMode}
             onValueChange={handleOfflineToggle}
             trackColor={{ true: accent.buttonColor }}
             disabled={toggling}
-          />
-        </View>
-
-        <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
-          <View style={styles.rowTextBlock}>
-            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Freeform mode</Text>
-            <Text style={[styles.rowSubLabel, { color: colors.textMuted }]}>Write without a prompt</Text>
-          </View>
-          <Switch
-            value={isFreeform}
-            onValueChange={handleFreeformToggle}
-            trackColor={{ true: accent.buttonColor }}
           />
         </View>
 
