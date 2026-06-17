@@ -61,12 +61,30 @@ describe('getNextPrompt', () => {
       .mockResolvedValueOnce(null)              // recent_categories
       .mockResolvedValueOnce(null)              // recent_depths
       .mockResolvedValueOnce({ value: '3' })    // prompt_call_count
-      .mockResolvedValueOnce({ value: 'false' }); // offline_mode
+      .mockResolvedValueOnce({ value: 'false' }) // offline_mode
+      .mockResolvedValueOnce(null);              // help_me_write_chips
 
     const result = await getNextPrompt(db as any);
 
     expect(mockGenerateAiPrompt).toHaveBeenCalledTimes(1);
     expect(result.text).toBe('AI-generated question');
     expect(result.source).toBe('ai');                // NEW
+  });
+
+  it('omits recentTopics when the stored Memory chip is off', async () => {
+    mockGenerateAiPrompt.mockResolvedValueOnce('AI-generated question');
+    db.getFirstAsync
+      .mockResolvedValueOnce(null)              // recent_categories
+      .mockResolvedValueOnce(null)              // recent_depths
+      .mockResolvedValueOnce({ value: '3' })    // prompt_call_count
+      .mockResolvedValueOnce({ value: 'false' }) // offline_mode
+      .mockResolvedValueOnce({ value: JSON.stringify({ time: true, place: true, weather: true, memory: false }) }); // help_me_write_chips
+
+    await getNextPrompt(db as any);
+
+    expect(mockGenerateAiPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ recentTopics: [] }),
+      expect.any(String)
+    );
   });
 });

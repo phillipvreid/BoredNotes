@@ -47,7 +47,7 @@ export default function RespondScreen() {
       const storedChips = await getSetting(db, 'help_me_write_chips');
       if (storedChips) {
         try {
-          setModifiers(JSON.parse(storedChips));
+          setModifiers({ ...DEFAULT_MODIFIERS, ...JSON.parse(storedChips) });
         } catch {}
       }
 
