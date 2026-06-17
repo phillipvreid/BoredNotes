@@ -3,18 +3,28 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
-import { getNextPrompt, getCurrentPrompt } from '../src/prompts/next';
-import { forceRefreshContextualPrompt } from '../src/prompts/contextual';
-import { getSetting } from '../src/db/settings';
+import { getNextPrompt } from '../src/prompts/next';
+import { getContextualPrompt, forceRefreshContextualPrompt } from '../src/prompts/contextual';
+import { getSetting, setSetting } from '../src/db/settings';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
 import { pickPhoto, takePhoto } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
 import { checkEntryAgainstPlaces } from '../src/db/places';
+import { DEFAULT_MODIFIERS } from '../src/types';
+import type { CurrentPrompt, PromptModifiers } from '../src/types';
+
+const CHIP_LABELS: Record<keyof PromptModifiers, string> = {
+  place: 'Place',
+  time: 'Time',
+  weather: 'Weather',
+  memory: 'Memory',
+};
+const CHIP_KEYS: (keyof PromptModifiers)[] = ['place', 'time', 'weather', 'memory'];
 
 export default function RespondScreen() {
   const { colors, accent } = useTheme();
@@ -23,26 +33,24 @@ export default function RespondScreen() {
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [prompt, setPrompt] = useState<string>('');
-  const [respondMode, setRespondMode] = useState<'prompted' | 'freeform'>('prompted');
-  const [refreshingPrompt, setRefreshingPrompt] = useState(false);
-
-  const { promptText, promptCategory } = useLocalSearchParams<{
-    promptText?: string;
-    promptCategory?: string;
-  }>();
+  const [helpMeWriteOpen, setHelpMeWriteOpen] = useState(false);
+  const [prompt, setPrompt] = useState<CurrentPrompt | null>(null);
+  const [promptLoading, setPromptLoading] = useState(false);
+  const [modifiers, setModifiers] = useState<PromptModifiers>(DEFAULT_MODIFIERS);
+  const [offlineMode, setOfflineMode] = useState(false);
 
   useEffect(() => {
     (async () => {
       const db = await getDb();
-      if (promptText && promptCategory) {
-        setPrompt(promptText);
-      } else {
-        const current = await getCurrentPrompt(db);
-        setPrompt(current?.text ?? '');
+      setOfflineMode((await getSetting(db, 'offline_mode')) === 'true');
+
+      const storedChips = await getSetting(db, 'help_me_write_chips');
+      if (storedChips) {
+        try {
+          setModifiers(JSON.parse(storedChips));
+        } catch {}
       }
-      const mode = await getSetting(db, 'respond_mode');
-      setRespondMode((mode as 'prompted' | 'freeform') ?? 'prompted');
+
       const shouldAutoLocate = (await getSetting(db, 'auto_location')) === 'true';
       if (shouldAutoLocate) {
         try {
@@ -56,16 +64,54 @@ export default function RespondScreen() {
     })();
   }, []);
 
-  async function handleRefreshPrompt() {
-    setRefreshingPrompt(true);
+  async function loadPrompt(activeModifiers: PromptModifiers) {
+    setPromptLoading(true);
     try {
       const db = await getDb();
-      const fresh = await forceRefreshContextualPrompt(db);
-      setPrompt(fresh.text);
+      const result = await getContextualPrompt(db, activeModifiers);
+      setPrompt(result);
+    } finally {
+      setPromptLoading(false);
+    }
+  }
+
+  async function handleToggleHelpMeWrite() {
+    if (helpMeWriteOpen) {
+      setHelpMeWriteOpen(false);
+      return;
+    }
+    setHelpMeWriteOpen(true);
+    if (!prompt) {
+      await loadPrompt(modifiers);
+    }
+  }
+
+  async function handleRefreshPrompt() {
+    setPromptLoading(true);
+    try {
+      const db = await getDb();
+      const fresh = await forceRefreshContextualPrompt(db, modifiers);
+      setPrompt(fresh);
     } catch {
       Alert.alert('Could not refresh prompt', 'Please try again.');
     } finally {
-      setRefreshingPrompt(false);
+      setPromptLoading(false);
+    }
+  }
+
+  async function handleToggleModifier(key: keyof PromptModifiers) {
+    const next = { ...modifiers, [key]: !modifiers[key] };
+    setModifiers(next);
+    setPromptLoading(true);
+    try {
+      const db = await getDb();
+      await setSetting(db, 'help_me_write_chips', JSON.stringify(next));
+      const fresh = await forceRefreshContextualPrompt(db, next);
+      setPrompt(fresh);
+    } catch {
+      Alert.alert('Could not update prompt', 'Please try again.');
+    } finally {
+      setPromptLoading(false);
     }
   }
 
@@ -112,12 +158,12 @@ export default function RespondScreen() {
     try {
       const db = await getDb();
       const entryId = await createEntry(db, {
-        prompt_text: respondMode === 'freeform' ? '' : prompt,
+        prompt_text: helpMeWriteOpen ? (prompt?.text ?? '') : '',
         response_text: response.trim(),
         location_label: locationLabel || undefined,
         location_lat: locationCoords?.lat,
         location_lng: locationCoords?.lng,
-        entry_mode: respondMode,
+        entry_mode: helpMeWriteOpen ? 'prompted' : 'freeform',
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
@@ -150,17 +196,57 @@ export default function RespondScreen() {
             <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
           </TouchableOpacity>
 
-          {respondMode === 'prompted' && (
-            <View style={styles.promptRow}>
-              <Text style={[styles.prompt, { color: colors.textPrimary, flex: 1 }]}>{prompt}</Text>
-              <TouchableOpacity
-                onPress={handleRefreshPrompt}
-                disabled={refreshingPrompt}
-                hitSlop={8}
-                style={styles.refreshBtn}
-              >
-                <Feather name="refresh-cw" size={14} color={colors.textMuted} />
-              </TouchableOpacity>
+          {!helpMeWriteOpen && (
+            <TouchableOpacity onPress={handleToggleHelpMeWrite} style={styles.helpPill}>
+              <Text style={[styles.helpPillTxt, { color: accent.buttonColor }]}>✨ Help me write</Text>
+            </TouchableOpacity>
+          )}
+
+          {helpMeWriteOpen && (
+            <View style={styles.promptBlock}>
+              <View style={styles.promptRow}>
+                {promptLoading ? (
+                  <Text style={[styles.prompt, { color: colors.textMuted, flex: 1 }]}>…</Text>
+                ) : (
+                  <>
+                    <Text style={[styles.prompt, { color: colors.textPrimary, flex: 1 }]}>{prompt?.text}</Text>
+                    {!offlineMode && prompt?.source === 'ai' && (
+                      <View style={[styles.aiBadge, { backgroundColor: accent.buttonColor + '20' }]}>
+                        <Text style={[styles.aiBadgeText, { color: accent.buttonColor }]}>AI</Text>
+                      </View>
+                    )}
+                  </>
+                )}
+                <TouchableOpacity onPress={handleRefreshPrompt} disabled={promptLoading} hitSlop={8} style={styles.refreshBtn}>
+                  <Feather name="refresh-cw" size={14} color={colors.textMuted} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleToggleHelpMeWrite} hitSlop={8} style={styles.refreshBtn}>
+                  <Feather name="x" size={14} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              {!offlineMode && (
+                <View style={styles.chipRow}>
+                  {CHIP_KEYS.map(key => (
+                    <TouchableOpacity
+                      key={key}
+                      onPress={() => handleToggleModifier(key)}
+                      disabled={promptLoading}
+                      style={[
+                        styles.chip,
+                        {
+                          backgroundColor: modifiers[key] ? accent.buttonColor : colors.surface,
+                          borderColor: modifiers[key] ? accent.buttonColor : colors.border,
+                        },
+                      ]}
+                    >
+                      <Text style={[styles.chipTxt, { color: modifiers[key] ? '#fff' : colors.textSecondary }]}>
+                        {CHIP_LABELS[key]}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
           )}
 
@@ -173,10 +259,6 @@ export default function RespondScreen() {
             value={response}
             onChangeText={setResponse}
           />
-
-          {respondMode === 'freeform' && (
-            <Text style={[styles.freeformHint, { color: colors.textMuted }]}>writing freely</Text>
-          )}
 
           {photoUri && (
             <View style={styles.photoPreview}>
@@ -244,9 +326,17 @@ const styles = StyleSheet.create({
   container: { padding: 20, gap: 16, paddingBottom: 40 },
   closeBtn: { alignSelf: 'flex-end', padding: 4 },
   closeTxt: { fontSize: 18 },
-  promptRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 8 },
+  helpPill: { alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 4 },
+  helpPillTxt: { fontSize: 15, fontWeight: '600' },
+  promptBlock: { gap: 10 },
+  promptRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   prompt: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
   refreshBtn: { marginTop: 8 },
+  aiBadge: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginTop: 6 },
+  aiBadgeText: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
+  chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  chip: { borderRadius: 14, borderWidth: 1, paddingVertical: 6, paddingHorizontal: 12 },
+  chipTxt: { fontSize: 12, fontWeight: '600' },
   input: { fontSize: 16, lineHeight: 26, minHeight: 160, textAlignVertical: 'top', borderBottomWidth: 1, paddingBottom: 12, fontFamily: 'Georgia', fontStyle: 'italic' },
   photoPreview: { gap: 6 },
   photoImg: { width: '100%', height: 180, borderRadius: 8 },
@@ -260,5 +350,4 @@ const styles = StyleSheet.create({
   attachTxt: { fontSize: 13 },
   submitBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
   submitTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  freeformHint: { fontSize: 12, fontStyle: 'italic', textAlign: 'right', marginTop: -8 },
 });
