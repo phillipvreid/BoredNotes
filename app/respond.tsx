@@ -309,9 +309,9 @@ export default function RespondScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.submitBtn, { backgroundColor: (!response.trim() || submitting) ? colors.border : accent.buttonColor }]}
+            style={[styles.submitBtn, { backgroundColor: (!response.trim() || submitting || (helpMeWriteOpen && promptLoading)) ? colors.border : accent.buttonColor }]}
             onPress={handleSubmit}
-            disabled={!response.trim() || submitting}
+            disabled={!response.trim() || submitting || (helpMeWriteOpen && promptLoading)}
           >
             <Text style={styles.submitTxt}>{submitting ? 'Saving…' : 'Save entry →'}</Text>
           </TouchableOpacity>
