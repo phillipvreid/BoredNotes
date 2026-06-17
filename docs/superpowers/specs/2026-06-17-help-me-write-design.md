@@ -103,7 +103,7 @@ This replaces any code-level weighting/random-subset logic: variety relies on th
 ## Settings Screen (`app/settings.tsx`)
 
 - Remove the "Freeform mode" row, its `isFreeform` state, and `handleFreeformToggle` — the whole block tied to `respond_mode`.
-- "Offline Mode" row and its disclosure copy are unchanged; the existing privacy disclosure still covers the `memory` chip's behavior (it's a finer-grained version of the same recent-entries-to-AI concern).
+- **Offline Mode disclosure copy must be updated.** Today it reads "AI-generated prompts use short snippets from your recent notes for context. Enable offline mode to disable this." — written as if recent-note snippets are always sent whenever AI is used. Once the Memory chip exists, that's no longer true: snippets are only sent when Memory is on. Update the subtitle to something like: "AI-generated prompts can use short snippets from your recent notes when the Memory option is on. Enable offline mode to disable AI prompts entirely." so the disclosure accurately reflects the new opt-in behavior.
 
 ---
 
@@ -125,6 +125,7 @@ This replaces any code-level weighting/random-subset logic: variety relies on th
 
 ## Testing
 
+- **Existing tests will break, not just need new cases:** `__tests__/prompts/contextual.test.ts` calls `getContextualPrompt`/`forceRefreshContextualPrompt` directly, and `__tests__/prompts/ai.test.ts` exercises `buildContextLine` via `generateAiPrompt` — every existing call site in both files must be updated to pass `modifiers` (typically `DEFAULT_MODIFIERS`) before any new modifier-specific cases are added.
 - `ai.ts`: each modifier's effect on the built context line individually and in combination; all-off produces no context line; soft steering line present only when context line is non-empty; `memory` continues to be governed purely by the `recentTopics` argument.
 - `contextual.ts`: modifiers correctly gate `recentTopics` computation; offline branch ignores modifiers and still returns a library prompt.
 - `app/respond.tsx`: pill expand/collapse preserves typed text; chip toggle persists `help_me_write_chips` and triggers regeneration; offline mode hides chip row; submit produces correct `entry_mode`/`prompt_text` for both expanded and collapsed states.
