@@ -1,7 +1,7 @@
 {
   "name": "borednotes",
   "main": "expo-router/entry",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@expo/vector-icons": "^15.0.3",
     "expo": "~54.0.35",
     "expo-asset": "~12.0.13",
     "expo-blur": "~15.0.8",

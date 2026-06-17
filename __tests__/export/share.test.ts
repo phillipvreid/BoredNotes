@@ -1,9 +1,14 @@
 import { exportEntriesToCsv } from '../../src/export/share';
-import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { openDatabaseAsync } from 'expo-sqlite';
 
-jest.mock('expo-file-system');
+jest.mock('expo-file-system/next', () => ({
+  File: jest.fn().mockImplementation((_dir: unknown, filename: string) => ({
+    write: jest.fn(),
+    uri: `file:///mock-cache/${filename}`,
+  })),
+  Paths: { cache: '/mock-cache' },
+}));
 jest.mock('expo-sharing');
 
 describe('exportEntriesToCsv', () => {
@@ -30,13 +35,12 @@ describe('exportEntriesToCsv', () => {
 
     await exportEntriesToCsv(db);
 
-    expect(FileSystem.writeAsStringAsync).toHaveBeenCalledWith(
-      expect.stringContaining('borednotes-export-'),
-      expect.stringContaining('A red door.'),
-      { encoding: 'utf8' }
-    );
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system/next') as { File: jest.Mock };
+    const fileInstance = File.mock.results[0].value as { write: jest.Mock; uri: string };
+    expect(fileInstance.write).toHaveBeenCalledWith(expect.stringContaining('A red door.'));
     expect(Sharing.shareAsync).toHaveBeenCalledWith(
-      expect.stringContaining('borednotes-export-'),
+      fileInstance.uri,
       { mimeType: 'text/csv', dialogTitle: 'Export Notes' }
     );
   });
@@ -46,10 +50,11 @@ describe('exportEntriesToCsv', () => {
 
     await exportEntriesToCsv(db);
 
-    expect(FileSystem.writeAsStringAsync).toHaveBeenCalledWith(
-      expect.any(String),
-      'id,created_at,entry_mode,prompt_text,response_text,location_label,location_lat,location_lng',
-      { encoding: 'utf8' }
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { File } = require('expo-file-system/next') as { File: jest.Mock };
+    const fileInstance = File.mock.results[0].value as { write: jest.Mock; uri: string };
+    expect(fileInstance.write).toHaveBeenCalledWith(
+      'id,created_at,entry_mode,prompt_text,response_text,location_label,location_lat,location_lng'
     );
     expect(Sharing.shareAsync).toHaveBeenCalled();
   });
