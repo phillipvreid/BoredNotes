@@ -181,6 +181,31 @@ describe('generateAiPrompt', () => {
     expect(body.messages[0].content).toContain("It's a Thursday evening in autumn.");
   });
 
+  it('includes both time and weather fragments when place is off', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'How does the weather match your evening?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'observational',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: true, place: false, weather: true },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain("It's a rainy Thursday evening in autumn, 11°C.");
+    expect(body.messages[0].content).not.toContain('Edinburgh');
+  });
+
   it('omits the context line entirely when all modifiers are off', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce({
       ok: true,

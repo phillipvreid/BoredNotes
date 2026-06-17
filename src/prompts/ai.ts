@@ -32,6 +32,9 @@ function buildContextLine(
   if (hasTime && hasPlace) {
     return `It's a ${ctx.dayOfWeek} ${ctx.timeOfDay} in ${ctx.locationLabel}.`;
   }
+  if (hasTime && hasWeather) {
+    return `It's a ${ctx.weatherCondition} ${ctx.dayOfWeek} ${ctx.timeOfDay} in ${ctx.season}, ${ctx.temperatureCelsius}°C.`;
+  }
   if (hasTime) {
     return `It's a ${ctx.dayOfWeek} ${ctx.timeOfDay} in ${ctx.season}.`;
   }
