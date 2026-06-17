@@ -105,4 +105,128 @@ describe('generateAiPrompt', () => {
     const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
     expect(body.messages[0].content).not.toContain("It's a");
   });
+
+  it('includes only the weather fragment when only the weather modifier is on', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'What does the air feel like?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'observational',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: false, place: false, weather: true },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain("It's rainy, 11°C.");
+    expect(body.messages[0].content).not.toContain('Edinburgh');
+    expect(body.messages[0].content).not.toContain('Thursday');
+  });
+
+  it('includes only the place fragment when only the place modifier is on', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'What do you notice around you?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'observational',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: false, place: true, weather: false },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain('The user is currently in Edinburgh, Scotland.');
+    expect(body.messages[0].content).not.toContain('rainy');
+  });
+
+  it('falls back to season when time is on but place is off, even if a location is available', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'What season feeling stands out?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'reflective',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: true, place: false, weather: false },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain("It's a Thursday evening in autumn.");
+  });
+
+  it('omits the context line entirely when all modifiers are off', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'A bare prompt?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'reflective',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: false, place: false, weather: false },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).not.toContain("It's");
+    expect(body.messages[0].content).not.toContain('force every detail');
+  });
+
+  it('appends a soft steering line only when a context line is present', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'A steered prompt?' }] }),
+    } as any);
+
+    await generateAiPrompt(
+      {
+        category: 'reflective',
+        depth: 1,
+        recentTopics: [],
+        context: {
+          timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
+          locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
+        },
+        modifiers: { time: true, place: false, weather: false },
+      },
+      MOCK_KEY
+    );
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain('only use what makes it feel timely or personal');
+  });
 });
