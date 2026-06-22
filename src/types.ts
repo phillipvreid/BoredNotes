@@ -52,6 +52,20 @@ export interface CurrentPrompt {
   source: 'ai' | 'library';
 }
 
+export interface PromptModifiers {
+  time: boolean;
+  place: boolean;
+  weather: boolean;
+  memory: boolean;
+}
+
+export const DEFAULT_MODIFIERS: PromptModifiers = {
+  time: true,
+  place: true,
+  weather: true,
+  memory: true,
+};
+
 export interface EntryWithMedia extends Entry {
   media: MediaItem[];
 }

@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { CurrentPrompt, PromptCategory } from '../types';
+import type { CurrentPrompt, PromptCategory, PromptModifiers } from '../types';
 import { getSetting, setSetting } from '../db/settings';
 import { getRecentEntries } from '../db/entries';
 import { getEligiblePrompts } from '../db/prompts';
@@ -14,6 +14,7 @@ const THROTTLE_MS = 60 * 60 * 1000;
 async function _getContextualPrompt(
   db: SQLiteDatabase,
   skipThrottle: boolean,
+  modifiers: PromptModifiers,
 ): Promise<CurrentPrompt> {
   const offlineMode = (await getSetting(db, 'offline_mode')) === 'true';
   if (offlineMode) {
@@ -63,13 +64,19 @@ async function _getContextualPrompt(
     const pool = eligible.length > 0 ? eligible : allFallback;
     const selected = selectPrompt(pool, recentCategories, recentDepths);
 
-    const recentTopics = recentEntries
-      .slice(0, 3)
-      .map(e => e.response_text.slice(0, 40).replace(/\n/g, ' '));
+    const recentTopics = modifiers.memory
+      ? recentEntries.slice(0, 3).map(e => e.response_text.slice(0, 40).replace(/\n/g, ' '))
+      : [];
 
     const context = await gatherContext();
     const aiText = await generateAiPrompt(
-      { category: selected.category, depth: selected.depth, recentTopics, context },
+      {
+        category: selected.category,
+        depth: selected.depth,
+        recentTopics,
+        context,
+        modifiers: { time: modifiers.time, place: modifiers.place, weather: modifiers.weather },
+      },
       API_KEY
     );
 
@@ -88,11 +95,17 @@ async function _getContextualPrompt(
   return (await getCurrentPrompt(db)) ?? await getNextPrompt(db);
 }
 
-export async function getContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
-  return _getContextualPrompt(db, false);
+export async function getContextualPrompt(
+  db: SQLiteDatabase,
+  modifiers: PromptModifiers,
+): Promise<CurrentPrompt> {
+  return _getContextualPrompt(db, false, modifiers);
 }
 
-export async function forceRefreshContextualPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> {
+export async function forceRefreshContextualPrompt(
+  db: SQLiteDatabase,
+  modifiers: PromptModifiers,
+): Promise<CurrentPrompt> {
   await setSetting(db, 'contextual_prompt_generated_at', '');
-  return _getContextualPrompt(db, true);
+  return _getContextualPrompt(db, true, modifiers);
 }
