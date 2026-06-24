@@ -47,9 +47,16 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   const finalCategory = chosenLibraryPrompt.category;
 
   if (!offlineMode && useAi && API_KEY) {
-    const recentTopics = recentEntries.slice(0, 3).map(e =>
-      e.response_text.slice(0, 40).replace(/\n/g, ' ')
-    );
+    const storedChips = await getSetting(db, 'help_me_write_chips');
+    let memoryEnabled = true;
+    if (storedChips) {
+      try {
+        memoryEnabled = JSON.parse(storedChips).memory !== false;
+      } catch {}
+    }
+    const recentTopics = memoryEnabled
+      ? recentEntries.slice(0, 3).map(e => e.response_text.slice(0, 40).replace(/\n/g, ' '))
+      : [];
     const aiText = await generateAiPrompt(
       { category: finalCategory, depth: chosenLibraryPrompt.depth, recentTopics },
       API_KEY

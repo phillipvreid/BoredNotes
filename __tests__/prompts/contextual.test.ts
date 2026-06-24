@@ -4,6 +4,7 @@ jest.mock('../../src/context/gather');
 import { getContextualPrompt, forceRefreshContextualPrompt } from '../../src/prompts/contextual';
 import { generateAiPrompt } from '../../src/prompts/ai';
 import { gatherContext } from '../../src/context/gather';
+import { DEFAULT_MODIFIERS } from '../../src/types';
 
 const mockGenerateAiPrompt = generateAiPrompt as jest.Mock;
 const mockGatherContext = gatherContext as jest.Mock;
@@ -57,18 +58,42 @@ describe('getContextualPrompt', () => {
     const db = makeMockDb();
     mockGenerateAiPrompt.mockResolvedValue('What small joy surprised you this morning?');
 
-    const result = await getContextualPrompt(db as any);
+    const result = await getContextualPrompt(db as any, DEFAULT_MODIFIERS);
 
     expect(result.text).toBe('What small joy surprised you this morning?');
     expect(result.category).toBe('reflective');
     expect(result.source).toBe('ai');
   });
 
+  it('omits recentTopics from the AI call when the memory modifier is off', async () => {
+    const db = makeMockDb();
+    mockGenerateAiPrompt.mockResolvedValue('What small joy surprised you this morning?');
+
+    await getContextualPrompt(db as any, { ...DEFAULT_MODIFIERS, memory: false });
+
+    expect(mockGenerateAiPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ recentTopics: [] }),
+      expect.any(String)
+    );
+  });
+
+  it('passes time/place/weather modifiers through to the AI call', async () => {
+    const db = makeMockDb();
+    mockGenerateAiPrompt.mockResolvedValue('A prompt');
+
+    await getContextualPrompt(db as any, { time: true, place: false, weather: false, memory: true });
+
+    expect(mockGenerateAiPrompt).toHaveBeenCalledWith(
+      expect.objectContaining({ modifiers: { time: true, place: false, weather: false } }),
+      expect.any(String)
+    );
+  });
+
   it('falls back to DB prompt when generateAiPrompt returns null', async () => {
     const db = makeMockDb();
     mockGenerateAiPrompt.mockResolvedValue(null);
 
-    const result = await getContextualPrompt(db as any);
+    const result = await getContextualPrompt(db as any, DEFAULT_MODIFIERS);
 
     expect(result.text).toBe('Fallback prompt');
     expect(result.category).toBe('reflective');
@@ -84,7 +109,7 @@ describe('getContextualPrompt', () => {
       contextual_prompt_source: 'ai',
     });
 
-    const result = await getContextualPrompt(db as any);
+    const result = await getContextualPrompt(db as any, DEFAULT_MODIFIERS);
 
     expect(result.text).toBe('Cached contextual prompt');
     expect(result.category).toBe('personal');
@@ -96,7 +121,7 @@ describe('getContextualPrompt', () => {
   it('skips generation and returns DB prompt when offline mode is enabled', async () => {
     const db = makeMockDb({ offline_mode: 'true' });
 
-    const result = await getContextualPrompt(db as any);
+    const result = await getContextualPrompt(db as any, DEFAULT_MODIFIERS);
 
     expect(result.text).toBe('Fallback prompt');
     expect(result.source).toBe('library');
@@ -121,7 +146,7 @@ describe('forceRefreshContextualPrompt', () => {
     });
     mockGenerateAiPrompt.mockResolvedValue('Brand new AI prompt');
 
-    const result = await forceRefreshContextualPrompt(db as any);
+    const result = await forceRefreshContextualPrompt(db as any, DEFAULT_MODIFIERS);
 
     expect(result.text).toBe('Brand new AI prompt');
     expect(result.source).toBe('ai');
