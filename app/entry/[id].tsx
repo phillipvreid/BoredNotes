@@ -5,6 +5,8 @@ import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
 import { getMediaForEntry } from '../../src/db/media';
 import { useTheme } from '../../src/theme/ThemeContext';
+import { DEFEND_PAD, FONTS, INK, MEDALS } from '../../src/theme/tokens';
+import { parseRankData } from '../../src/games/rank';
 import type { Entry, MediaItem } from '../../src/types';
 import * as Haptics from 'expo-haptics';
 import { PlaceNameSheet } from '../../src/components/PlaceNameSheet';
@@ -18,7 +20,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function EntryDetailScreen() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -37,6 +39,8 @@ export default function EntryDetailScreen() {
   const photo = media.find(m => m.type === 'photo');
 
   if (!entry) return null;
+
+  const rank = entry.entry_kind === 'rank' ? parseRankData(entry.game_data) : null;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
@@ -76,10 +80,27 @@ export default function EntryDetailScreen() {
           <Image source={{ uri: photo.file_path }} style={styles.photo} resizeMode="cover" />
         )}
 
+        {rank ? (
+          <View style={styles.rankBlock}>
+            {rank.items.map((item, i) => (
+              <View key={i} style={styles.rankRow}>
+                <View style={[styles.medal, { backgroundColor: MEDALS[i] ?? MEDALS[2] }]}>
+                  <Text style={styles.medalTxt}>{i + 1}</Text>
+                </View>
+                <Text style={[styles.rankItem, { color: colors.textPrimary }]}>{item}</Text>
+              </View>
+            ))}
+            <View style={styles.defenseBox}>
+              <Text style={styles.defenseLabel}>DEFENSE</Text>
+              <Text style={styles.defenseTxt}>{rank.defense}</Text>
+            </View>
+          </View>
+        ) : (
         <Text style={[styles.response, { color: colors.textPrimary }]}>{entry.response_text}</Text>
+        )}
 
         <TouchableOpacity
-          style={[styles.shareBtn, { backgroundColor: accent.buttonColor }]}
+          style={[styles.shareBtn, { backgroundColor: colors.action, borderColor: colors.border }]}
           onPress={() => router.push(`/share/${entry.id}`)}
         >
           <Text style={styles.shareTxt}>Share this entry</Text>
@@ -113,6 +134,17 @@ const styles = StyleSheet.create({
   prompt: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic', lineHeight: 24 },
   photo: { width: '100%', height: 220, borderRadius: 12 },
   response: { fontSize: 18, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
-  shareBtn: { borderRadius: 12, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
-  shareTxt: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  rankBlock: { gap: 9 },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  medal: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 9 },
+  medalTxt: { fontFamily: FONTS.label, fontSize: 11, letterSpacing: 1, color: '#fff' },
+  rankItem: { fontFamily: FONTS.bodySemiBold, fontSize: 17, flex: 1 },
+  defenseBox: {
+    backgroundColor: DEFEND_PAD, borderWidth: 2, borderColor: INK,
+    borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginTop: 4,
+  },
+  defenseLabel: { fontFamily: FONTS.label, fontSize: 9, letterSpacing: 1, color: INK },
+  defenseTxt: { fontFamily: FONTS.bodySemiBold, fontSize: 15, lineHeight: 21, color: INK, marginTop: 3 },
+  shareBtn: { borderRadius: 14, borderWidth: 3, paddingVertical: 14, alignItems: 'center', marginTop: 8 },
+  shareTxt: { color: '#141414', fontSize: 15, fontWeight: '800' },
 });

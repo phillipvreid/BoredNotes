@@ -3,15 +3,15 @@ import { useColorScheme } from 'react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { getSetting, setSetting } from '../db/settings';
 import {
-  ACCENTS, DEFAULT_ACCENT_ID, lightPalette, darkPalette,
-  type AccentSwatch, type Palette,
+  PAPERS, DEFAULT_PAPER_ID, makePalette,
+  type PaperSwatch, type Palette,
 } from './tokens';
 
 interface ThemeContextValue {
   colors: Palette;
-  accent: AccentSwatch;
+  paper: PaperSwatch;
   isDark: boolean;
-  setAccent: (id: string) => void;
+  setPaper: (id: string) => void;
   setDarkMode: (on: boolean) => void;
 }
 
@@ -24,21 +24,21 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ db, children }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
-  const [accentId, setAccentId] = useState(DEFAULT_ACCENT_ID);
+  const [paperId, setPaperId] = useState(DEFAULT_PAPER_ID);
   const [isDark, setIsDark] = useState(systemScheme === 'dark');
 
   useEffect(() => {
     (async () => {
-      const storedAccent = await getSetting(db, 'theme_accent');
+      const storedPaper = await getSetting(db, 'theme_paper');
       const storedDark = await getSetting(db, 'theme_dark_mode');
-      if (storedAccent) setAccentId(storedAccent);
+      if (storedPaper) setPaperId(storedPaper);
       if (storedDark !== null) setIsDark(storedDark === 'true');
     })();
   }, []);
 
-  function setAccent(id: string) {
-    setAccentId(id);
-    setSetting(db, 'theme_accent', id);
+  function setPaper(id: string) {
+    setPaperId(id);
+    setSetting(db, 'theme_paper', id);
   }
 
   function setDarkMode(on: boolean) {
@@ -46,11 +46,11 @@ export function ThemeProvider({ db, children }: ThemeProviderProps) {
     setSetting(db, 'theme_dark_mode', String(on));
   }
 
-  const accent = ACCENTS.find(a => a.id === accentId) ?? ACCENTS[0];
-  const colors = isDark ? darkPalette : lightPalette;
+  const paper = PAPERS.find(p => p.id === paperId) ?? PAPERS[0];
+  const colors = makePalette(paper, isDark);
 
   return (
-    <ThemeContext.Provider value={{ colors, accent, isDark, setAccent, setDarkMode }}>
+    <ThemeContext.Provider value={{ colors, paper, isDark, setPaper, setDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

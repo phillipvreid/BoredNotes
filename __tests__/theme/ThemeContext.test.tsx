@@ -2,7 +2,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react-native';
 import { ThemeProvider, useTheme } from '../../src/theme/ThemeContext';
 import { openDatabaseAsync } from 'expo-sqlite';
-import { DEFAULT_ACCENT_ID } from '../../src/theme/tokens';
+import { DEFAULT_PAPER_ID } from '../../src/theme/tokens';
 
 describe('ThemeContext', () => {
   let db: any;
@@ -17,35 +17,35 @@ describe('ThemeContext', () => {
     return <ThemeProvider db={db}>{children}</ThemeProvider>;
   }
 
-  it('defaults to sage accent when no stored value', async () => {
+  it('defaults to cream paper when no stored value', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    expect(result.current.accent.id).toBe(DEFAULT_ACCENT_ID);
+    expect(result.current.paper.id).toBe(DEFAULT_PAPER_ID);
   });
 
-  it('loads stored accent from DB on mount', async () => {
+  it('loads stored paper from DB on mount', async () => {
     db.getFirstAsync
-      .mockResolvedValueOnce({ value: 'terracotta' })
+      .mockResolvedValueOnce({ value: 'mint' })
       .mockResolvedValueOnce(null);
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    expect(result.current.accent.id).toBe('terracotta');
+    expect(result.current.paper.id).toBe('mint');
   });
 
-  it('setAccent updates accent synchronously', async () => {
+  it('setPaper updates paper synchronously', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    act(() => { result.current.setAccent('indigo'); });
-    expect(result.current.accent.id).toBe('indigo');
+    act(() => { result.current.setPaper('bubblegum'); });
+    expect(result.current.paper.id).toBe('bubblegum');
   });
 
-  it('setAccent persists to DB', async () => {
+  it('setPaper persists to DB', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    await act(async () => { result.current.setAccent('indigo'); });
+    await act(async () => { result.current.setPaper('bubblegum'); });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO settings'),
-      ['theme_accent', 'indigo']
+      ['theme_paper', 'bubblegum']
     );
   });
 
@@ -64,6 +64,14 @@ describe('ThemeContext', () => {
       expect.stringContaining('INSERT INTO settings'),
       ['theme_dark_mode', 'true']
     );
+  });
+
+  it('colors update when dark mode toggles', async () => {
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    const lightBg = result.current.colors.bg;
+    act(() => { result.current.setDarkMode(true); });
+    expect(result.current.colors.bg).not.toBe(lightBg);
   });
 
   it('throws when useTheme is called outside ThemeProvider', () => {

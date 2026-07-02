@@ -23,3 +23,24 @@ export function selectPrompt(
   if (candidates.length === 0) candidates = available;
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
+
+// Home shows a small stack of prompt cards, each from a different category
+// so the category colors read as a collage rather than a run of one hue.
+export function selectHomeCardPrompts(available: Prompt[], count = 3): Prompt[] {
+  const shuffled = [...available].sort(() => Math.random() - 0.5);
+  const picked: Prompt[] = [];
+  const usedCategories = new Set<PromptCategory>();
+
+  for (const prompt of shuffled) {
+    if (picked.length === count) break;
+    if (usedCategories.has(prompt.category)) continue;
+    usedCategories.add(prompt.category);
+    picked.push(prompt);
+  }
+  // Fewer categories than cards: top up with whatever is left.
+  for (const prompt of shuffled) {
+    if (picked.length === count) break;
+    if (!picked.includes(prompt)) picked.push(prompt);
+  }
+  return picked;
+}

@@ -124,4 +124,70 @@ describe('places migration', () => {
     });
     await expect(getDb!()).resolves.not.toThrow();
   });
+
+  it('adds the micro-game columns on init', async () => {
+    let getDb: () => Promise<any>;
+    let db: any;
+    jest.isolateModules(() => {
+      const sqlite = require('expo-sqlite');
+      const mockDb = {
+        execAsync: jest.fn().mockResolvedValue(undefined),
+        runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
+        getAllAsync: jest.fn().mockResolvedValue([]),
+        getFirstAsync: jest.fn().mockResolvedValue(null),
+      };
+      sqlite.openDatabaseAsync.mockResolvedValue(mockDb);
+      db = mockDb;
+      ({ getDb } = require('../../src/db/database'));
+    });
+    await getDb!();
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('entry_kind'))).toBe(true);
+    expect(calls.some((sql: string) => sql.includes('game_data'))).toBe(true);
+    expect(calls.some((sql: string) => sql.includes('game_config'))).toBe(true);
+  });
+
+  it('rebuilds prompts table when its category CHECK forbids game', async () => {
+    let getDb: () => Promise<any>;
+    let db: any;
+    jest.isolateModules(() => {
+      const sqlite = require('expo-sqlite');
+      const mockDb = {
+        execAsync: jest.fn().mockResolvedValue(undefined),
+        runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
+        getAllAsync: jest.fn().mockResolvedValue([]),
+        getFirstAsync: jest.fn().mockResolvedValue({
+          sql: "CREATE TABLE prompts (category TEXT NOT NULL CHECK (category IN ('observational','reflective','personal','creative')))",
+        }),
+      };
+      sqlite.openDatabaseAsync.mockResolvedValue(mockDb);
+      db = mockDb;
+      ({ getDb } = require('../../src/db/database'));
+    });
+    await getDb!();
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('RENAME TO prompts_old'))).toBe(true);
+  });
+
+  it('skips the prompts rebuild when the CHECK already allows game', async () => {
+    let getDb: () => Promise<any>;
+    let db: any;
+    jest.isolateModules(() => {
+      const sqlite = require('expo-sqlite');
+      const mockDb = {
+        execAsync: jest.fn().mockResolvedValue(undefined),
+        runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
+        getAllAsync: jest.fn().mockResolvedValue([]),
+        getFirstAsync: jest.fn().mockResolvedValue({
+          sql: "CREATE TABLE prompts (category TEXT NOT NULL CHECK (category IN ('observational','reflective','personal','creative','game')))",
+        }),
+      };
+      sqlite.openDatabaseAsync.mockResolvedValue(mockDb);
+      db = mockDb;
+      ({ getDb } = require('../../src/db/database'));
+    });
+    await getDb!();
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => sql.includes('RENAME TO prompts_old'))).toBe(false);
+  });
 });

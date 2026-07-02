@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useTheme } from '../src/theme/ThemeContext';
+import { FONTS } from '../src/theme/tokens';
+import { HITS_COPY } from '../src/theme/copy';
+import { IconSticker } from '../src/components/ui/IconSticker';
+import { Chip } from '../src/components/ui/Chip';
 import { FeedTab } from '../src/boredbefore/FeedTab';
 import { CalendarTab } from '../src/boredbefore/CalendarTab';
 import { MapTab } from '../src/boredbefore/MapTab';
@@ -11,46 +14,32 @@ type Tab = 'Feed' | 'Calendar' | 'Map';
 const TABS: Tab[] = ['Feed', 'Calendar', 'Map'];
 
 export default function BoredBeforeScreen() {
-  const { colors, accent, isDark } = useTheme();
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState<Tab>('Feed');
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text style={[styles.back, { color: colors.textSecondary }]}>← Back</Text>
-        </TouchableOpacity>
+        <IconSticker glyph="←" onPress={() => router.back()} />
+        <Text style={[styles.title, { color: colors.textPrimary }]}>{HITS_COPY.title}</Text>
+        <Text style={[styles.subtitle, { color: colors.textSecondary }]}>{HITS_COPY.subtitle}</Text>
       </View>
 
-      <BlurView
-        intensity={50}
-        tint={isDark ? 'dark' : 'light'}
-        style={styles.tabBarBlur}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabBar}
+        contentContainerStyle={styles.tabBarContent}
       >
-        <View style={styles.tabBarInner}>
-          {TABS.map(tab => (
-            <TouchableOpacity
-              key={tab}
-              style={[
-                styles.tabBtn,
-                activeTab === tab && {
-                  backgroundColor: isDark ? 'rgba(60,60,60,0.9)' : 'rgba(255,255,255,0.9)',
-                  shadowColor: '#000', shadowOpacity: 0.08,
-                  shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
-                },
-              ]}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text style={[
-                styles.tabLabel,
-                { color: activeTab === tab ? accent.buttonColor : colors.textMuted },
-              ]}>
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </BlurView>
+        {TABS.map(tab => (
+          <Chip
+            key={tab}
+            label={tab.toUpperCase()}
+            active={activeTab === tab}
+            onPress={() => setActiveTab(tab)}
+          />
+        ))}
+      </ScrollView>
 
       <View style={styles.content}>
         {activeTab === 'Feed' && <FeedTab />}
@@ -63,11 +52,12 @@ export default function BoredBeforeScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  header: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 4 },
-  back: { fontSize: 15 },
-  tabBarBlur: { marginHorizontal: 16, marginBottom: 8, borderRadius: 20, overflow: 'hidden' },
-  tabBarInner: { flexDirection: 'row', padding: 4 },
-  tabBtn: { flex: 1, paddingVertical: 8, borderRadius: 16, alignItems: 'center' },
-  tabLabel: { fontSize: 14, fontWeight: '500' },
-  content: { flex: 1 },
+  header: { paddingHorizontal: 18, paddingTop: 8 },
+  title: {
+    fontFamily: FONTS.display, fontSize: 31, lineHeight: 32, letterSpacing: -0.8, marginTop: 14,
+  },
+  subtitle: { fontFamily: FONTS.body, fontSize: 14, marginTop: 5 },
+  tabBar: { flexGrow: 0, marginTop: 10 },
+  tabBarContent: { paddingHorizontal: 18, paddingVertical: 6, gap: 8 },
+  content: { flex: 1, marginTop: 7 },
 });

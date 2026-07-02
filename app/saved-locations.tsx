@@ -14,7 +14,7 @@ type PlaceRow = Place & { entry_count: number };
 const RADII = [25, 50, 100, 200] as const;
 
 export default function SavedLocationsScreen() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const [places, setPlaces] = useState<PlaceRow[]>([]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
@@ -116,8 +116,8 @@ export default function SavedLocationsScreen() {
                       style={[
                         styles.radiusChip,
                         {
-                          borderColor: editRadius === r ? accent.buttonColor : colors.border,
-                          backgroundColor: editRadius === r ? accent.buttonColor : 'transparent',
+                          borderColor: colors.border,
+                          backgroundColor: editRadius === r ? colors.action : 'transparent',
                         },
                       ]}
                       onPress={() => setEditRadius(r)}
@@ -147,7 +147,7 @@ export default function SavedLocationsScreen() {
                   <TouchableOpacity
                     style={[
                       styles.saveBtn,
-                      { backgroundColor: saving ? colors.border : accent.buttonColor },
+                      { backgroundColor: saving ? colors.border : colors.action },
                     ]}
                     onPress={() => handleSave(place)}
                     disabled={saving}
@@ -165,7 +165,7 @@ export default function SavedLocationsScreen() {
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => openEdit(place)}>
-                  <Text style={[styles.editCta, { color: accent.buttonColor }]}>Edit →</Text>
+                  <Text style={[styles.editCta, { color: colors.textPrimary }]}>Edit →</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -210,5 +210,5 @@ const styles = StyleSheet.create({
     flex: 1, borderRadius: 10,
     paddingVertical: 10, alignItems: 'center',
   },
-  saveTxt: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  saveTxt: { color: '#141414', fontSize: 14, fontWeight: '800' },
 });

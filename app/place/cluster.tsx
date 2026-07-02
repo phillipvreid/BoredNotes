@@ -13,7 +13,7 @@ function isPinned(e: any): e is PinnedEntry {
 }
 
 export default function ClusterFeedScreen() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const { lat: latStr, lng: lngStr, radius: radiusStr } = useLocalSearchParams<{
     lat: string; lng: string; radius: string;
   }>();
@@ -56,7 +56,7 @@ export default function ClusterFeedScreen() {
         style={[styles.ctaRow, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
         onPress={() => setSheetVisible(true)}
       >
-        <Text style={[styles.ctaTxt, { color: accent.buttonColor }]}>Name this place →</Text>
+        <Text style={[styles.ctaTxt, { color: colors.textPrimary }]}>Name this place →</Text>
       </TouchableOpacity>
       <PlaceFeedList entries={entries} />
       <PlaceNameSheet

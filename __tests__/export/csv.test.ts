@@ -5,6 +5,8 @@ const base: Entry = {
   id: 1,
   created_at: '2026-01-15T10:30:00.000Z',
   entry_mode: 'prompted',
+  entry_kind: 'text',
+  game_data: null,
   prompt_text: 'What did you notice today?',
   response_text: 'A red door.',
   location_label: null,

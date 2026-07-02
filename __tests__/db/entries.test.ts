@@ -17,7 +17,7 @@ describe('createEntry', () => {
     });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO entries'),
-      ['What did you notice today?', 'A red door.', null, null, null, 'prompted']
+      ['What did you notice today?', 'A red door.', null, null, null, 'prompted', 'text', null]
     );
   });
 
@@ -29,7 +29,7 @@ describe('createEntry', () => {
     });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO entries'),
-      ['', 'Just a quiet morning.', null, null, null, 'freeform']
+      ['', 'Just a quiet morning.', null, null, null, 'freeform', 'text', null]
     );
   });
 
@@ -45,6 +45,19 @@ describe('createEntry', () => {
   it('returns the new entry id', async () => {
     const id = await createEntry(db, { prompt_text: 'p', response_text: 'r' });
     expect(id).toBe(42);
+  });
+
+  it('inserts a rank entry with entry_kind and game_data', async () => {
+    const gameData = JSON.stringify({ items: ['pizza', 'cereal', 'clementine'], defense: 'intimacy' });
+    await createEntry(db, {
+      prompt_text: 'Rank your last 3 snacks. Defend #1.',
+      response_text: '1. pizza',
+      entry_kind: 'rank',
+      game_data: gameData,
+    });
+    const callArgs = db.runAsync.mock.calls[0][1];
+    expect(callArgs[6]).toBe('rank');
+    expect(callArgs[7]).toBe(gameData);
   });
 });
 

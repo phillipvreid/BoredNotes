@@ -20,7 +20,7 @@ interface Props {
 export function PlaceNameSheet({
   visible, placeId, coordinate, initialName = '', entryCount, onSaved, onClose,
 }: Props) {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
 
@@ -87,12 +87,12 @@ export function PlaceNameSheet({
             <TouchableOpacity
               style={[
                 styles.btn, styles.btnPrimary,
-                { backgroundColor: (!name.trim() || saving) ? colors.border : accent.buttonColor },
+                { backgroundColor: (!name.trim() || saving) ? colors.border : colors.action },
               ]}
               onPress={handleSave}
               disabled={!name.trim() || saving}
             >
-              <Text style={[styles.btnTxt, { color: '#fff' }]}>{saving ? 'Saving…' : 'Save'}</Text>
+              <Text style={[styles.btnTxt, { color: '#141414' }]}>{saving ? 'Saving…' : 'Save'}</Text>
             </TouchableOpacity>
           </View>
         </View>

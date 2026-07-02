@@ -1,9 +1,9 @@
-import { selectPrompt } from '../../src/prompts/selection';
+import { selectPrompt, selectHomeCardPrompts } from '../../src/prompts/selection';
 import type { Prompt } from '../../src/types';
 
 const makePrompt = (overrides: Partial<Prompt>): Prompt => ({
   id: 1, text: 'Test prompt', category: 'observational', depth: 1,
-  source: 'library', last_used_at: null, ...overrides,
+  source: 'library', last_used_at: null, kind: 'text', game_config: null, ...overrides,
 });
 
 describe('selectPrompt', () => {
@@ -37,5 +37,41 @@ describe('selectPrompt', () => {
 
   it('throws if available list is empty', () => {
     expect(() => selectPrompt([], [], [])).toThrow('No prompts available');
+  });
+});
+
+describe('selectHomeCardPrompts', () => {
+  it('picks the requested number of prompts from distinct categories', () => {
+    const prompts = [
+      makePrompt({ id: 1, category: 'observational' }),
+      makePrompt({ id: 2, category: 'observational' }),
+      makePrompt({ id: 3, category: 'reflective' }),
+      makePrompt({ id: 4, category: 'personal' }),
+      makePrompt({ id: 5, category: 'creative' }),
+    ];
+    const result = selectHomeCardPrompts(prompts, 3);
+    expect(result).toHaveLength(3);
+    const categories = result.map(p => p.category);
+    expect(new Set(categories).size).toBe(3);
+  });
+
+  it('tops up with duplicate categories when fewer categories than cards', () => {
+    const prompts = [
+      makePrompt({ id: 1, category: 'observational' }),
+      makePrompt({ id: 2, category: 'observational' }),
+      makePrompt({ id: 3, category: 'observational' }),
+    ];
+    const result = selectHomeCardPrompts(prompts, 3);
+    expect(result).toHaveLength(3);
+    expect(new Set(result.map(p => p.id)).size).toBe(3);
+  });
+
+  it('returns everything when fewer prompts than requested', () => {
+    const prompts = [makePrompt({ id: 1 })];
+    expect(selectHomeCardPrompts(prompts, 3)).toHaveLength(1);
+  });
+
+  it('returns empty for empty input', () => {
+    expect(selectHomeCardPrompts([], 3)).toEqual([]);
   });
 });
