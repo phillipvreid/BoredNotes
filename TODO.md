@@ -33,7 +33,7 @@ Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 
 - [ ] Share screen still uses the old (pre-Arcade Sticker) design — bring it in line with the current sticker/pop design. Will use Claude design (claude.ai/design) for this pass.
 
 ## Map
-- [ ] Remove "places you've been bored" message from the map.
+- [x] Remove "places you've been bored" message from the map.
 - [ ] Decide whether the map feature is worth keeping at all.
 
 ## Photo

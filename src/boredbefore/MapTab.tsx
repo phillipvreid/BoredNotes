@@ -182,10 +182,6 @@ export function MapTab() {
         ))}
       </MapView>
 
-      <Text style={[styles.mapLabel, { color: colors.textMuted }]}>
-        places you've been bored
-      </Text>
-
       <PlaceNameSheet
         visible={sheet.visible}
         placeId={sheet.placeId}
@@ -208,11 +204,6 @@ export function MapTab() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   map: { flex: 1 },
-  mapLabel: {
-    textAlign: 'center',
-    fontFamily: 'Georgia', fontStyle: 'italic', fontSize: 13,
-    paddingVertical: 8,
-  },
   pill: {
     borderRadius: 12, paddingHorizontal: 10, paddingVertical: 5,
   },
