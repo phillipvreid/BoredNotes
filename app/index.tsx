@@ -31,24 +31,20 @@ export default function HomeScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const db = await getDb();
-        const pool = await getEligiblePrompts(db, {});
-        setCards(selectHomeCardPrompts(pool, 3));
-      } catch {}
-    })();
-  }, []);
-
+  // Re-run on every focus so the card stack and count reflect entries added
+  // since the last visit (a just-used prompt drops out of getEligiblePrompts).
   useFocusEffect(
     useCallback(() => {
       let active = true;
       (async () => {
         try {
           const db = await getDb();
+          const pool = await getEligiblePrompts(db, {});
           const n = await countEntries(db);
-          if (active) setEntryCount(n);
+          if (active) {
+            setCards(selectHomeCardPrompts(pool, 3));
+            setEntryCount(n);
+          }
         } catch {}
       })();
       return () => { active = false; };

@@ -211,6 +211,7 @@ export default function RespondScreen() {
         entry_mode: prompted ? 'prompted' : 'freeform',
         entry_kind: isRank ? 'rank' : 'text',
         game_data: isRank ? JSON.stringify(rankData) : null,
+        category: prompted ? activePrompt?.category ?? null : null,
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);

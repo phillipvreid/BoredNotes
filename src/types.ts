@@ -29,6 +29,7 @@ export interface Entry {
   location_lng: number | null;
   entry_mode: 'prompted' | 'freeform';
   place_id: number | null;
+  category: PromptCategory | null;
   has_photo?: number;
 }
 

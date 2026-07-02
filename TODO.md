@@ -1,0 +1,47 @@
+# BoredNotes — Post-v2.0.0 To-Do (Arcade Pop UI)
+
+Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 suites / 159 tests passing, tsc clean.
+
+## Verify on device
+- [ ] Run `npx expo run:ios` and click through Home, Reply (text + brain dump), Reply·Rank, Greatest Hits, Share sheet, Settings on a real simulator/device — CI only proves logic, not the rendered UI.
+- [ ] Check custom fonts (Bricolage Grotesque / Hanken Grotesk / Space Mono) actually load via `expo-font` and don't flash unstyled text.
+- [ ] Confirm all 4 paper themes render correctly in both light and dark mode from Settings.
+- [ ] Test Rank & Defend end-to-end: create a rank entry, confirm medal rendering shows correctly in Greatest Hits and entry detail.
+- [ ] Spot-check offline mode still disables AI prompt generation under the new UI.
+
+## Polish / known gaps
+- [ ] Review flat offset shadows and ink keylines on smaller iPhone screens (SE-class) for cramping/overlap.
+- [ ] Confirm Mascot bob/blink animation doesn't drain battery or jank on older devices.
+- [ ] Sanity-check the global Toast doesn't stack or overlap with the Share sheet.
+- [ ] Re-check CSV export and search still work with `entry_kind`/`game_data` for game entries (response_text plain-text fallback).
+
+## Housekeeping
+- [ ] Write/save a design spec + plan doc for the Arcade Sticker rollout under `docs/superpowers/specs` and `docs/superpowers/plans` (all other features have one; this one doesn't yet).
+- [x] Delete the stray untracked `Agent` file showing in `git status`.
+- [x] Push branch and confirm it actually landed on remote (per project workflow note — pushes have silently failed before). Confirmed on GitHub: main has c285185.
+- [ ] Open PR for `feat/arcade-sticker-v2` → main once device testing above is done.
+
+## Next feature candidates
+- [ ] Second micro-game beyond Rank & Defend, reusing the generic game plumbing (`prompts.kind` / `game_config` / `entry_kind` / `game_data`).
+- [ ] Extend category hues / IconSticker set if new prompt categories are added.
+
+## Bugs
+- [x] Greatest Hits cards show "prompt" instead of the entry's actual category. Fixed: added nullable `entries.category` column + migration, threaded through createEntry/respond, FeedTab renders real category hue with "PROMPTED" fallback for legacy rows. (Needs on-device visual check.)
+- [x] Home page cards don't refresh after submitting an entry. Fixed: card selection moved into the focus effect in `app/index.tsx`. (Needs on-device visual check.)
+
+## Screens needing rework
+- [ ] Share screen still uses the old (pre-Arcade Sticker) design — bring it in line with the current sticker/pop design. Will use Claude design (claude.ai/design) for this pass.
+
+## Map
+- [ ] Remove "places you've been bored" message from the map.
+- [ ] Decide whether the map feature is worth keeping at all.
+
+## Photo
+- [ ] Decide whether photo attachment makes sense for the app's concept, or should be cut.
+
+## Settings
+- [ ] Add a toggle to disable the "wonky" (tilted box) effect.
+- [ ] Replace the dark mode toggle with a three-way Light / Dark / System selector, defaulting to System, tracking the iOS appearance setting.
+
+## Boredbefore / Feed
+- [ ] Remove the calendar tab entirely; replace with a date search/filter on the Feed page.

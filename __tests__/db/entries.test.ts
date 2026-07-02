@@ -17,7 +17,7 @@ describe('createEntry', () => {
     });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO entries'),
-      ['What did you notice today?', 'A red door.', null, null, null, 'prompted', 'text', null]
+      ['What did you notice today?', 'A red door.', null, null, null, 'prompted', 'text', null, null]
     );
   });
 
@@ -29,7 +29,7 @@ describe('createEntry', () => {
     });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO entries'),
-      ['', 'Just a quiet morning.', null, null, null, 'freeform', 'text', null]
+      ['', 'Just a quiet morning.', null, null, null, 'freeform', 'text', null, null]
     );
   });
 
@@ -58,6 +58,25 @@ describe('createEntry', () => {
     const callArgs = db.runAsync.mock.calls[0][1];
     expect(callArgs[6]).toBe('rank');
     expect(callArgs[7]).toBe(gameData);
+  });
+
+  it('persists the category for a prompted entry', async () => {
+    await createEntry(db, {
+      prompt_text: 'What did you notice today?',
+      response_text: 'A red door.',
+      category: 'observational',
+    });
+    const callArgs = db.runAsync.mock.calls[0][1];
+    expect(callArgs[8]).toBe('observational');
+  });
+
+  it('defaults category to null when omitted', async () => {
+    await createEntry(db, {
+      prompt_text: 'Test prompt',
+      response_text: 'Test response',
+    });
+    const callArgs = db.runAsync.mock.calls[0][1];
+    expect(callArgs[8]).toBeNull();
   });
 });
 
