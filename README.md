@@ -1,6 +1,6 @@
 # BoredNotes
 
-BoredNotes is a private, local-first iOS journaling/reflection app designed as a healthier alternative to passive scrolling. Users respond to prompts or write freeform notes. Entries can include text, location context, and media. No social feed, no followers, no backend.
+BoredNotes is a private, local-first iOS micro-journaling and prompt/response app designed to create a fun and engaging way to kill time without scrolling social media. Users respond to prompts or write freeform notes. Entries can include text, location context, and media. No social feed, no followers.
 
 ## Principles
 
@@ -9,7 +9,6 @@ BoredNotes is a private, local-first iOS journaling/reflection app designed as a
 - No social feed
 - No followers
 - No analytics for v1
-- No backend for v1
 
 ## Tech Stack
 

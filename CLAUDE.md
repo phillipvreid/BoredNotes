@@ -6,9 +6,9 @@ When asked for a simple list, doc, or quick fix, do exactly that — do NOT auto
 
 ## What this app is
 
-BoredNotes is a private, local-first iOS journaling/reflection app designed as a healthier alternative to passive scrolling.
+BoredNotes is a private, local-first iOS micro-journaling/reflection app designed as a healthier alternative to passive scrolling.
 
-Users respond to prompts or write freeform notes. Entries can include text, location context, and media. The app is meant to feel personal and calm, not social or gamified.
+Users respond to prompts or write freeform notes. Entries can include text, location context, and media. The app is meant to feel fun and punchy, using a dry and sarcastic (but never rude) sense of humor throughout. 
 
 ## Product principles
 
@@ -16,12 +16,11 @@ Users respond to prompts or write freeform notes. Entries can include text, loca
 - Local-first storage.
 - No social feed.
 - No followers.
-- No algorithmic engagement loop.
-- No backend for v1.
 - No analytics for v1.
 - Privacy and user trust matter more than growth mechanics.
-- Offline mode must disable AI prompt generation.
+- Offline mode must disable AI prompt generation and any data transfer.
 - Do not send full private notes to AI services unless explicitly requested by the user.
+- Personality!
 
 ## Tech stack
 
@@ -72,7 +71,7 @@ npm run start
 ## Environment: Expo / React Native (iOS)
 
 - This is an Expo React Native project; native modules (react-native-maps, expo-location, expo-sqlite, media pickers) do NOT work in Expo Go, so they must be tested in a real native build.
-- Primary dev machine is a MacBook Pro with Xcode installed, and the developer has a paid Apple Developer account. Local native builds are the default testing path.
+- Primary dev machine is a MacBook Air with Xcode installed, and the developer has a paid Apple Developer account. Local native builds are the default testing path.
 - Local build/run loop (run in a separate terminal, NOT in-session — long-running):
   - Simulator: `npx expo run:ios` (no signing needed; use for most UI/logic checks). Covers maps, SQLite, location tagging, share cards, export.
   - Physical device / debugging: open `ios/BoredNotes.xcworkspace` in Xcode, or `npx expo run:ios --device`.
@@ -96,7 +95,6 @@ npm run start
 
 - Keep changes small and focused.
 - Prefer tests for behavior changes.
-- Do not introduce a backend unless explicitly requested.
 - Do not introduce analytics unless explicitly requested.
 - Do not perform major Expo/React Native upgrades inside unrelated feature branches.
 - Keep implementation and tests consistent when Expo APIs change.

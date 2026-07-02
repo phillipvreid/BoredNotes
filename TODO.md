@@ -3,11 +3,11 @@
 Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 suites / 159 tests passing, tsc clean.
 
 ## Verify on device
-- [ ] Run `npx expo run:ios` and click through Home, Reply (text + brain dump), Reply·Rank, Greatest Hits, Share sheet, Settings on a real simulator/device — CI only proves logic, not the rendered UI.
-- [ ] Check custom fonts (Bricolage Grotesque / Hanken Grotesk / Space Mono) actually load via `expo-font` and don't flash unstyled text.
-- [ ] Confirm all 4 paper themes render correctly in both light and dark mode from Settings.
-- [ ] Test Rank & Defend end-to-end: create a rank entry, confirm medal rendering shows correctly in Greatest Hits and entry detail.
-- [ ] Spot-check offline mode still disables AI prompt generation under the new UI.
+- [x] Run `npx expo run:ios` and click through Home, Reply (text + brain dump), Reply·Rank, Greatest Hits, Share sheet, Settings on a real simulator/device — CI only proves logic, not the rendered UI.
+- [x] Check custom fonts (Bricolage Grotesque / Hanken Grotesk / Space Mono) actually load via `expo-font` and don't flash unstyled text.
+- [x] Confirm all 4 paper themes render correctly in both light and dark mode from Settings.
+- [x] Test Rank & Defend end-to-end: create a rank entry, confirm medal rendering shows correctly in Greatest Hits and entry detail.
+- [x] Spot-check offline mode still disables AI prompt generation under the new UI.
 
 ## Polish / known gaps
 - [ ] Review flat offset shadows and ink keylines on smaller iPhone screens (SE-class) for cramping/overlap.
@@ -28,10 +28,11 @@ Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 
 ## Bugs
 - [x] Greatest Hits cards show "prompt" instead of the entry's actual category. Fixed: added nullable `entries.category` column + migration, threaded through createEntry/respond, FeedTab renders real category hue with "PROMPTED" fallback for legacy rows. (Needs on-device visual check.)
 - [x] Home page cards don't refresh after submitting an entry. Fixed: card selection moved into the focus effect in `app/index.tsx`. (Needs on-device visual check.)
+- [ ] Rank+Defend, the 1 2 and 3 are appearing incorrectly on the respond page. The numbers are floating off of answer pills. They should adhere to the design shown in the components. 
 
 ## Screens needing rework
 - [ ] Share screen still uses the old (pre-Arcade Sticker) design — bring it in line with the current sticker/pop design. Will use Claude design (claude.ai/design) for this pass.
-
+- [ ] Respond screen of "dump a thought": the "help me write" feature needs to be adjusted. The feature should not just give someone a prompt, those should be reserved for the homescreen. Instead, they should generate a custom writing prompt based off of the option someone selects: place, time, weather, or memory. 
 ## Map
 - [x] Remove "places you've been bored" message from the map.
 - [ ] Decide whether the map feature is worth keeping at all.
