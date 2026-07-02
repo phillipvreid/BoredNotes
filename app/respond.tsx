@@ -313,7 +313,7 @@ export default function RespondScreen() {
             <View style={styles.rankStack}>
               {rankSlots.slice(0, RANK_SLOT_COUNT).map((slotPlaceholder, i) => (
                 <Sticker key={i} borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.rankSlot}>
-                  <OutlinedNumber value={String(i + 1)} tilt={RANK_TILTS[i]} />
+                  <OutlinedNumber value={String(i + 1)} tilt={RANK_TILTS[i]} size={52} />
                   <TextInput
                     style={[styles.rankInput, { color: colors.textPrimary }]}
                     placeholder={slotPlaceholder}

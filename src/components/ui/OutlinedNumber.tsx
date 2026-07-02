@@ -21,7 +21,7 @@ export function OutlinedNumber({ value, size = 40, tilt = 0 }: OutlinedNumberPro
   const textStyle = { fontFamily: FONTS.display, fontSize: size, lineHeight: size * 1.1 };
 
   return (
-    <View style={[styles.box, { width: size + 6, transform: [{ rotate: `${tilt}deg` }] }]}>
+    <View style={[styles.box, { width: size + 6, height: size * 1.1, transform: [{ rotate: `${tilt}deg` }] }]}>
       {STROKE_OFFSETS.map(([x, y], i) => (
         <Text
           key={i}

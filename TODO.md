@@ -27,8 +27,8 @@ Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 
 
 ## Bugs
 - [x] Greatest Hits cards show "prompt" instead of the entry's actual category. Fixed: added nullable `entries.category` column + migration, threaded through createEntry/respond, FeedTab renders real category hue with "PROMPTED" fallback for legacy rows. (Needs on-device visual check.)
-- [x] Home page cards don't refresh after submitting an entry. Fixed: card selection moved into the focus effect in `app/index.tsx`. (Needs on-device visual check.)
-- [ ] Rank+Defend, the 1 2 and 3 are appearing incorrectly on the respond page. The numbers are floating off of answer pills. They should adhere to the design shown in the components. 
+- [x] Home page cards don't refresh after submitting an entry. Fixed: card selection moved into the focus effect in `app/index.tsx`, then gated reselection on `entryCount` actually changing via a ref (opening/closing a prompt without submitting no longer reshuffles the deck; count still refreshes every focus). Confirmed on device.
+- [x] Rank+Defend, the 1 2 and 3 are appearing incorrectly on the respond page. Fixed: `OutlinedNumber`'s outer box had no explicit height, so it collapsed to 0 in Yoga layout and the number spilled below the pill. Added `height: size * 1.1` to the box and bumped the rank-slot instance to `size={52}` to fill the pill. Confirmed on device.
 
 ## Screens needing rework
 - [ ] Share screen still uses the old (pre-Arcade Sticker) design — bring it in line with the current sticker/pop design. Will use Claude design (claude.ai/design) for this pass.
