@@ -10,6 +10,8 @@ function makePin(id: number, lat: number, lng: number, place_id: number | null =
     created_at: '2026-01-01T00:00:00',
     location_label: null,
     entry_mode: 'prompted',
+    entry_kind: 'text',
+    game_data: null,
     place_id,
     location_lat: lat,
     location_lng: lng,

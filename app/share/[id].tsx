@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Switch, Alert, TouchableOpacity } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
@@ -9,10 +9,17 @@ import { getMediaForEntry } from '../../src/db/media';
 import { ShareCard } from '../../src/share/renderer';
 import { CARD_STYLES, DEFAULT_STYLE_ID, DEFAULT_VARIANT_ID } from '../../src/share/templates';
 import { useTheme } from '../../src/theme/ThemeContext';
+import { FONTS } from '../../src/theme/tokens';
+import { SHARE_LINES, pick } from '../../src/theme/copy';
+import { IconSticker } from '../../src/components/ui/IconSticker';
+import { Mascot } from '../../src/components/ui/Mascot';
+import { SpeechBubble } from '../../src/components/ui/SpeechBubble';
+import { Chip } from '../../src/components/ui/Chip';
+import { ActionButton } from '../../src/components/ui/ActionButton';
 import type { Entry, MediaItem } from '../../src/types';
 
 export default function ShareCardScreen() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const cardRef = useRef<View>(null);
   const [entry, setEntry] = useState<Entry | null>(null);
@@ -22,6 +29,7 @@ export default function ShareCardScreen() {
   const [showDate, setShowDate] = useState(true);
   const [showLocation, setShowLocation] = useState(true);
   const [sharing, setSharing] = useState(false);
+  const [shareLine] = useState(() => pick(SHARE_LINES));
 
   useEffect(() => {
     (async () => {
@@ -53,12 +61,16 @@ export default function ShareCardScreen() {
   const currentStyle = CARD_STYLES.find(s => s.id === styleId) ?? CARD_STYLES[0];
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: colors.sheet }]}>
       <ScrollView contentContainerStyle={styles.container}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.close}>
-          <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
-        </TouchableOpacity>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Share</Text>
+        <View style={styles.headerRow}>
+          <IconSticker glyph="✕" onPress={() => router.back()} />
+        </View>
+
+        <View style={styles.mascotRow}>
+          <Mascot size={64} />
+          <SpeechBubble kicker="SHARE IT, THEN" style={styles.bubble}>{shareLine}</SpeechBubble>
+        </View>
 
         <View style={styles.preview}>
           <ShareCard
@@ -76,30 +88,19 @@ export default function ShareCardScreen() {
           />
         </View>
 
-        {/* Style tabs */}
-        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>Style</Text>
-        <View style={styles.tabRow}>
-          {CARD_STYLES.map(s => {
-            const active = s.id === styleId;
-            return (
-              <TouchableOpacity
-                key={s.id}
-                style={[
-                  styles.tab,
-                  active && { backgroundColor: accent.buttonColor + '22', borderColor: accent.buttonColor + '66' },
-                ]}
-                onPress={() => { setStyleId(s.id); setVariantId(s.variants[0].id); }}
-              >
-                <Text style={[styles.tabLabel, { color: active ? accent.buttonColor : colors.textMuted }]}>
-                  {s.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>STYLE</Text>
+        <View style={styles.chipRow}>
+          {CARD_STYLES.map(s => (
+            <Chip
+              key={s.id}
+              label={s.label.toUpperCase()}
+              active={s.id === styleId}
+              onPress={() => { setStyleId(s.id); setVariantId(s.variants[0].id); }}
+            />
+          ))}
         </View>
 
-        {/* Colour dots */}
-        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>Colour</Text>
+        <Text style={[styles.pickerLabel, { color: colors.textMuted }]}>COLOUR</Text>
         <View style={styles.dotsRow}>
           {currentStyle.variants.map(v => {
             const active = v.id === variantId;
@@ -107,10 +108,9 @@ export default function ShareCardScreen() {
               <TouchableOpacity key={v.id} onPress={() => setVariantId(v.id)} style={styles.dotWrap}>
                 <View style={[
                   styles.dot,
-                  { backgroundColor: v.dotGradient[0] },
-                  active && { borderColor: accent.buttonColor, borderWidth: 2.5 },
+                  { backgroundColor: v.dotGradient[0], borderColor: active ? colors.border : 'transparent' },
                 ]} />
-                <Text style={[styles.dotLabel, { color: active ? accent.buttonColor : colors.textMuted }]}>
+                <Text style={[styles.dotLabel, { color: active ? colors.textPrimary : colors.textMuted }]}>
                   {v.label}
                 </Text>
               </TouchableOpacity>
@@ -120,22 +120,21 @@ export default function ShareCardScreen() {
 
         <View style={styles.toggleRow}>
           <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>Show date</Text>
-          <Switch value={showDate} onValueChange={setShowDate} />
+          <Switch value={showDate} onValueChange={setShowDate} trackColor={{ true: colors.action }} />
         </View>
         {entry.location_label && (
           <View style={styles.toggleRow}>
             <Text style={[styles.toggleLabel, { color: colors.textPrimary }]}>Show location</Text>
-            <Switch value={showLocation} onValueChange={setShowLocation} />
+            <Switch value={showLocation} onValueChange={setShowLocation} trackColor={{ true: colors.action }} />
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.shareBtn, { backgroundColor: sharing ? colors.border : accent.buttonColor }]}
+        <ActionButton
+          label={sharing ? 'PREPARING…' : 'SEND IT'}
           onPress={handleShare}
           disabled={sharing}
-        >
-          <Text style={styles.shareTxt}>{sharing ? 'Preparing…' : 'Share →'}</Text>
-        </TouchableOpacity>
+          style={styles.shareBtn}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -143,21 +142,18 @@ export default function ShareCardScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { padding: 20, gap: 16, paddingBottom: 40 },
-  close: { alignSelf: 'flex-end' },
-  closeTxt: { fontSize: 18 },
-  title: { fontSize: 24, fontWeight: '700' },
+  container: { paddingHorizontal: 18, paddingTop: 8, gap: 16, paddingBottom: 40 },
+  headerRow: { flexDirection: 'row' },
+  mascotRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 11 },
+  bubble: { flex: 1, marginBottom: 10 },
   preview: { alignItems: 'center', paddingVertical: 8 },
-  pickerLabel: { fontSize: 11, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 },
-  tabRow: { flexDirection: 'row', gap: 8 },
-  tab: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: 'center', borderWidth: 1.5, borderColor: 'transparent' },
-  tabLabel: { fontSize: 13, fontWeight: '500' },
+  pickerLabel: { fontFamily: FONTS.label, fontSize: 11, letterSpacing: 1 },
+  chipRow: { flexDirection: 'row', gap: 9, flexWrap: 'wrap' },
   dotsRow: { flexDirection: 'row', gap: 10 },
   dotWrap: { alignItems: 'center', gap: 6, flex: 1 },
-  dot: { width: 28, height: 28, borderRadius: 14, borderWidth: 2.5, borderColor: 'transparent' },
-  dotLabel: { fontSize: 10 },
+  dot: { width: 28, height: 28, borderRadius: 14, borderWidth: 2.5 },
+  dotLabel: { fontFamily: FONTS.labelRegular, fontSize: 10 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  toggleLabel: { fontSize: 15 },
-  shareBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center' },
-  shareTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  toggleLabel: { fontFamily: FONTS.bodySemiBold, fontSize: 15 },
+  shareBtn: { justifyContent: 'center', marginTop: 4 },
 });

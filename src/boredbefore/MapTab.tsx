@@ -32,7 +32,7 @@ const DEFAULT_SHEET: SheetState = {
 };
 
 export function MapTab() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const mapRef = useRef<MapView>(null);
   const savedRegion = useRef<Region | null>(null);
   const clusterFocused = useRef(false);
@@ -137,7 +137,7 @@ export function MapTab() {
             >
               <View style={[
                 styles.pill,
-                { backgroundColor: group.type === 'named' ? accent.buttonColor : '#888888' },
+                { backgroundColor: group.type === 'named' ? '#2E5BFF' : '#888888' },
               ]}>
                 <Text style={styles.pillText}>
                   {group.type === 'named'
@@ -157,7 +157,7 @@ export function MapTab() {
             anchor={{ x: 0.5, y: 0.5 }}
           >
             <View style={styles.dotHitArea}>
-              <View style={[styles.dot, { backgroundColor: accent.buttonColor }]} />
+              <View style={[styles.dot, { backgroundColor: '#2E5BFF' }]} />
             </View>
             <Callout onPress={() => router.push(`/entry/${entry.id}`)}>
               <View style={styles.callout}>
@@ -173,7 +173,7 @@ export function MapTab() {
                 >
                   {entry.response_text}
                 </Text>
-                <Text style={[styles.calloutCta, { color: accent.buttonColor }]}>
+                <Text style={[styles.calloutCta, { color: colors.textPrimary }]}>
                   Open entry →
                 </Text>
               </View>

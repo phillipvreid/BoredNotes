@@ -3,8 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
 } from 'react-native';
-import { router } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
@@ -16,19 +15,56 @@ import { pickPhoto, takePhoto } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
 import { checkEntryAgainstPlaces } from '../src/db/places';
 import { DEFAULT_MODIFIERS } from '../src/types';
-import type { CurrentPrompt, PromptModifiers } from '../src/types';
+import type { CurrentPrompt, PromptCategory, PromptKind, PromptModifiers } from '../src/types';
+import {
+  DEFAULT_RANK_SLOTS, RANK_SLOT_COUNT, parseRankConfig, renderRankResponseText,
+} from '../src/games/rank';
+import {
+  FONTS, INK, DEFEND_PAD, KEYLINE_HEAVY, SHADOW_STICKER, SHADOW_SM, CHIP_SCRIM, CATEGORY_STYLES,
+} from '../src/theme/tokens';
+import { REPLY_COPY, wordCounterLine } from '../src/theme/copy';
+import { Sticker } from '../src/components/ui/Sticker';
+import { ActionButton } from '../src/components/ui/ActionButton';
+import { IconSticker } from '../src/components/ui/IconSticker';
+import { Mascot } from '../src/components/ui/Mascot';
+import { Chip } from '../src/components/ui/Chip';
+import { OutlinedNumber } from '../src/components/ui/OutlinedNumber';
+import { useToast } from '../src/components/ui/Toast';
 
 const CHIP_LABELS: Record<keyof PromptModifiers, string> = {
-  place: 'Place',
-  time: 'Time',
-  weather: 'Weather',
-  memory: 'Memory',
+  place: 'PLACE',
+  time: 'TIME',
+  weather: 'WEATHER',
+  memory: 'MEMORY',
 };
 const CHIP_KEYS: (keyof PromptModifiers)[] = ['place', 'time', 'weather', 'memory'];
 
+// Hand-placed numeral tilts from the kit's rank slots.
+const RANK_TILTS = [-6, 5, -4];
+
 export default function RespondScreen() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
+  const { showToast } = useToast();
+  const params = useLocalSearchParams<{
+    promptText?: string; promptCategory?: string; promptKind?: string; gameConfig?: string;
+  }>();
+  const cardPrompt: CurrentPrompt | null = params.promptText
+    ? {
+        text: params.promptText,
+        category: (params.promptCategory as PromptCategory) ?? 'reflective',
+        source: 'library',
+        kind: (params.promptKind as PromptKind) ?? 'text',
+        game_config: params.gameConfig || null,
+      }
+    : null;
+  const isRank = cardPrompt?.kind === 'rank';
+  const rankSlots = isRank
+    ? (parseRankConfig(cardPrompt?.game_config)?.slots ?? DEFAULT_RANK_SLOTS)
+    : DEFAULT_RANK_SLOTS;
+
   const [response, setResponse] = useState('');
+  const [rankItems, setRankItems] = useState<string[]>(Array(RANK_SLOT_COUNT).fill(''));
+  const [defense, setDefense] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [photoUri, setPhotoUri] = useState<string | null>(null);
@@ -38,6 +74,11 @@ export default function RespondScreen() {
   const [promptLoading, setPromptLoading] = useState(false);
   const [modifiers, setModifiers] = useState<PromptModifiers>(DEFAULT_MODIFIERS);
   const [offlineMode, setOfflineMode] = useState(false);
+
+  // Which prompt (if any) drives this entry: a card tapped on Home wins,
+  // otherwise the optional help-me-write contextual prompt.
+  const activePrompt = cardPrompt ?? (helpMeWriteOpen ? prompt : null);
+  const prompted = activePrompt !== null;
 
   useEffect(() => {
     (async () => {
@@ -150,20 +191,26 @@ export default function RespondScreen() {
   }
 
   async function handleSubmit() {
-    if (!response.trim()) {
-      Alert.alert('Write something first', 'Your response cannot be empty.');
+    const rankData = { items: rankItems.map(i => i.trim()), defense: defense.trim() };
+    const rankComplete = rankData.items.every(i => i !== '') && rankData.defense !== '';
+    if (isRank ? !rankComplete : !response.trim()) {
+      Alert.alert('Write something first', isRank
+        ? 'Fill all three slots and defend your #1.'
+        : 'Your response cannot be empty.');
       return;
     }
     setSubmitting(true);
     try {
       const db = await getDb();
       const entryId = await createEntry(db, {
-        prompt_text: helpMeWriteOpen ? (prompt?.text ?? '') : '',
-        response_text: response.trim(),
+        prompt_text: activePrompt?.text ?? '',
+        response_text: isRank ? renderRankResponseText(rankData) : response.trim(),
         location_label: locationLabel || undefined,
         location_lat: locationCoords?.lat,
         location_lng: locationCoords?.lng,
-        entry_mode: helpMeWriteOpen ? 'prompted' : 'freeform',
+        entry_mode: prompted ? 'prompted' : 'freeform',
+        entry_kind: isRank ? 'rank' : 'text',
+        game_data: isRank ? JSON.stringify(rankData) : null,
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
@@ -181,6 +228,7 @@ export default function RespondScreen() {
       }
       if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
       await getNextPrompt(db);
+      showToast();
       router.back();
     } catch {
       Alert.alert('Error', 'Could not save your entry. Please try again.');
@@ -188,133 +236,164 @@ export default function RespondScreen() {
     }
   }
 
+  const catStyle = activePrompt ? CATEGORY_STYLES[activePrompt.category] : null;
+  const headerLabel = prompted ? REPLY_COPY.promptedLabel : REPLY_COPY.freeformLabel;
+  const sendLabel = prompted ? REPLY_COPY.promptedSend : REPLY_COPY.freeformSend;
+  const rankFilled = rankItems.every(i => i.trim() !== '') && defense.trim() !== '';
+  const sendDisabled = (isRank ? !rankFilled : !response.trim())
+    || submitting || (helpMeWriteOpen && promptLoading);
+
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <TouchableOpacity onPress={() => router.back()} style={styles.closeBtn}>
-            <Text style={[styles.closeTxt, { color: colors.textMuted }]}>✕</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRow}>
+            <IconSticker glyph="←" onPress={() => router.back()} />
+            <Text style={[styles.headerLabel, { color: colors.textPrimary }]}>{headerLabel}</Text>
+          </View>
 
-          {!helpMeWriteOpen && (
-            <TouchableOpacity onPress={handleToggleHelpMeWrite} style={styles.helpPill}>
-              <Text style={[styles.helpPillTxt, { color: accent.buttonColor }]}>✨ Help me write</Text>
-            </TouchableOpacity>
+          {/* Freeform gets the option to summon a prompt */}
+          {!cardPrompt && !helpMeWriteOpen && (
+            <Chip label="HELP ME WRITE" onPress={handleToggleHelpMeWrite} shadow={SHADOW_SM} style={styles.helpChip} />
           )}
 
-          {helpMeWriteOpen && (
-            <View style={styles.promptBlock}>
-              <View style={styles.promptRow}>
-                {promptLoading ? (
-                  <Text style={[styles.prompt, { color: colors.textMuted, flex: 1 }]}>…</Text>
-                ) : (
-                  <>
-                    <Text style={[styles.prompt, { color: colors.textPrimary, flex: 1 }]}>{prompt?.text}</Text>
-                    {!offlineMode && prompt?.source === 'ai' && (
-                      <View style={[styles.aiBadge, { backgroundColor: accent.buttonColor + '20' }]}>
-                        <Text style={[styles.aiBadgeText, { color: accent.buttonColor }]}>AI</Text>
-                      </View>
-                    )}
-                  </>
+          {activePrompt && (
+            <Sticker
+              color={catStyle!.color}
+              borderColor={INK}
+              borderWidth={KEYLINE_HEAVY}
+              shadow={SHADOW_STICKER}
+              radius={20}
+              style={styles.promptCard}
+            >
+              <View style={styles.promptMeta}>
+                <View style={styles.catPill}>
+                  <Text style={styles.catPillTxt}>{catStyle!.label}</Text>
+                </View>
+                {!offlineMode && activePrompt.source === 'ai' && (
+                  <View style={styles.catPill}>
+                    <Text style={styles.catPillTxt}>AI</Text>
+                  </View>
                 )}
-                <TouchableOpacity onPress={handleRefreshPrompt} disabled={promptLoading} hitSlop={8} style={styles.refreshBtn}>
-                  <Feather name="refresh-cw" size={14} color={colors.textMuted} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleToggleHelpMeWrite} hitSlop={8} style={styles.refreshBtn}>
-                  <Feather name="x" size={14} color={colors.textMuted} />
-                </TouchableOpacity>
               </View>
-
-              {!offlineMode && (
-                <View style={styles.chipRow}>
-                  {CHIP_KEYS.map(key => (
-                    <TouchableOpacity
-                      key={key}
-                      onPress={() => handleToggleModifier(key)}
-                      disabled={promptLoading}
-                      style={[
-                        styles.chip,
-                        {
-                          backgroundColor: modifiers[key] ? accent.buttonColor : colors.surface,
-                          borderColor: modifiers[key] ? accent.buttonColor : colors.border,
-                        },
-                      ]}
-                    >
-                      <Text style={[styles.chipTxt, { color: modifiers[key] ? '#fff' : colors.textSecondary }]}>
-                        {CHIP_LABELS[key]}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+              <Text style={styles.promptTxt}>
+                {promptLoading ? '…' : activePrompt.text}
+              </Text>
+              {!cardPrompt && (
+                <View style={styles.promptActions}>
+                  <TouchableOpacity onPress={handleRefreshPrompt} disabled={promptLoading} hitSlop={8}>
+                    <Text style={styles.promptActionTxt}>↻ ANOTHER</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={handleToggleHelpMeWrite} hitSlop={8}>
+                    <Text style={styles.promptActionTxt}>✕ NEVERMIND</Text>
+                  </TouchableOpacity>
                 </View>
               )}
+              <View style={styles.miniMascot} pointerEvents="none">
+                <Mascot size={50} variant="yellow" bobDirection="right" />
+              </View>
+            </Sticker>
+          )}
+
+          {helpMeWriteOpen && !cardPrompt && !offlineMode && (
+            <View style={styles.chipRow}>
+              {CHIP_KEYS.map(key => (
+                <Chip
+                  key={key}
+                  label={CHIP_LABELS[key]}
+                  active={modifiers[key]}
+                  onPress={promptLoading ? undefined : () => handleToggleModifier(key)}
+                />
+              ))}
             </View>
           )}
 
-          <TextInput
-            style={[styles.input, { color: colors.textPrimary, borderBottomColor: colors.border }]}
-            placeholder="What's on your mind…"
-            placeholderTextColor={colors.textMuted}
-            multiline
-            autoFocus
-            value={response}
-            onChangeText={setResponse}
-          />
+          {isRank ? (
+            <View style={styles.rankStack}>
+              {rankSlots.slice(0, RANK_SLOT_COUNT).map((slotPlaceholder, i) => (
+                <Sticker key={i} borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.rankSlot}>
+                  <OutlinedNumber value={String(i + 1)} tilt={RANK_TILTS[i]} />
+                  <TextInput
+                    style={[styles.rankInput, { color: colors.textPrimary }]}
+                    placeholder={slotPlaceholder}
+                    placeholderTextColor={colors.when}
+                    autoFocus={i === 0}
+                    value={rankItems[i]}
+                    onChangeText={text => {
+                      setRankItems(items => items.map((it, j) => (j === i ? text : it)));
+                    }}
+                  />
+                </Sticker>
+              ))}
+              <Sticker color={DEFEND_PAD} borderColor={INK} borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.defendPad}>
+                <Text style={styles.defendLabel}>DEFEND YOUR #1</Text>
+                <TextInput
+                  style={styles.defendInput}
+                  placeholder="no scoring. just commit to the bit."
+                  placeholderTextColor="#b6b3a6"
+                  multiline
+                  value={defense}
+                  onChangeText={setDefense}
+                />
+              </Sticker>
+            </View>
+          ) : (
+          <Sticker borderWidth={KEYLINE_HEAVY} shadow={4} radius={16} style={styles.inputCard}>
+            <TextInput
+              style={[styles.input, { color: colors.textPrimary }]}
+              placeholder={prompted ? REPLY_COPY.promptedPlaceholder : REPLY_COPY.freeformPlaceholder}
+              placeholderTextColor={colors.when}
+              multiline
+              autoFocus
+              value={response}
+              onChangeText={setResponse}
+            />
+          </Sticker>
+          )}
 
           {photoUri && (
             <View style={styles.photoPreview}>
-              <Image source={{ uri: photoUri }} style={styles.photoImg} />
+              <Image source={{ uri: photoUri }} style={[styles.photoImg, { borderColor: colors.border }]} />
               <TouchableOpacity onPress={() => setPhotoUri(null)}>
-                <Text style={styles.removeTxt}>Remove photo</Text>
+                <Text style={styles.removeTxt}>REMOVE PHOTO ✕</Text>
               </TouchableOpacity>
             </View>
           )}
 
-          <View style={styles.metaRow}>
-            <View style={styles.locationRow}>
-              <TouchableOpacity onPress={handleAddLocation}>
-                <Text style={[styles.metaBtnTxt, { color: colors.textSecondary }]}>
-                  {locationLabel ? `📍 ${locationLabel}` : '📍 Add place'}
-                </Text>
-              </TouchableOpacity>
-              {locationLabel !== '' && (
-                <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }}>
-                  <Text style={styles.removeTxt}>✕</Text>
-                </TouchableOpacity>
-              )}
-            </View>
+          <View style={styles.attachRow}>
+            <Chip label="+ PHOTO" onPress={handlePickPhoto} />
+            <Chip label="+ CAMERA" onPress={handleTakePhoto} />
+            <Chip
+              label={locationLabel ? `◉ ${locationLabel.toUpperCase()}` : '◉ PLACE'}
+              active={locationLabel !== ''}
+              onPress={handleAddLocation}
+            />
             {locationLabel !== '' && (
-              <TextInput
-                style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
-                value={locationLabel}
-                onChangeText={setLocationLabel}
-                placeholder="Edit place name"
-                placeholderTextColor={colors.textMuted}
-              />
+              <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }} hitSlop={8}>
+                <Text style={[styles.removeTxt, { alignSelf: 'center' }]}>✕</Text>
+              </TouchableOpacity>
             )}
           </View>
+          {locationLabel !== '' && (
+            <TextInput
+              style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
+              value={locationLabel}
+              onChangeText={setLocationLabel}
+              placeholder="Edit place name"
+              placeholderTextColor={colors.when}
+            />
+          )}
 
-          <View style={styles.attachRow}>
-            <TouchableOpacity
-              onPress={handlePickPhoto}
-              style={[styles.attachBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            >
-              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>🖼 Photo</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={handleTakePhoto}
-              style={[styles.attachBtn, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            >
-              <Text style={[styles.attachTxt, { color: colors.textSecondary }]}>📷 Camera</Text>
-            </TouchableOpacity>
+          <View style={styles.footerRow}>
+            <Text style={[styles.counter, { color: colors.textMuted }]}>
+              {isRank ? (rankFilled ? 'committed to the bit' : 'no scoring. just commit.') : wordCounterLine(response)}
+            </Text>
+            <ActionButton
+              label={submitting ? 'SAVING…' : sendLabel}
+              onPress={handleSubmit}
+              disabled={sendDisabled}
+            />
           </View>
-
-          <TouchableOpacity
-            style={[styles.submitBtn, { backgroundColor: (!response.trim() || submitting || (helpMeWriteOpen && promptLoading)) ? colors.border : accent.buttonColor }]}
-            onPress={handleSubmit}
-            disabled={!response.trim() || submitting || (helpMeWriteOpen && promptLoading)}
-          >
-            <Text style={styles.submitTxt}>{submitting ? 'Saving…' : 'Save entry →'}</Text>
-          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -323,31 +402,41 @@ export default function RespondScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { padding: 20, gap: 16, paddingBottom: 40 },
-  closeBtn: { alignSelf: 'flex-end', padding: 4 },
-  closeTxt: { fontSize: 18 },
-  helpPill: { alignSelf: 'flex-start', paddingVertical: 8, paddingHorizontal: 4 },
-  helpPillTxt: { fontSize: 15, fontWeight: '600' },
-  promptBlock: { gap: 10 },
-  promptRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  prompt: { fontSize: 20, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
-  refreshBtn: { marginTop: 8 },
-  aiBadge: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 1, marginTop: 6 },
-  aiBadgeText: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5 },
+  container: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  headerLabel: { fontFamily: FONTS.label, fontSize: 13, letterSpacing: 1 },
+  helpChip: { alignSelf: 'flex-start' },
+  promptCard: { padding: 18, paddingBottom: 20, marginBottom: 8 },
+  promptMeta: { flexDirection: 'row', gap: 6 },
+  catPill: { backgroundColor: CHIP_SCRIM, borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8, alignSelf: 'flex-start' },
+  catPillTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#fff' },
+  promptTxt: {
+    fontFamily: FONTS.display, fontSize: 23, lineHeight: 25, letterSpacing: -0.3,
+    color: '#fff', marginTop: 9, maxWidth: 250,
+  },
+  promptActions: { flexDirection: 'row', gap: 16, marginTop: 12 },
+  promptActionTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: 'rgba(255,255,255,.75)' },
+  miniMascot: { position: 'absolute', bottom: -15, right: 16 },
   chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  chip: { borderRadius: 14, borderWidth: 1, paddingVertical: 6, paddingHorizontal: 12 },
-  chipTxt: { fontSize: 12, fontWeight: '600' },
-  input: { fontSize: 16, lineHeight: 26, minHeight: 160, textAlignVertical: 'top', borderBottomWidth: 1, paddingBottom: 12, fontFamily: 'Georgia', fontStyle: 'italic' },
+  inputCard: { minHeight: 180, padding: 16 },
+  rankStack: { gap: 9 },
+  rankSlot: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    height: 52, paddingHorizontal: 13, overflow: 'visible',
+  },
+  rankInput: { flex: 1, fontFamily: FONTS.bodySemiBold, fontSize: 16, paddingVertical: 0 },
+  defendPad: { minHeight: 110, paddingVertical: 11, paddingHorizontal: 13 },
+  defendLabel: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#141414' },
+  defendInput: {
+    fontFamily: FONTS.body, fontSize: 16, lineHeight: 22, color: '#141414',
+    marginTop: 5, minHeight: 66, textAlignVertical: 'top',
+  },
+  input: { fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 150, textAlignVertical: 'top' },
   photoPreview: { gap: 6 },
-  photoImg: { width: '100%', height: 180, borderRadius: 8 },
-  removeTxt: { color: '#f87171', fontSize: 13 },
-  metaRow: { gap: 6 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  metaBtnTxt: { fontSize: 14 },
-  locationInput: { fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
-  attachRow: { flexDirection: 'row', gap: 10 },
-  attachBtn: { flex: 1, borderRadius: 8, borderWidth: 1, paddingVertical: 10, alignItems: 'center' },
-  attachTxt: { fontSize: 13 },
-  submitBtn: { borderRadius: 12, paddingVertical: 16, alignItems: 'center', marginTop: 8 },
-  submitTxt: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  photoImg: { width: '100%', height: 180, borderRadius: 12, borderWidth: KEYLINE_HEAVY },
+  removeTxt: { color: '#FF4438', fontFamily: FONTS.label, fontSize: 11, letterSpacing: 0.5 },
+  attachRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
+  locationInput: { fontFamily: FONTS.body, fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
+  footerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 },
+  counter: { fontFamily: FONTS.labelRegular, fontSize: 13, flex: 1 },
 });

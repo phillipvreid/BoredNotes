@@ -52,6 +52,7 @@ async function _getContextualPrompt(
     ) as number[];
 
     const eligible = await getEligiblePrompts(db, {
+      onlyKind: 'text',
       excludeTexts: recentEntries.map(e => e.prompt_text),
       excludeCategories: recentCategories.slice(-2),
       excludeDepth:
@@ -60,7 +61,7 @@ async function _getContextualPrompt(
           ? recentDepths[recentDepths.length - 1]
           : null,
     });
-    const allFallback = await getEligiblePrompts(db, {});
+    const allFallback = await getEligiblePrompts(db, { onlyKind: 'text' });
     const pool = eligible.length > 0 ? eligible : allFallback;
     const selected = selectPrompt(pool, recentCategories, recentDepths);
 

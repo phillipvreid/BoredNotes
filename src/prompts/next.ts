@@ -20,6 +20,7 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   );
 
   const eligible = await getEligiblePrompts(db, {
+    onlyKind: 'text',
     excludeTexts: recentTexts,
     excludeCategories: recentCategories.slice(-2),
     excludeDepth:
@@ -32,7 +33,7 @@ export async function getNextPrompt(db: SQLiteDatabase): Promise<CurrentPrompt> 
   // If all criteria knock out every prompt (rare: user has been writing a lot),
   // fall back to the unfiltered pool. selectPrompt will still try to apply
   // category/depth variety, and has its own internal fallback to any prompt.
-  const allFallback = await getEligiblePrompts(db, {});
+  const allFallback = await getEligiblePrompts(db, { onlyKind: 'text' });
   const pool = eligible.length > 0 ? eligible : allFallback;
   const chosenLibraryPrompt = selectPrompt(pool, recentCategories, recentDepths);
 
@@ -90,6 +91,7 @@ export async function peekNextLibraryPrompt(db: SQLiteDatabase): Promise<Current
     JSON.parse((await getSetting(db, 'recent_depths')) ?? '[]') as number[]
   );
   const eligible = await getEligiblePrompts(db, {
+    onlyKind: 'text',
     excludeTexts: recentEntries.map(e => e.prompt_text),
     excludeCategories: recentCategories.slice(-2),
     excludeDepth:
@@ -98,7 +100,7 @@ export async function peekNextLibraryPrompt(db: SQLiteDatabase): Promise<Current
         ? recentDepths[recentDepths.length - 1]
         : null,
   });
-  const allFallback = await getEligiblePrompts(db, {});
+  const allFallback = await getEligiblePrompts(db, { onlyKind: 'text' });
   const pool = eligible.length > 0 ? eligible : allFallback;
   const selected = selectPrompt(pool, recentCategories, recentDepths);
   return { text: selected.text, category: selected.category, source: 'library' };

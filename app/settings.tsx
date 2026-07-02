@@ -4,7 +4,8 @@ import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useTheme } from '../src/theme/ThemeContext';
-import { ACCENTS } from '../src/theme/tokens';
+import { PAPERS, FONTS } from '../src/theme/tokens';
+import { IconSticker } from '../src/components/ui/IconSticker';
 import { getDb } from '../src/db/database';
 import { getSetting, setSetting } from '../src/db/settings';
 import { getNextPrompt } from '../src/prompts/next';
@@ -13,7 +14,7 @@ import { exportEntriesToCsv } from '../src/export/share';
 const version = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
-  const { colors, accent, isDark, setAccent, setDarkMode } = useTheme();
+  const { colors, paper, isDark, setPaper, setDarkMode } = useTheme();
   const [offlineMode, setOfflineMode] = useState(false);
   const [toggling, setToggling] = useState(false);
 
@@ -75,9 +76,7 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <View style={[styles.header, { backgroundColor: colors.bg }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-          <Text style={[styles.backTxt, { color: colors.textSecondary }]}>← Back</Text>
-        </TouchableOpacity>
+        <IconSticker glyph="←" onPress={() => router.back()} style={styles.back} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>Settings</Text>
       </View>
       <ScrollView contentContainerStyle={styles.container}>
@@ -85,16 +84,20 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>APPEARANCE</Text>
 
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
-          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Theme</Text>
+          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Paper</Text>
           <View style={styles.swatches}>
-            {ACCENTS.map(swatch => (
+            {PAPERS.map(swatch => (
               <TouchableOpacity
                 key={swatch.id}
-                style={[styles.swatch, { backgroundColor: swatch.buttonColor }]}
-                onPress={() => setAccent(swatch.id)}
+                style={[styles.swatch, {
+                  backgroundColor: isDark ? swatch.dark : swatch.light,
+                  borderColor: colors.border,
+                  borderWidth: paper.id === swatch.id ? 2.5 : 1,
+                }]}
+                onPress={() => setPaper(swatch.id)}
               >
-                {accent.id === swatch.id && (
-                  <Feather name="check" size={14} color="#fff" />
+                {paper.id === swatch.id && (
+                  <Feather name="check" size={14} color={colors.textPrimary} />
                 )}
               </TouchableOpacity>
             ))}
@@ -106,7 +109,7 @@ export default function SettingsScreen() {
           <Switch
             value={isDark}
             onValueChange={setDarkMode}
-            trackColor={{ true: accent.buttonColor }}
+            trackColor={{ true: colors.action }}
           />
         </View>
 
@@ -121,7 +124,7 @@ export default function SettingsScreen() {
           <Switch
             value={offlineMode}
             onValueChange={handleOfflineToggle}
-            trackColor={{ true: accent.buttonColor }}
+            trackColor={{ true: colors.action }}
             disabled={toggling}
           />
         </View>
@@ -137,7 +140,7 @@ export default function SettingsScreen() {
           <Switch
             value={autoLocation}
             onValueChange={handleAutoLocationToggle}
-            trackColor={{ true: accent.buttonColor }}
+            trackColor={{ true: colors.action }}
           />
         </View>
 
@@ -146,7 +149,7 @@ export default function SettingsScreen() {
           onPress={() => router.push('/saved-locations')}
         >
           <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Saved locations</Text>
-          <Text style={[styles.rowValue, { color: accent.buttonColor }]}>→</Text>
+          <Text style={[styles.rowValue, { color: colors.textPrimary }]}>→</Text>
         </TouchableOpacity>
 
         {/* Data section */}
@@ -157,7 +160,7 @@ export default function SettingsScreen() {
           onPress={handleExport}
         >
           <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Export notes</Text>
-          <Text style={[styles.rowValue, { color: accent.buttonColor }]}>CSV →</Text>
+          <Text style={[styles.rowValue, { color: colors.textPrimary }]}>CSV →</Text>
         </TouchableOpacity>
 
         {/* About section */}
@@ -176,14 +179,14 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 },
   container: { padding: 20, gap: 8, paddingBottom: 40 },
-  back: { paddingVertical: 4, marginBottom: 4 },
+  back: { marginBottom: 12 },
   backTxt: { fontSize: 15 },
-  title: { fontSize: 28, fontWeight: '700', marginBottom: 8 },
-  sectionHead: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', marginTop: 16, marginBottom: 4 },
+  title: { fontFamily: FONTS.display, fontSize: 31, letterSpacing: -0.8, marginBottom: 8 },
+  sectionHead: { fontFamily: FONTS.label, fontSize: 11, letterSpacing: 1, textTransform: 'uppercase', marginTop: 16, marginBottom: 4 },
   row: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    padding: 16, borderRadius: 12, borderWidth: 1,
-    shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,
+    padding: 16, borderRadius: 14, borderWidth: 2.5,
+    shadowRadius: 0, shadowOffset: { width: 3, height: 3 }, elevation: 3,
   },
   rowLabel: { fontSize: 15 },
   rowSubtitle: { fontSize: 12, marginTop: 2 },

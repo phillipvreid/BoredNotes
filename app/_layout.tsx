@@ -2,14 +2,39 @@ import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import { View, ActivityIndicator, Text } from 'react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { useFonts } from 'expo-font';
+import {
+  BricolageGrotesque_700Bold,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
+import {
+  HankenGrotesk_400Regular,
+  HankenGrotesk_500Medium,
+  HankenGrotesk_600SemiBold,
+  HankenGrotesk_700Bold,
+  HankenGrotesk_800ExtraBold,
+} from '@expo-google-fonts/hanken-grotesk';
+import { SpaceMono_400Regular, SpaceMono_700Bold } from '@expo-google-fonts/space-mono';
 import { getDb } from '../src/db/database';
 import { seedLibraryIfNeeded } from '../src/prompts/seed';
 import { flushPendingGeocodes } from '../src/location/location';
 import { ThemeProvider } from '../src/theme/ThemeContext';
+import { ToastProvider } from '../src/components/ui/Toast';
 
 export default function RootLayout() {
   const [db, setDb] = useState<SQLiteDatabase | null>(null);
   const [initError, setInitError] = useState<string | null>(null);
+  const [fontsLoaded, fontError] = useFonts({
+    BricolageGrotesque_700Bold,
+    BricolageGrotesque_800ExtraBold,
+    HankenGrotesk_400Regular,
+    HankenGrotesk_500Medium,
+    HankenGrotesk_600SemiBold,
+    HankenGrotesk_700Bold,
+    HankenGrotesk_800ExtraBold,
+    SpaceMono_400Regular,
+    SpaceMono_700Bold,
+  });
 
   useEffect(() => {
     (async () => {
@@ -33,9 +58,9 @@ export default function RootLayout() {
     );
   }
 
-  if (!db) {
+  if (!db || (!fontsLoaded && !fontError)) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fafaf9' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FBFAF3' }}>
         <ActivityIndicator />
       </View>
     );
@@ -43,6 +68,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider db={db}>
+      <ToastProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="respond" options={{ presentation: 'modal' }} />
@@ -54,6 +80,7 @@ export default function RootLayout() {
         <Stack.Screen name="place/cluster" />
         <Stack.Screen name="saved-locations" />
       </Stack>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

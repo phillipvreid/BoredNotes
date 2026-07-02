@@ -1,16 +1,18 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Prompt, PromptCategory } from '../types';
+import type { Prompt, PromptCategory, PromptKind } from '../types';
 
 export async function insertPrompt(
   db: SQLiteDatabase,
   text: string,
   category: PromptCategory,
   depth: 1 | 2 | 3,
-  source: 'library' | 'custom' = 'library'
+  source: 'library' | 'custom' = 'library',
+  kind: PromptKind = 'text',
+  gameConfig: string | null = null
 ): Promise<void> {
   await db.runAsync(
-    'INSERT INTO prompts (text, category, depth, source) VALUES (?, ?, ?, ?)',
-    [text, category, depth, source]
+    'INSERT INTO prompts (text, category, depth, source, kind, game_config) VALUES (?, ?, ?, ?, ?, ?)',
+    [text, category, depth, source, kind, gameConfig]
   );
 }
 
@@ -23,6 +25,7 @@ export interface PromptFilter {
   excludeTexts?: string[];
   excludeCategories?: PromptCategory[];
   excludeDepth?: number | null;
+  onlyKind?: PromptKind;
 }
 
 export async function getEligiblePrompts(
@@ -47,6 +50,11 @@ export async function getEligiblePrompts(
   if (filter.excludeDepth != null) {
     conditions.push('depth != ?');
     params.push(filter.excludeDepth);
+  }
+
+  if (filter.onlyKind) {
+    conditions.push('kind = ?');
+    params.push(filter.onlyKind);
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

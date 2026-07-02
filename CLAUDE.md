@@ -29,7 +29,7 @@ Users respond to prompts or write freeform notes. Entries can include text, loca
 - TypeScript
 - Expo Router
 - SQLite via `expo-sqlite`
-- EAS Build
+- Local Xcode builds (`npx expo run:ios`) + EAS Build for distribution
 - Jest / jest-expo
 
 ## Important directories
@@ -71,10 +71,15 @@ npm run start
 
 ## Environment: Expo / React Native (iOS)
 
-- This is an Expo React Native project; on-device testing requires an EAS dev build, NOT Expo Go (react-native-maps and other native modules don't work in Expo Go).
-- On-device builds require a paid Apple Developer account.
-- Run interactive commands (e.g. `eas device:create`) in a separate terminal, not in-session.
-- Whenever a build is needed (e.g. after native config or dependency changes), open a new terminal window and run `eas build --profile development --platform ios` there — don't run it in-session, it's long-running and interactive.
+- This is an Expo React Native project; native modules (react-native-maps, expo-location, expo-sqlite, media pickers) do NOT work in Expo Go, so they must be tested in a real native build.
+- Primary dev machine is a MacBook Pro with Xcode installed, and the developer has a paid Apple Developer account. Local native builds are the default testing path.
+- Local build/run loop (run in a separate terminal, NOT in-session — long-running):
+  - Simulator: `npx expo run:ios` (no signing needed; use for most UI/logic checks). Covers maps, SQLite, location tagging, share cards, export.
+  - Physical device / debugging: open `ios/BoredNotes.xcworkspace` in Xcode, or `npx expo run:ios --device`.
+- Simulator limitations that require a physical device: real camera capture, haptics, true GPS movement. The simulator can simulate a static location and use the photo library.
+- EAS Build (`eas build --profile development --platform ios`) is still available for clean/distribution builds and TestFlight; no longer the only option for seeing the app run. Run any EAS or `eas device:create` commands in a separate terminal, not in-session.
+- Run `npx expo install --check` before any local or cloud build to catch peer-dep/SDK mismatches early.
+- The assistant's own session runs in a Linux sandbox without Xcode, so it cannot build or run the iOS app; it writes/edits code and runs Jest, and the developer runs the native build on the Mac.
 
 ## Git Workflow
 

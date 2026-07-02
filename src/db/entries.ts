@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Entry } from '../types';
+import type { Entry, EntryKind } from '../types';
 
 export interface CreateEntryInput {
   prompt_text: string;
@@ -8,12 +8,14 @@ export interface CreateEntryInput {
   location_lat?: number;
   location_lng?: number;
   entry_mode?: 'prompted' | 'freeform';
+  entry_kind?: EntryKind;
+  game_data?: string | null;
 }
 
 export async function createEntry(db: SQLiteDatabase, input: CreateEntryInput): Promise<number> {
   const result = await db.runAsync(
-    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng, entry_mode)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng, entry_mode, entry_kind, game_data)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.prompt_text,
       input.response_text,
@@ -21,6 +23,8 @@ export async function createEntry(db: SQLiteDatabase, input: CreateEntryInput): 
       input.location_lat ?? null,
       input.location_lng ?? null,
       input.entry_mode ?? 'prompted',
+      input.entry_kind ?? 'text',
+      input.game_data ?? null,
     ]
   );
   return result.lastInsertRowId;
@@ -35,6 +39,11 @@ export async function getRecentEntries(db: SQLiteDatabase, limit: number): Promi
     'SELECT * FROM entries ORDER BY created_at DESC LIMIT ?',
     [limit]
   );
+}
+
+export async function countEntries(db: SQLiteDatabase): Promise<number> {
+  const row = await db.getFirstAsync<{ n: number }>('SELECT COUNT(*) as n FROM entries', []);
+  return row?.n ?? 0;
 }
 
 export async function getAllEntries(db: SQLiteDatabase): Promise<Entry[]> {

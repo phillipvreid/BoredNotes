@@ -70,5 +70,8 @@
   {"text": "If your past self from five years ago were watching you right now, what would they think?", "category": "creative", "depth": 3},
   {"text": "What's a story you keep telling about yourself that might not be true anymore?", "category": "creative", "depth": 3},
   {"text": "If you could send a postcard from this exact moment to your future self, what would it say?", "category": "creative", "depth": 3},
-  {"text": "Describe the version of yourself you're becoming.", "category": "creative", "depth": 3}
+  {"text": "Describe the version of yourself you're becoming.", "category": "creative", "depth": 3},
+  {"text": "Rank your last 3 snacks. Defend #1.", "category": "game", "depth": 1, "kind": "rank", "slots": ["your undisputed #1…", "the runner-up…", "third place, sorry…"]},
+  {"text": "Rank 3 people you would trust with your phone.", "category": "game", "depth": 1, "kind": "rank", "slots": ["most trusted…", "probably fine…", "risky but ok…"]},
+  {"text": "Rank 3 ways to waste a perfectly good afternoon.", "category": "game", "depth": 1, "kind": "rank", "slots": ["the elite waste…", "solid filler…", "desperate measures…"]}
 ]

@@ -26,7 +26,7 @@ const MONTH_NAMES = [
 ];
 
 export function CalendarTab() {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
@@ -96,7 +96,7 @@ export function CalendarTab() {
         <TouchableOpacity onPress={() => setShowYearPicker(v => !v)}>
           <Text style={[styles.monthLabel, { color: colors.textPrimary }]}>
             {MONTH_NAMES[month]}{' '}
-            <Text style={{ color: accent.buttonColor }}>{year}</Text>
+            <Text style={{ color: colors.textPrimary, fontWeight: '700' }}>{year}</Text>
           </Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={nextMonth}>
@@ -109,11 +109,11 @@ export function CalendarTab() {
           {availableYears.map(y => (
             <TouchableOpacity
               key={y}
-              style={[styles.yearRow, y === year && { backgroundColor: accent.buttonColor + '22' }]}
+              style={[styles.yearRow, y === year && { backgroundColor: colors.action + '44' }]}
               onPress={() => handleYearSelect(y)}
             >
               <Text style={[styles.yearTxt, {
-                color: y === year ? accent.buttonColor : colors.textPrimary,
+                color: colors.textPrimary,
                 fontWeight: y === year ? '700' : '400',
               }]}>
                 {y}
@@ -137,7 +137,7 @@ export function CalendarTab() {
               key={dateStr}
               style={[
                 styles.cell,
-                isSelected && { backgroundColor: accent.buttonColor, borderRadius: 8 },
+                isSelected && { backgroundColor: colors.action, borderRadius: 8 },
               ]}
               onPress={() => hasEntry && handleDayPress(dateStr)}
               disabled={!hasEntry}
@@ -153,7 +153,7 @@ export function CalendarTab() {
               {hasEntry && (
                 <View style={[
                   styles.dot,
-                  { backgroundColor: accent.labelColor },
+                  { backgroundColor: colors.textPrimary },
                   isSelected && styles.selectedDot,
                 ]} />
               )}
@@ -200,9 +200,9 @@ const styles = StyleSheet.create({
   cell: { width: '14.28%', aspectRatio: 1, alignItems: 'center', justifyContent: 'center', gap: 2 },
   dayHeader: { width: '14.28%', textAlign: 'center', fontSize: 11, paddingVertical: 6 },
   dayNum: { fontSize: 14 },
-  selectedDayNum: { color: '#fff' },
+  selectedDayNum: { color: '#141414', fontWeight: '800' },
   dot: { width: 4, height: 4, borderRadius: 2 },
-  selectedDot: { backgroundColor: '#fff' },
+  selectedDot: { backgroundColor: '#141414' },
   entryCard: {
     borderRadius: 12, padding: 16, gap: 6,
     shadowRadius: 4, shadowOffset: { width: 0, height: 1 }, elevation: 2,

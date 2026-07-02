@@ -8,7 +8,7 @@ interface Props {
 }
 
 export function PlaceFeedList({ entries }: Props) {
-  const { colors, accent } = useTheme();
+  const { colors } = useTheme();
 
   if (entries.length === 0) {
     return (
@@ -36,7 +36,7 @@ export function PlaceFeedList({ entries }: Props) {
           <Text style={[styles.snippet, { color: colors.textPrimary }]} numberOfLines={2}>
             {entry.response_text}
           </Text>
-          <Text style={[styles.cta, { color: accent.buttonColor }]}>Open →</Text>
+          <Text style={[styles.cta, { color: colors.textPrimary }]}>Open →</Text>
         </TouchableOpacity>
       ))}
     </ScrollView>
