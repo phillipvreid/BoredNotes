@@ -13,6 +13,7 @@ function makePin(id: number, lat: number, lng: number, place_id: number | null =
     entry_kind: 'text',
     game_data: null,
     place_id,
+    category: null,
     location_lat: lat,
     location_lng: lng,
   };

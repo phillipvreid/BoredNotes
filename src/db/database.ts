@@ -38,6 +38,8 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
     `ALTER TABLE entries ADD COLUMN game_data TEXT`,
     `ALTER TABLE prompts ADD COLUMN kind TEXT NOT NULL DEFAULT 'text'`,
     `ALTER TABLE prompts ADD COLUMN game_config TEXT`,
+    // Category of the prompt an entry answered; null for legacy/freeform entries.
+    `ALTER TABLE entries ADD COLUMN category TEXT`,
   ];
   for (const sql of gameColumns) {
     try {

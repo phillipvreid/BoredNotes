@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { Entry, EntryKind } from '../types';
+import type { Entry, EntryKind, PromptCategory } from '../types';
 
 export interface CreateEntryInput {
   prompt_text: string;
@@ -10,12 +10,13 @@ export interface CreateEntryInput {
   entry_mode?: 'prompted' | 'freeform';
   entry_kind?: EntryKind;
   game_data?: string | null;
+  category?: PromptCategory | null;
 }
 
 export async function createEntry(db: SQLiteDatabase, input: CreateEntryInput): Promise<number> {
   const result = await db.runAsync(
-    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng, entry_mode, entry_kind, game_data)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO entries (prompt_text, response_text, location_label, location_lat, location_lng, entry_mode, entry_kind, game_data, category)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.prompt_text,
       input.response_text,
@@ -25,6 +26,7 @@ export async function createEntry(db: SQLiteDatabase, input: CreateEntryInput): 
       input.entry_mode ?? 'prompted',
       input.entry_kind ?? 'text',
       input.game_data ?? null,
+      input.category ?? null,
     ]
   );
   return result.lastInsertRowId;

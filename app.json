@@ -3,7 +3,7 @@
     "name": "BoredNotes",
     "slug": "borednotes",
     "scheme": "borednotes",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,

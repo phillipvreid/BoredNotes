@@ -211,6 +211,7 @@ export default function RespondScreen() {
         entry_mode: prompted ? 'prompted' : 'freeform',
         entry_kind: isRank ? 'rank' : 'text',
         game_data: isRank ? JSON.stringify(rankData) : null,
+        category: prompted ? activePrompt?.category ?? null : null,
       });
       if (locationCoords && !locationLabel) {
         await queuePendingGeocode(db, entryId, locationCoords.lat, locationCoords.lng);
@@ -312,7 +313,7 @@ export default function RespondScreen() {
             <View style={styles.rankStack}>
               {rankSlots.slice(0, RANK_SLOT_COUNT).map((slotPlaceholder, i) => (
                 <Sticker key={i} borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.rankSlot}>
-                  <OutlinedNumber value={String(i + 1)} tilt={RANK_TILTS[i]} />
+                  <OutlinedNumber value={String(i + 1)} tilt={RANK_TILTS[i]} size={52} />
                   <TextInput
                     style={[styles.rankInput, { color: colors.textPrimary }]}
                     placeholder={slotPlaceholder}

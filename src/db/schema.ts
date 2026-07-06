@@ -19,7 +19,8 @@ export const CREATE_TABLES_SQL = `
     entry_mode TEXT NOT NULL DEFAULT 'prompted' CHECK (entry_mode IN ('prompted', 'freeform')),
     place_id INTEGER REFERENCES places(id) ON DELETE SET NULL,
     entry_kind TEXT NOT NULL DEFAULT 'text',
-    game_data TEXT
+    game_data TEXT,
+    category TEXT
   );
 
   CREATE TABLE IF NOT EXISTS media (

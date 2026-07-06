@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import { getDb } from '../src/db/database';
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const [ctaLabel] = useState(() => pick(CTA_LABELS));
   const [cards, setCards] = useState<Prompt[]>([]);
   const [entryCount, setEntryCount] = useState<number | null>(null);
+  const lastEntryCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -31,16 +32,9 @@ export default function HomeScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const db = await getDb();
-        const pool = await getEligiblePrompts(db, {});
-        setCards(selectHomeCardPrompts(pool, 3));
-      } catch {}
-    })();
-  }, []);
-
+  // Re-run on every focus so the count stays fresh, but only reselect the
+  // card stack when entryCount has actually changed (i.e. a submit happened)
+  // — merely opening and closing a prompt shouldn't reshuffle the deck.
   useFocusEffect(
     useCallback(() => {
       let active = true;
@@ -48,7 +42,13 @@ export default function HomeScreen() {
         try {
           const db = await getDb();
           const n = await countEntries(db);
-          if (active) setEntryCount(n);
+          if (!active) return;
+          setEntryCount(n);
+          if (lastEntryCountRef.current === null || n !== lastEntryCountRef.current) {
+            const pool = await getEligiblePrompts(db, {});
+            if (active) setCards(selectHomeCardPrompts(pool, 3));
+          }
+          lastEntryCountRef.current = n;
         } catch {}
       })();
       return () => { active = false; };
