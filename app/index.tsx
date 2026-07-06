@@ -7,7 +7,7 @@ import { getEligiblePrompts } from '../src/db/prompts';
 import { selectHomeCardPrompts } from '../src/prompts/selection';
 import { useTheme } from '../src/theme/ThemeContext';
 import {
-  FONTS, INK, KEYLINE_HEAVY, SHADOW_CARD, TILTS, CHIP_SCRIM, CATEGORY_STYLES, ACTION,
+  FONTS, INK, KEYLINE_HEAVY, SHADOW_CARD, TILTS, CHIP_SCRIM,
 } from '../src/theme/tokens';
 import { QUIPS, QUIP_ROTATION_MS, CTA_LABELS, HOME_PICK_LABEL, HITS_COPY, pick } from '../src/theme/copy';
 import { Sticker } from '../src/components/ui/Sticker';
@@ -18,7 +18,7 @@ import { SpeechBubble } from '../src/components/ui/SpeechBubble';
 import type { Prompt } from '../src/types';
 
 export default function HomeScreen() {
-  const { colors } = useTheme();
+  const { colors, categoryStyles } = useTheme();
   const [quipIndex, setQuipIndex] = useState(0);
   const [ctaLabel] = useState(() => pick(CTA_LABELS));
   const [cards, setCards] = useState<Prompt[]>([]);
@@ -88,7 +88,7 @@ export default function HomeScreen() {
 
         <View style={styles.cardStack}>
           {cards.map((prompt, i) => {
-            const cat = CATEGORY_STYLES[prompt.category];
+            const cat = categoryStyles[prompt.category];
             return (
               <Sticker
                 key={prompt.id}
@@ -125,7 +125,7 @@ export default function HomeScreen() {
             <Text style={[styles.star, { color: colors.starFg }]}>★</Text>
             <Text style={[styles.archiveLabel, { color: colors.archiveInk }]}>{HITS_COPY.barLabel}</Text>
           </View>
-          <Text style={styles.archiveCount}>
+          <Text style={[styles.archiveCount, { color: colors.action }]}>
             {entryCount === null ? '' : `${entryCount} ${HITS_COPY.barCountSuffix}`}
           </Text>
         </Sticker>
@@ -158,5 +158,5 @@ const styles = StyleSheet.create({
   archiveLeft: { flexDirection: 'row', alignItems: 'center', gap: 9 },
   star: { fontFamily: FONTS.display, fontSize: 15 },
   archiveLabel: { fontFamily: FONTS.label, fontSize: 14, letterSpacing: 0.5 },
-  archiveCount: { fontFamily: FONTS.label, fontSize: 13, color: ACTION },
+  archiveCount: { fontFamily: FONTS.label, fontSize: 13 },
 });
