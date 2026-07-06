@@ -115,7 +115,7 @@ export const THEMES: ThemeDef[] = [
     id: 'blue-raspberry',
     label: 'Blue Raspberry',
     ink: '#142033',
-    action: '#FF8A3D',
+    action: '#3FB2FF',
     paper: { light: '#EFF3F9', dark: '#0F151E' },
     lightText: { secondary: '#7C8698', muted: '#97A0B0', when: '#AEB6C4' },
     dark: { surface: '#1A2330', sheet: '#141C28', border: '#D7E2F0', text: '#E8EFF9', secondary: '#8A96A8' },

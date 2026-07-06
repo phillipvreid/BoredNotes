@@ -68,6 +68,11 @@ describe('tokens', () => {
     }
   });
 
+  it('blue raspberry action is a blue, matching its theme', () => {
+    const br = THEMES.find(t => t.id === 'blue-raspberry')!;
+    expect(br.action).toBe('#3FB2FF');
+  });
+
   it('no category hue reuses its theme\'s reserved action colour', () => {
     for (const theme of THEMES) {
       for (const hue of Object.values(theme.cats)) {
