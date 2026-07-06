@@ -10,9 +10,6 @@ Pulled from `TODO.md` as of 2026-07-06. Run via `npx expo run:ios` on simulator/
 
 ## New from this test pass (2026-07-06)
 
-- [ ] Respond screen: Send button hidden below keyboard — FIXED IN CODE (keyboard-aware padding collapse + smaller input min-heights, plus the attach row removal freeing space). Verify on device: freeform, freeform + Help Me Write open, and prompt-card entry, keyboard up — Send visible without scrolling in all three. Rank & Defend may still scroll (by design).
-- [ ] Photo/Camera/Place chips removed from respond screen — DONE. Verify: auto-location (Settings toggle) still tags entries, and the editable place line with its ✕ appears when it does. PLACE returns later with a more streamlined approach (see TODO).
-- [ ] Home screen jagged sticker keylines — FIXED IN CODE (tilted stickers now rasterize on iOS). Verify on the purple IMAGINE/CONFESS and blue REFLECT cards.
 - [ ] Blue Raspberry ActionButton orange → now `#3FB2FF` blue. Verify on device; tune the hex in `src/theme/tokens.ts` if it reads wrong next to REFLECT blue.
 - [ ] App icon — parked: design it in the claude.ai/design Arcade Sticker project first, then wire `assets/icon.png` + the `icon` field in `app.json` and re-run prebuild.
 
@@ -25,6 +22,9 @@ Pulled from `TODO.md` as of 2026-07-06. Run via `npx expo run:ios` on simulator/
 
 ## Fixed, confirmed on device
 
+- [x] Respond screen: Send button no longer hidden below keyboard (verified 2026-07-06; keyboard-aware padding collapse + smaller input min-heights). Rank & Defend may still scroll (by design).
+- [x] Photo/Camera/Place chips removed from respond screen (verified 2026-07-06). PLACE returns later with a more streamlined approach (see TODO).
+- [x] Home screen jagged sticker keylines — tilted stickers now rasterize on iOS (verified 2026-07-06 on the tilted Home cards).
 - [x] Home cards not refreshing after submitting an entry.
 - [x] Rank & Defend number badges (1/2/3) rendering incorrectly on respond page.
 - [x] Help Me Write chip-driven prompts (wording/quality still being tuned separately).
