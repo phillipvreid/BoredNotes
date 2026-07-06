@@ -1,11 +1,12 @@
 # BoredNotes — Post-v2.0.0 To-Do (Arcade Pop UI)
 
-Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 suites / 159 tests passing, tsc clean.
+Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 + Rank & Defend), #17 (Help Me Write), #18 (six themes), #20 (stack catch-up) — 21 suites / 175 tests passing, tsc clean. Feature branches retired.
 
 ## Verify on device
 - [x] Run `npx expo run:ios` and click through Home, Reply (text + brain dump), Reply·Rank, Greatest Hits, Share sheet, Settings on a real simulator/device — CI only proves logic, not the rendered UI.
 - [x] Check custom fonts (Bricolage Grotesque / Hanken Grotesk / Space Mono) actually load via `expo-font` and don't flash unstyled text.
-- [x] Confirm all 4 paper themes render correctly in both light and dark mode from Settings.
+- [x] Confirm all 4 paper themes render correctly in both light and dark mode from Settings. (Superseded: papers replaced by the six full themes below.)
+- [ ] Confirm the six concession-stand themes (Classic, Blue Raspberry, Sour Apple, Grape Soda, Bubblegum, Cherry Cola) render correctly in both light and dark mode from Settings — implemented and unit-tested, never yet seen on device. Check the ActionButton re-tints on theme change and Grape Soda's purple action.
 - [x] Test Rank & Defend end-to-end: create a rank entry, confirm medal rendering shows correctly in Greatest Hits and entry detail.
 - [x] Spot-check offline mode still disables AI prompt generation under the new UI.
 
@@ -19,7 +20,7 @@ Status as of 2026-07-02: `feat/arcade-sticker-v2` branch, commit c285185 — 21 
 - [ ] Write/save a design spec + plan doc for the Arcade Sticker rollout under `docs/superpowers/specs` and `docs/superpowers/plans` (all other features have one; this one doesn't yet).
 - [x] Delete the stray untracked `Agent` file showing in `git status`.
 - [x] Push branch and confirm it actually landed on remote (per project workflow note — pushes have silently failed before). Confirmed on GitHub: main has c285185.
-- [ ] Open PR for `feat/arcade-sticker-v2` → main once device testing above is done.
+- [x] Open PR for `feat/arcade-sticker-v2` → main once device testing above is done. Done: PRs #19/#17/#18 merged (plus #20 to land the stacked content that missed main); all confirmed on `main` at b7a5a53.
 
 ## Next feature candidates
 - [ ] Second micro-game beyond Rank & Defend, reusing the generic game plumbing (`prompts.kind` / `game_config` / `entry_kind` / `game_data`).
