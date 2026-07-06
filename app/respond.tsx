@@ -255,7 +255,11 @@ export default function RespondScreen() {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
       <View style={{ flex: 1, paddingBottom: keyboardHeight }}>
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.container, keyboardHeight > 0 && styles.containerKeyboard]}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.headerRow}>
             <IconSticker glyph="←" onPress={() => router.back()} />
             <Text style={[styles.headerLabel, { color: colors.textPrimary }]}>{headerLabel}</Text>
@@ -399,6 +403,7 @@ const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { flex: 1 },
   container: { flexGrow: 1, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
+  containerKeyboard: { paddingBottom: 12 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerLabel: { fontFamily: FONTS.label, fontSize: 13, letterSpacing: 1 },
   helpChip: { alignSelf: 'flex-start' },
@@ -414,7 +419,7 @@ const styles = StyleSheet.create({
   promptCloseTxt: { fontFamily: FONTS.label, fontSize: 15, color: 'rgba(255,255,255,.85)' },
   miniMascot: { position: 'absolute', bottom: -15, right: 16 },
   chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  inputCard: { flex: 1, minHeight: 180, padding: 16 },
+  inputCard: { flex: 1, minHeight: 120, padding: 16 },
   rankStack: { gap: 9 },
   rankSlot: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -428,7 +433,7 @@ const styles = StyleSheet.create({
     marginTop: 5, minHeight: 66, textAlignVertical: 'top',
   },
   input: {
-    flex: 1, fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 150,
+    flex: 1, fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 90,
     textAlignVertical: 'top',
   },
   removeTxt: { color: '#FF4438', fontFamily: FONTS.label, fontSize: 11, letterSpacing: 0.5 },
