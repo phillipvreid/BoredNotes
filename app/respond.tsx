@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, KeyboardAvoidingView, Platform, Image, SafeAreaView,
+  ScrollView, Alert, Keyboard, LayoutAnimation, Platform, Image, SafeAreaView,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
 import { createMedia } from '../src/db/media';
@@ -22,7 +22,7 @@ import {
 import {
   FONTS, INK, DEFEND_PAD, KEYLINE_HEAVY, SHADOW_STICKER, SHADOW_SM, CHIP_SCRIM, CATEGORY_STYLES,
 } from '../src/theme/tokens';
-import { REPLY_COPY, wordCounterLine } from '../src/theme/copy';
+import { REPLY_COPY, wordCounterLine, DISCARD_COPY, DISCARD_WARN_MIN_WORDS } from '../src/theme/copy';
 import { Sticker } from '../src/components/ui/Sticker';
 import { ActionButton } from '../src/components/ui/ActionButton';
 import { IconSticker } from '../src/components/ui/IconSticker';
@@ -45,6 +45,10 @@ const RANK_TILTS = [-6, 5, -4];
 export default function RespondScreen() {
   const { colors } = useTheme();
   const { showToast } = useToast();
+  const navigation = useNavigation();
+  // Set right before a successful save navigates away, so the unsaved-content
+  // guard below doesn't fire on the way out.
+  const savedRef = useRef(false);
   const params = useLocalSearchParams<{
     promptText?: string; promptCategory?: string; promptKind?: string; gameConfig?: string;
   }>();
@@ -74,11 +78,58 @@ export default function RespondScreen() {
   const [promptLoading, setPromptLoading] = useState(false);
   const [modifiers, setModifiers] = useState<PromptModifiers>(DEFAULT_MODIFIERS);
   const [offlineMode, setOfflineMode] = useState(false);
+  // This screen is a modal (see app/_layout.tsx), where KeyboardAvoidingView's
+  // screen-coordinate frame math is unreliable and leaves the send button under
+  // the keyboard. Track the keyboard height directly and lift the footer by it.
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   // Which prompt (if any) drives this entry: a card tapped on Home wins,
   // otherwise the optional help-me-write contextual prompt.
   const activePrompt = cardPrompt ?? (helpMeWriteOpen ? prompt : null);
   const prompted = activePrompt !== null;
+
+  useEffect(() => {
+    const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const animate = (duration?: number) => {
+      if (Platform.OS !== 'ios') return;
+      LayoutAnimation.configureNext({
+        duration: duration || 250,
+        update: { type: LayoutAnimation.Types.keyboard },
+      });
+    };
+    const showSub = Keyboard.addListener(showEvt, e => {
+      animate(e.duration);
+      setKeyboardHeight(e.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvt, e => {
+      animate(e?.duration);
+      setKeyboardHeight(0);
+    });
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
+
+  const responseWordCount = response.trim() === '' ? 0 : response.trim().split(/\s+/).length;
+  const hasUnsavedContent = isRank
+    ? rankItems.some(i => i.trim() !== '') || defense.trim() !== ''
+    : responseWordCount >= DISCARD_WARN_MIN_WORDS;
+
+  // Guard every exit path when there's meaningful unsaved input. beforeRemove
+  // covers the back button and Android hardware back; disabling the swipe
+  // gesture covers the iOS modal drag-to-dismiss (which native-stack's
+  // beforeRemove can't reliably intercept). savedRef lets a real save through.
+  useEffect(() => {
+    navigation.setOptions({ gestureEnabled: !hasUnsavedContent });
+    const unsub = navigation.addListener('beforeRemove', e => {
+      if (savedRef.current || !hasUnsavedContent) return;
+      e.preventDefault();
+      Alert.alert(DISCARD_COPY.title, DISCARD_COPY.body, [
+        { text: DISCARD_COPY.keep, style: 'cancel' },
+        { text: DISCARD_COPY.discard, style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+      ]);
+    });
+    return unsub;
+  }, [navigation, hasUnsavedContent]);
 
   useEffect(() => {
     (async () => {
@@ -124,19 +175,6 @@ export default function RespondScreen() {
     setHelpMeWriteOpen(true);
     if (!prompt) {
       await loadPrompt(modifiers);
-    }
-  }
-
-  async function handleRefreshPrompt() {
-    setPromptLoading(true);
-    try {
-      const db = await getDb();
-      const fresh = await forceRefreshContextualPrompt(db, modifiers);
-      setPrompt(fresh);
-    } catch {
-      Alert.alert('Could not refresh prompt', 'Please try again.');
-    } finally {
-      setPromptLoading(false);
     }
   }
 
@@ -229,6 +267,7 @@ export default function RespondScreen() {
       }
       if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
       await getNextPrompt(db);
+      savedRef.current = true;
       showToast();
       router.back();
     } catch {
@@ -238,6 +277,13 @@ export default function RespondScreen() {
   }
 
   const catStyle = activePrompt ? CATEGORY_STYLES[activePrompt.category] : null;
+  // Help Me Write prompts are chip-driven, not tied to the homescreen's
+  // observe/reflect/personal/creative taxonomy — swap the pill label (but
+  // keep the card's hue for visual variety) so it never reads as a home card.
+  const activeChipLabels = CHIP_KEYS.filter(k => modifiers[k]).map(k => CHIP_LABELS[k]);
+  const promptPillLabel = cardPrompt
+    ? catStyle?.label
+    : (activeChipLabels.length > 0 ? activeChipLabels.join(' + ') : 'SPARK');
   const headerLabel = prompted ? REPLY_COPY.promptedLabel : REPLY_COPY.freeformLabel;
   const sendLabel = prompted ? REPLY_COPY.promptedSend : REPLY_COPY.freeformSend;
   const rankFilled = rankItems.every(i => i.trim() !== '') && defense.trim() !== '';
@@ -246,8 +292,8 @@ export default function RespondScreen() {
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+      <View style={{ flex: 1, paddingBottom: keyboardHeight }}>
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
           <View style={styles.headerRow}>
             <IconSticker glyph="←" onPress={() => router.back()} />
             <Text style={[styles.headerLabel, { color: colors.textPrimary }]}>{headerLabel}</Text>
@@ -269,7 +315,7 @@ export default function RespondScreen() {
             >
               <View style={styles.promptMeta}>
                 <View style={styles.catPill}>
-                  <Text style={styles.catPillTxt}>{catStyle!.label}</Text>
+                  <Text style={styles.catPillTxt}>{promptPillLabel}</Text>
                 </View>
                 {!offlineMode && activePrompt.source === 'ai' && (
                   <View style={styles.catPill}>
@@ -280,15 +326,16 @@ export default function RespondScreen() {
               <Text style={styles.promptTxt}>
                 {promptLoading ? '…' : activePrompt.text}
               </Text>
+              {/* Help Me Write can be dismissed from the corner; rerolling is
+                  done by toggling a chip below, so no ANOTHER button needed. */}
               {!cardPrompt && (
-                <View style={styles.promptActions}>
-                  <TouchableOpacity onPress={handleRefreshPrompt} disabled={promptLoading} hitSlop={8}>
-                    <Text style={styles.promptActionTxt}>↻ ANOTHER</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={handleToggleHelpMeWrite} hitSlop={8}>
-                    <Text style={styles.promptActionTxt}>✕ NEVERMIND</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity
+                  onPress={handleToggleHelpMeWrite}
+                  hitSlop={12}
+                  style={styles.promptClose}
+                >
+                  <Text style={styles.promptCloseTxt}>✕</Text>
+                </TouchableOpacity>
               )}
               <View style={styles.miniMascot} pointerEvents="none">
                 <Mascot size={50} variant="yellow" bobDirection="right" />
@@ -385,6 +432,9 @@ export default function RespondScreen() {
             />
           )}
 
+          {/* Footer scrolls with the content (no opaque overlay bar). The
+              parent View's paddingBottom shrinks the scroll region when the
+              keyboard is up, so the send button still lands above it. */}
           <View style={styles.footerRow}>
             <Text style={[styles.counter, { color: colors.textMuted }]}>
               {isRank ? (rankFilled ? 'committed to the bit' : 'no scoring. just commit.') : wordCounterLine(response)}
@@ -396,30 +446,31 @@ export default function RespondScreen() {
             />
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  container: { paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
+  scroll: { flex: 1 },
+  container: { flexGrow: 1, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headerLabel: { fontFamily: FONTS.label, fontSize: 13, letterSpacing: 1 },
   helpChip: { alignSelf: 'flex-start' },
-  promptCard: { padding: 18, paddingBottom: 20, marginBottom: 8 },
+  promptCard: { padding: 14, paddingBottom: 16, marginBottom: 8 },
   promptMeta: { flexDirection: 'row', gap: 6 },
   catPill: { backgroundColor: CHIP_SCRIM, borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8, alignSelf: 'flex-start' },
   catPillTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#fff' },
   promptTxt: {
-    fontFamily: FONTS.display, fontSize: 23, lineHeight: 25, letterSpacing: -0.3,
-    color: '#fff', marginTop: 9, maxWidth: 250,
+    fontFamily: FONTS.display, fontSize: 21, lineHeight: 24, letterSpacing: -0.3,
+    color: '#fff', marginTop: 7, maxWidth: 250,
   },
-  promptActions: { flexDirection: 'row', gap: 16, marginTop: 12 },
-  promptActionTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: 'rgba(255,255,255,.75)' },
+  promptClose: { position: 'absolute', top: 8, right: 12, zIndex: 2 },
+  promptCloseTxt: { fontFamily: FONTS.label, fontSize: 15, color: 'rgba(255,255,255,.85)' },
   miniMascot: { position: 'absolute', bottom: -15, right: 16 },
   chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  inputCard: { minHeight: 180, padding: 16 },
+  inputCard: { flex: 1, minHeight: 180, padding: 16 },
   rankStack: { gap: 9 },
   rankSlot: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
@@ -432,7 +483,10 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.body, fontSize: 16, lineHeight: 22, color: '#141414',
     marginTop: 5, minHeight: 66, textAlignVertical: 'top',
   },
-  input: { fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 150, textAlignVertical: 'top' },
+  input: {
+    flex: 1, fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 150,
+    textAlignVertical: 'top',
+  },
   photoPreview: { gap: 6 },
   photoImg: { width: '100%', height: 180, borderRadius: 12, borderWidth: KEYLINE_HEAVY },
   removeTxt: { color: '#FF4438', fontFamily: FONTS.label, fontSize: 11, letterSpacing: 0.5 },
