@@ -6,7 +6,7 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [x] Run `npx expo run:ios` and click through Home, Reply (text + brain dump), Reply·Rank, Greatest Hits, Share sheet, Settings on a real simulator/device — CI only proves logic, not the rendered UI.
 - [x] Check custom fonts (Bricolage Grotesque / Hanken Grotesk / Space Mono) actually load via `expo-font` and don't flash unstyled text.
 - [x] Confirm all 4 paper themes render correctly in both light and dark mode from Settings. (Superseded: papers replaced by the six full themes below.)
-- [ ] Confirm the six concession-stand themes (Classic, Blue Raspberry, Sour Apple, Grape Soda, Bubblegum, Cherry Cola) render correctly in both light and dark mode from Settings — implemented and unit-tested, never yet seen on device. Check the ActionButton re-tints on theme change and Grape Soda's purple action.
+- [x] Confirm the six concession-stand themes (Classic, Blue Raspberry, Sour Apple, Grape Soda, Bubblegum, Cherry Cola) render correctly in both light and dark mode from Settings — implemented and unit-tested, never yet seen on device. Check the ActionButton re-tints on theme change and Grape Soda's purple action.
 - [x] Test Rank & Defend end-to-end: create a rank entry, confirm medal rendering shows correctly in Greatest Hits and entry detail.
 - [x] Spot-check offline mode still disables AI prompt generation under the new UI.
 
@@ -25,6 +25,8 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 ## Next feature candidates
 - [ ] Second micro-game beyond Rank & Defend, reusing the generic game plumbing (`prompts.kind` / `game_config` / `entry_kind` / `game_data`).
 - [ ] Extend category hues / IconSticker set if new prompt categories are added.
+- [ ] Bring back a streamlined PLACE (manual location tagging) on the respond screen — the chip was removed 2026-07-06 with Photo/Camera; auto-location still works via Settings.
+- [ ] App icon: design in the claude.ai/design Arcade Sticker project, then wire `assets/icon.png` + `app.json` `icon` field.
 
 ## Bugs
 - [x] Greatest Hits cards show "prompt" instead of the entry's actual category. Fixed: added nullable `entries.category` column + migration, threaded through createEntry/respond, FeedTab renders real category hue with "PROMPTED" fallback for legacy rows. (Needs on-device visual check.)
