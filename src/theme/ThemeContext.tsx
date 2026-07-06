@@ -3,15 +3,18 @@ import { useColorScheme } from 'react-native';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { getSetting, setSetting } from '../db/settings';
 import {
-  PAPERS, DEFAULT_PAPER_ID, makePalette,
-  type PaperSwatch, type Palette,
+  THEMES, DEFAULT_THEME_ID, LEGACY_PAPER_TO_THEME, makePalette, makeCategoryStyles,
+  type ThemeDef, type Palette, type CatHues, type CategoryStyle,
 } from './tokens';
+import type { PromptCategory } from '../types';
 
 interface ThemeContextValue {
   colors: Palette;
-  paper: PaperSwatch;
+  theme: ThemeDef;
+  catHues: CatHues;
+  categoryStyles: Record<PromptCategory, CategoryStyle>;
   isDark: boolean;
-  setPaper: (id: string) => void;
+  setTheme: (id: string) => void;
   setDarkMode: (on: boolean) => void;
 }
 
@@ -24,21 +27,25 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ db, children }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
-  const [paperId, setPaperId] = useState(DEFAULT_PAPER_ID);
+  const [themeId, setThemeId] = useState(DEFAULT_THEME_ID);
   const [isDark, setIsDark] = useState(systemScheme === 'dark');
 
   useEffect(() => {
     (async () => {
-      const storedPaper = await getSetting(db, 'theme_paper');
+      const storedTheme = await getSetting(db, 'theme_id');
+      const legacyPaper = storedTheme ? null : await getSetting(db, 'theme_paper');
       const storedDark = await getSetting(db, 'theme_dark_mode');
-      if (storedPaper) setPaperId(storedPaper);
+      if (storedTheme) setThemeId(storedTheme);
+      else if (legacyPaper && LEGACY_PAPER_TO_THEME[legacyPaper]) {
+        setThemeId(LEGACY_PAPER_TO_THEME[legacyPaper]);
+      }
       if (storedDark !== null) setIsDark(storedDark === 'true');
     })();
   }, []);
 
-  function setPaper(id: string) {
-    setPaperId(id);
-    setSetting(db, 'theme_paper', id);
+  function setTheme(id: string) {
+    setThemeId(id);
+    setSetting(db, 'theme_id', id);
   }
 
   function setDarkMode(on: boolean) {
@@ -46,11 +53,12 @@ export function ThemeProvider({ db, children }: ThemeProviderProps) {
     setSetting(db, 'theme_dark_mode', String(on));
   }
 
-  const paper = PAPERS.find(p => p.id === paperId) ?? PAPERS[0];
-  const colors = makePalette(paper, isDark);
+  const theme = THEMES.find(t => t.id === themeId) ?? THEMES[0];
+  const colors = makePalette(theme, isDark);
+  const categoryStyles = makeCategoryStyles(theme.cats);
 
   return (
-    <ThemeContext.Provider value={{ colors, paper, isDark, setPaper, setDarkMode }}>
+    <ThemeContext.Provider value={{ colors, theme, catHues: theme.cats, categoryStyles, isDark, setTheme, setDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

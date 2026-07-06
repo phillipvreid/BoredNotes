@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BoredNotes Theme Palettes</title>
+<style>
+  :root {
+    --page-bg: #F6F5F0;
+    --page-ink: #1B1B18;
+    --page-muted: #7A786E;
+    --page-line: #DDDACE;
+    --card-bg: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --page-bg: #16150F;
+      --page-ink: #EFEADB;
+      --page-muted: #97948A;
+      --page-line: #35332A;
+      --card-bg: #201E17;
+    }
+  }
+  :root[data-theme="dark"] {
+    --page-bg: #16150F;
+    --page-ink: #EFEADB;
+    --page-muted: #97948A;
+    --page-line: #35332A;
+    --card-bg: #201E17;
+  }
+  :root[data-theme="light"] {
+    --page-bg: #F6F5F0;
+    --page-ink: #1B1B18;
+    --page-muted: #7A786E;
+    --page-line: #DDDACE;
+    --card-bg: #FFFFFF;
+  }
+
+  body {
+    background: var(--page-bg);
+    color: var(--page-ink);
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5;
+    padding: 40px 20px 80px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin-bottom: 6px;
+  }
+  .sub { color: var(--page-muted); max-width: 62ch; margin-bottom: 40px; }
+
+  .theme { margin-bottom: 56px; }
+  .theme-head {
+    display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .theme-name { font-size: 21px; font-weight: 800; letter-spacing: -0.01em; }
+  .theme-tag {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--page-muted); text-transform: uppercase;
+  }
+  .theme-desc { color: var(--page-muted); margin-bottom: 16px; max-width: 68ch; }
+
+  .previews { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+
+  /* ---- phone mock ---- */
+  .mock {
+    flex: 1 1 300px; max-width: 420px;
+    border-radius: 18px;
+    padding: 22px 18px 24px;
+    border: 1px solid var(--page-line);
+  }
+  .mode-label {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; opacity: 0.5; margin-bottom: 14px;
+  }
+  .sticker {
+    border-radius: 14px;
+    padding: 16px 16px 18px;
+    margin-bottom: 18px;
+    transform: rotate(-1.2deg);
+  }
+  .chip {
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.09em;
+    color: #FFFFFF;
+    padding: 4px 9px; border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .prompt {
+    font-weight: 800; font-size: 17px; line-height: 1.3;
+    letter-spacing: -0.01em; margin-bottom: 8px;
+  }
+  .when {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px; letter-spacing: 0.04em;
+  }
+  .action-btn {
+    display: inline-block;
+    font-weight: 800; font-size: 14.5px; letter-spacing: 0.01em;
+    padding: 11px 20px; border-radius: 999px;
+    transform: rotate(0.8deg);
+  }
+
+  /* ---- swatch strip ---- */
+  .swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sw {
+    display: flex; align-items: center; gap: 7px;
+    background: var(--card-bg);
+    border: 1px solid var(--page-line);
+    border-radius: 999px;
+    padding: 4px 11px 4px 5px;
+  }
+  .sw i {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1px solid rgba(128,128,128,.35);
+    flex: none;
+  }
+  .sw span {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10.5px; color: var(--page-muted); white-space: nowrap;
+  }
+
+  .note {
+    border-top: 1px solid var(--page-line);
+    padding-top: 22px; margin-top: 8px;
+    color: var(--page-muted); max-width: 68ch;
+  }
+  .note strong { color: var(--page-ink); }
+  .cat-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+  .cat {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em;
+    color: #fff; padding: 4px 9px; border-radius: 999px;
+  }
+  .cats-head {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--page-muted);
+    margin: 16px 0 8px;
+  }
+  .cats { display: flex; gap: 8px 10px; flex-wrap: wrap; }
+  .cat-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+  .cat-hex {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 9px; color: var(--page-muted);
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <h1>Theme palettes</h1>
+  <p class="sub">Six themes for the themes menu. Each one swaps the paper, ink, action color, and its own tint of the eight category hues — the sticker mechanics (keyline + flat offset shadow, tilts) stay the same in every theme. Each theme has its own light and dark mode.</p>
+
+  <!-- ============ CLASSIC ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Classic</span><span class="theme-tag">the current look</span></div>
+    <p class="theme-desc">Warm cream, near-black ink, arcade yellow. Unchanged — it just gets a name.</p>
+    <div class="previews">
+      <div class="mock" style="background:#FBFAF3">
+        <div class="mode-label" style="color:#141414">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #141414; box-shadow:4px 4px 0 #141414;">
+          <span class="chip" style="background:#2E5BFF">REFLECT</span>
+          <div class="prompt" style="color:#141414">What did you almost say out loud today?</div>
+          <div class="when" style="color:#b6b3a6">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FFD23E; color:#141414; border:2.5px solid #141414; box-shadow:3px 3px 0 #141414;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#1A1813">
+        <div class="mode-label" style="color:#F4EEDF">Dark</div>
+        <div class="sticker" style="background:#262320; border:2.5px solid #E8E2D2; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#2E5BFF">REFLECT</span>
+          <div class="prompt" style="color:#F4EEDF">What did you almost say out loud today?</div>
+          <div class="when" style="color:#86847d">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FFD23E; color:#141414; border:2.5px solid #141414; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#FBFAF3"></i><span>paper #FBFAF3</span></div>
+      <div class="sw"><i style="background:#141414"></i><span>ink #141414</span></div>
+      <div class="sw"><i style="background:#FFD23E"></i><span>action #FFD23E</span></div>
+      <div class="sw"><i style="background:#1A1813"></i><span>dark bg #1A1813</span></div>
+      <div class="sw"><i style="background:#262320"></i><span>dark card #262320</span></div>
+    </div>
+    <div class="cats-head">Category hues — the originals</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#2E5BFF">REFLECT</span><span class="cat-hex">#2E5BFF</span></div>
+      <div class="cat-item"><span class="cat" style="background:#06B6C9">OBSERVE</span><span class="cat-hex">#06B6C9</span></div>
+      <div class="cat-item"><span class="cat" style="background:#8B3DF5">CONFESS</span><span class="cat-hex">#8B3DF5</span></div>
+      <div class="cat-item"><span class="cat" style="background:#15A150">RANK</span><span class="cat-hex">#15A150</span></div>
+      <div class="cat-item"><span class="cat" style="background:#FF7A1A">TAKE</span><span class="cat-hex">#FF7A1A</span></div>
+      <div class="cat-item"><span class="cat" style="background:#F5468C">NOSTALGIA</span><span class="cat-hex">#F5468C</span></div>
+      <div class="cat-item"><span class="cat" style="background:#FF4438">GOSSIP</span><span class="cat-hex">#FF4438</span></div>
+      <div class="cat-item"><span class="cat" style="background:#6C5CE7">IMAGINE</span><span class="cat-hex">#6C5CE7</span></div>
+    </div>
+  </div>
+
+  <!-- ============ BLUEPRINT ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Blue Raspberry</span><span class="theme-tag">new</span></div>
+    <p class="theme-desc">ICEE-machine blue with midnight ink and an orange push-pop action. No raspberry in nature has ever been this color, which is the point.</p>
+    <div class="previews">
+      <div class="mock" style="background:#EFF3F9">
+        <div class="mode-label" style="color:#142033">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #142033; box-shadow:4px 4px 0 #142033;">
+          <span class="chip" style="background:#2B4FD9">REFLECT</span>
+          <div class="prompt" style="color:#142033">What did you almost say out loud today?</div>
+          <div class="when" style="color:#AEB6C4">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF8A3D; color:#142033; border:2.5px solid #142033; box-shadow:3px 3px 0 #142033;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#0F151E">
+        <div class="mode-label" style="color:#E8EFF9">Dark</div>
+        <div class="sticker" style="background:#1A2330; border:2.5px solid #D7E2F0; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#2B4FD9">REFLECT</span>
+          <div class="prompt" style="color:#E8EFF9">What did you almost say out loud today?</div>
+          <div class="when" style="color:#8A96A8">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF8A3D; color:#142033; border:2.5px solid #142033; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#EFF3F9"></i><span>paper #EFF3F9</span></div>
+      <div class="sw"><i style="background:#142033"></i><span>ink #142033</span></div>
+      <div class="sw"><i style="background:#FF8A3D"></i><span>action #FF8A3D</span></div>
+      <div class="sw"><i style="background:#0F151E"></i><span>dark bg #0F151E</span></div>
+      <div class="sw"><i style="background:#1A2330"></i><span>dark card #1A2330</span></div>
+    </div>
+    <div class="cats-head">Category hues — frozen jewel tones</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#2B4FD9">REFLECT</span><span class="cat-hex">#2B4FD9</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0891B5">OBSERVE</span><span class="cat-hex">#0891B5</span></div>
+      <div class="cat-item"><span class="cat" style="background:#7442E0">CONFESS</span><span class="cat-hex">#7442E0</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0E8A62">RANK</span><span class="cat-hex">#0E8A62</span></div>
+      <div class="cat-item"><span class="cat" style="background:#E05A1F">TAKE</span><span class="cat-hex">#E05A1F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#D6408F">NOSTALGIA</span><span class="cat-hex">#D6408F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#D93A47">GOSSIP</span><span class="cat-hex">#D93A47</span></div>
+      <div class="cat-item"><span class="cat" style="background:#5852D6">IMAGINE</span><span class="cat-hex">#5852D6</span></div>
+    </div>
+  </div>
+
+  <!-- ============ MATCHA ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Sour Apple</span><span class="theme-tag">new</span></div>
+    <p class="theme-desc">Green-apple slushie paper, dark green ink, acid-chartreuse action. Calm right up until the button, which tastes like a Warhead.</p>
+    <div class="previews">
+      <div class="mock" style="background:#ECF7E0">
+        <div class="mode-label" style="color:#143020">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #143020; box-shadow:4px 4px 0 #143020;">
+          <span class="chip" style="background:#2E6BD6">REFLECT</span>
+          <div class="prompt" style="color:#143020">What did you almost say out loud today?</div>
+          <div class="when" style="color:#AFC2A0">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#B5EC3A; color:#143020; border:2.5px solid #143020; box-shadow:3px 3px 0 #143020;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#121B10">
+        <div class="mode-label" style="color:#EAF4DE">Dark</div>
+        <div class="sticker" style="background:#1D2A18; border:2.5px solid #D8ECC6; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#2E6BD6">REFLECT</span>
+          <div class="prompt" style="color:#EAF4DE">What did you almost say out loud today?</div>
+          <div class="when" style="color:#8FA383">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#B5EC3A; color:#143020; border:2.5px solid #143020; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#ECF7E0"></i><span>paper #ECF7E0</span></div>
+      <div class="sw"><i style="background:#143020"></i><span>ink #143020</span></div>
+      <div class="sw"><i style="background:#B5EC3A"></i><span>action #B5EC3A</span></div>
+      <div class="sw"><i style="background:#121B10"></i><span>dark bg #121B10</span></div>
+      <div class="sw"><i style="background:#1D2A18"></i><span>dark card #1D2A18</span></div>
+    </div>
+    <div class="cats-head">Category hues — candy counter</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#2E6BD6">REFLECT</span><span class="cat-hex">#2E6BD6</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0AA396">OBSERVE</span><span class="cat-hex">#0AA396</span></div>
+      <div class="cat-item"><span class="cat" style="background:#8A4BD1">CONFESS</span><span class="cat-hex">#8A4BD1</span></div>
+      <div class="cat-item"><span class="cat" style="background:#269136">RANK</span><span class="cat-hex">#269136</span></div>
+      <div class="cat-item"><span class="cat" style="background:#EE7C0F">TAKE</span><span class="cat-hex">#EE7C0F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#E8517F">NOSTALGIA</span><span class="cat-hex">#E8517F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#E3472B">GOSSIP</span><span class="cat-hex">#E3472B</span></div>
+      <div class="cat-item"><span class="cat" style="background:#6459CF">IMAGINE</span><span class="cat-hex">#6459CF</span></div>
+    </div>
+  </div>
+
+  <!-- ============ GRAPE SODA ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Grape Soda</span><span class="theme-tag">new</span></div>
+    <p class="theme-desc">Lilac paper, deep plum ink, grape-slush purple action. Pure 90s-arcade-carpet energy — the purple that stains your tongue.</p>
+    <div class="previews">
+      <div class="mock" style="background:#F3EEFA">
+        <div class="mode-label" style="color:#241A38">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #241A38; box-shadow:4px 4px 0 #241A38;">
+          <span class="chip" style="background:#4747EF">REFLECT</span>
+          <div class="prompt" style="color:#241A38">What did you almost say out loud today?</div>
+          <div class="when" style="color:#B8B0C6">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#B983FF; color:#241A38; border:2.5px solid #241A38; box-shadow:3px 3px 0 #241A38;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#171224">
+        <div class="mode-label" style="color:#EFEAF8">Dark</div>
+        <div class="sticker" style="background:#241D33; border:2.5px solid #E4DCF2; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#4747EF">REFLECT</span>
+          <div class="prompt" style="color:#EFEAF8">What did you almost say out loud today?</div>
+          <div class="when" style="color:#9A92AC">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#B983FF; color:#241A38; border:2.5px solid #241A38; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#F3EEFA"></i><span>paper #F3EEFA</span></div>
+      <div class="sw"><i style="background:#241A38"></i><span>ink #241A38</span></div>
+      <div class="sw"><i style="background:#B983FF"></i><span>action #B983FF</span></div>
+      <div class="sw"><i style="background:#171224"></i><span>dark bg #171224</span></div>
+      <div class="sw"><i style="background:#241D33"></i><span>dark card #241D33</span></div>
+    </div>
+    <div class="cats-head">Category hues — black-light electric</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#4747EF">REFLECT</span><span class="cat-hex">#4747EF</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0D93C4">OBSERVE</span><span class="cat-hex">#0D93C4</span></div>
+      <div class="cat-item"><span class="cat" style="background:#A32BE8">CONFESS</span><span class="cat-hex">#A32BE8</span></div>
+      <div class="cat-item"><span class="cat" style="background:#10A375">RANK</span><span class="cat-hex">#10A375</span></div>
+      <div class="cat-item"><span class="cat" style="background:#FF5F3D">TAKE</span><span class="cat-hex">#FF5F3D</span></div>
+      <div class="cat-item"><span class="cat" style="background:#F03CA5">NOSTALGIA</span><span class="cat-hex">#F03CA5</span></div>
+      <div class="cat-item"><span class="cat" style="background:#ED3355">GOSSIP</span><span class="cat-hex">#ED3355</span></div>
+      <div class="cat-item"><span class="cat" style="background:#7C4BF5">IMAGINE</span><span class="cat-hex">#7C4BF5</span></div>
+    </div>
+  </div>
+
+  <!-- ============ BUBBLEGUM ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Bubblegum</span><span class="theme-tag">new</span></div>
+    <p class="theme-desc">Bubblegum-pink paper, dark berry ink, hot-pink action. Smells like the roller rink.</p>
+    <div class="previews">
+      <div class="mock" style="background:#FBEAF2">
+        <div class="mode-label" style="color:#33141F">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #33141F; box-shadow:4px 4px 0 #33141F;">
+          <span class="chip" style="background:#3D5BE8">REFLECT</span>
+          <div class="prompt" style="color:#33141F">What did you almost say out loud today?</div>
+          <div class="when" style="color:#C9B2BE">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF8FC7; color:#33141F; border:2.5px solid #33141F; box-shadow:3px 3px 0 #33141F;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#1F1119">
+        <div class="mode-label" style="color:#F8ECF2">Dark</div>
+        <div class="sticker" style="background:#2E1A24; border:2.5px solid #F2DCE7; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#3D5BE8">REFLECT</span>
+          <div class="prompt" style="color:#F8ECF2">What did you almost say out loud today?</div>
+          <div class="when" style="color:#A88E9B">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF8FC7; color:#33141F; border:2.5px solid #33141F; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#FBEAF2"></i><span>paper #FBEAF2</span></div>
+      <div class="sw"><i style="background:#33141F"></i><span>ink #33141F</span></div>
+      <div class="sw"><i style="background:#FF8FC7"></i><span>action #FF8FC7</span></div>
+      <div class="sw"><i style="background:#1F1119"></i><span>dark bg #1F1119</span></div>
+      <div class="sw"><i style="background:#2E1A24"></i><span>dark card #2E1A24</span></div>
+    </div>
+    <div class="cats-head">Category hues — gumball machine</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#3D5BE8">REFLECT</span><span class="cat-hex">#3D5BE8</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0D9EBD">OBSERVE</span><span class="cat-hex">#0D9EBD</span></div>
+      <div class="cat-item"><span class="cat" style="background:#A344D6">CONFESS</span><span class="cat-hex">#A344D6</span></div>
+      <div class="cat-item"><span class="cat" style="background:#12A96E">RANK</span><span class="cat-hex">#12A96E</span></div>
+      <div class="cat-item"><span class="cat" style="background:#F76F28">TAKE</span><span class="cat-hex">#F76F28</span></div>
+      <div class="cat-item"><span class="cat" style="background:#E8348F">NOSTALGIA</span><span class="cat-hex">#E8348F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#E93353">GOSSIP</span><span class="cat-hex">#E93353</span></div>
+      <div class="cat-item"><span class="cat" style="background:#7161E8">IMAGINE</span><span class="cat-hex">#7161E8</span></div>
+    </div>
+  </div>
+
+  <!-- ============ CHERRY COLA ============ -->
+  <div class="theme">
+    <div class="theme-head"><span class="theme-name">Cherry Cola</span><span class="theme-tag">new</span></div>
+    <p class="theme-desc">Rosy cola-tinted paper, dark cola ink, cherry-slush action. Free refills were a lie.</p>
+    <div class="previews">
+      <div class="mock" style="background:#FCEBE4">
+        <div class="mode-label" style="color:#38160E">Light</div>
+        <div class="sticker" style="background:#FFFFFF; border:2.5px solid #38160E; box-shadow:4px 4px 0 #38160E;">
+          <span class="chip" style="background:#3E51DE">REFLECT</span>
+          <div class="prompt" style="color:#38160E">What did you almost say out loud today?</div>
+          <div class="when" style="color:#CBAFA6">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF6A52; color:#38160E; border:2.5px solid #38160E; box-shadow:3px 3px 0 #38160E;">Write it down</span>
+      </div>
+      <div class="mock" style="background:#1D0F0B">
+        <div class="mode-label" style="color:#F7ECE4">Dark</div>
+        <div class="sticker" style="background:#2C1913; border:2.5px solid #F0DCD2; box-shadow:4px 4px 0 #000000;">
+          <span class="chip" style="background:#3E51DE">REFLECT</span>
+          <div class="prompt" style="color:#F7ECE4">What did you almost say out loud today?</div>
+          <div class="when" style="color:#A78F85">TUE 2:47 PM</div>
+        </div>
+        <span class="action-btn" style="background:#FF6A52; color:#38160E; border:2.5px solid #38160E; box-shadow:3px 3px 0 #000000;">Write it down</span>
+      </div>
+    </div>
+    <div class="swatches">
+      <div class="sw"><i style="background:#FCEBE4"></i><span>paper #FCEBE4</span></div>
+      <div class="sw"><i style="background:#38160E"></i><span>ink #38160E</span></div>
+      <div class="sw"><i style="background:#FF6A52"></i><span>action #FF6A52</span></div>
+      <div class="sw"><i style="background:#1D0F0B"></i><span>dark bg #1D0F0B</span></div>
+      <div class="sw"><i style="background:#2C1913"></i><span>dark card #2C1913</span></div>
+    </div>
+    <div class="cats-head">Category hues — fruit punch</div>
+    <div class="cats">
+      <div class="cat-item"><span class="cat" style="background:#3E51DE">REFLECT</span><span class="cat-hex">#3E51DE</span></div>
+      <div class="cat-item"><span class="cat" style="background:#0E9FAE">OBSERVE</span><span class="cat-hex">#0E9FAE</span></div>
+      <div class="cat-item"><span class="cat" style="background:#9D3BD1">CONFESS</span><span class="cat-hex">#9D3BD1</span></div>
+      <div class="cat-item"><span class="cat" style="background:#379328">RANK</span><span class="cat-hex">#379328</span></div>
+      <div class="cat-item"><span class="cat" style="background:#F2700F">TAKE</span><span class="cat-hex">#F2700F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#EE3D7F">NOSTALGIA</span><span class="cat-hex">#EE3D7F</span></div>
+      <div class="cat-item"><span class="cat" style="background:#C42033">GOSSIP</span><span class="cat-hex">#C42033</span></div>
+      <div class="cat-item"><span class="cat" style="background:#7452DB">IMAGINE</span><span class="cat-hex">#7452DB</span></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <p><strong>What stays the same in every theme:</strong> the sticker mechanics (keyline + flat offset shadow, press behavior, hand-placed tilts), white text on every category chip, and the reserved-action rule — each theme's action color only ever means "do the thing" and always carries its theme's dark ink. Category hues are now tinted per theme, but each category keeps its hue family (REFLECT is always a blue, GOSSIP is always a red) so entries stay recognizable when you switch themes.</p>
+  </div>
+</div>
+
+</body>
+</html>

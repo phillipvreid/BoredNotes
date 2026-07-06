@@ -2,7 +2,7 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react-native';
 import { ThemeProvider, useTheme } from '../../src/theme/ThemeContext';
 import { openDatabaseAsync } from 'expo-sqlite';
-import { DEFAULT_PAPER_ID } from '../../src/theme/tokens';
+import { DEFAULT_THEME_ID, THEMES } from '../../src/theme/tokens';
 
 describe('ThemeContext', () => {
   let db: any;
@@ -17,36 +17,77 @@ describe('ThemeContext', () => {
     return <ThemeProvider db={db}>{children}</ThemeProvider>;
   }
 
-  it('defaults to cream paper when no stored value', async () => {
+  it('defaults to classic when no stored value', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    expect(result.current.paper.id).toBe(DEFAULT_PAPER_ID);
+    expect(result.current.theme.id).toBe(DEFAULT_THEME_ID);
   });
 
-  it('loads stored paper from DB on mount', async () => {
+  it('loads stored theme from DB on mount', async () => {
     db.getFirstAsync
-      .mockResolvedValueOnce({ value: 'mint' })
+      .mockResolvedValueOnce({ value: 'grape-soda' })  // theme_id
+      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.theme.id).toBe('grape-soda');
+  });
+
+  it('migrates a legacy paper setting to its nearest theme', async () => {
+    db.getFirstAsync
+      .mockResolvedValueOnce(null)                     // theme_id absent
+      .mockResolvedValueOnce({ value: 'mint' })        // legacy theme_paper
+      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.theme.id).toBe('sour-apple');
+  });
+
+  it('stored theme_id wins over any legacy paper setting', async () => {
+    db.getFirstAsync
+      .mockResolvedValueOnce({ value: 'cherry-cola' }) // theme_id
+      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.theme.id).toBe('cherry-cola');
+    // legacy key never read when theme_id exists: theme_id + dark mode only
+    expect(db.getFirstAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores an unknown legacy paper value', async () => {
+    db.getFirstAsync
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({ value: 'parchment' })
       .mockResolvedValueOnce(null);
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    expect(result.current.paper.id).toBe('mint');
+    expect(result.current.theme.id).toBe(DEFAULT_THEME_ID);
   });
 
-  it('setPaper updates paper synchronously', async () => {
+  it('setTheme updates theme synchronously', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    act(() => { result.current.setPaper('bubblegum'); });
-    expect(result.current.paper.id).toBe('bubblegum');
+    act(() => { result.current.setTheme('bubblegum'); });
+    expect(result.current.theme.id).toBe('bubblegum');
   });
 
-  it('setPaper persists to DB', async () => {
+  it('setTheme persists to DB under theme_id', async () => {
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    await act(async () => { result.current.setPaper('bubblegum'); });
+    await act(async () => { result.current.setTheme('bubblegum'); });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO settings'),
-      ['theme_paper', 'bubblegum']
+      ['theme_id', 'bubblegum']
     );
+  });
+
+  it('categoryStyles and catHues follow the active theme', async () => {
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    const grape = THEMES.find(t => t.id === 'grape-soda')!;
+    act(() => { result.current.setTheme('grape-soda'); });
+    expect(result.current.catHues).toEqual(grape.cats);
+    expect(result.current.categoryStyles.reflective.color).toBe(grape.cats.reflect);
+    expect(result.current.colors.action).toBe(grape.action);
   });
 
   it('setDarkMode updates isDark synchronously', async () => {

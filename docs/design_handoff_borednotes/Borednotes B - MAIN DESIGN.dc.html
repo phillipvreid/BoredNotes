@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400..800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { -webkit-tap-highlight-color: transparent; }
+  textarea, input { font-family: 'Hanken Grotesk', sans-serif; }
+  textarea::placeholder, input::placeholder { color: #b6b3a6; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-8px) rotate(3deg); } }
+  @keyframes bobR { 0%,100% { transform: translateY(0) rotate(3deg); } 50% { transform: translateY(-6px) rotate(-3deg); } }
+  @keyframes blink { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+  @keyframes popin { 0% { transform: translateX(-50%) scale(.6) translateY(14px); opacity: 0; } 60% { transform: translateX(-50%) scale(1.08) translateY(0); } 100% { transform: translateX(-50%) scale(1) translateY(0); opacity: 1; } }
+  @keyframes swapin { 0% { transform: translateY(6px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+  @keyframes sheetup { 0% { transform: translateY(100%); } 100% { transform: translateY(0); } }
+  @keyframes fade { 0% { opacity: 0; } 100% { opacity: 1; } }
+  ::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  * { scrollbar-width: none; -ms-overflow-style: none; }
+</style>
+</helmet>
+
+<x-import component="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+  <div style="height:100%;width:100%;overflow:hidden;position:relative;background:{{ paperBg }};font-family:'Hanken Grotesk',sans-serif">
+
+    <!-- ============ HOME ============ -->
+    <div style="position:absolute;inset:0;box-sizing:border-box;padding:58px 18px 24px;display:flex;flex-direction:column">
+
+      <!-- top bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div style="background:#141414;color:#fff;font:700 13px 'Space Mono',monospace;letter-spacing:2px;padding:6px 10px;border-radius:8px">BOREDNOTES</div>
+        <div style="width:40px;height:40px;border-radius:11px;background:#fff;border:2.5px solid #141414;box-shadow:3px 3px 0 #141414;display:flex;align-items:center;justify-content:center">
+          <div style="width:4px;height:4px;border-radius:50%;background:#141414;margin:0 1.5px"></div>
+          <div style="width:4px;height:4px;border-radius:50%;background:#141414;margin:0 1.5px"></div>
+          <div style="width:4px;height:4px;border-radius:50%;background:#141414;margin:0 1.5px"></div>
+        </div>
+      </div>
+
+      <!-- mascot + speech bubble -->
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-top:14px;flex-shrink:0">
+        <div style="animation:bob 3s ease-in-out infinite;flex-shrink:0">
+          <div style="position:relative;width:96px;height:87px">
+            <div style="position:absolute;inset:0;background:#FF4438;border:3px solid #141414;border-radius:50% 50% 47% 47%/56% 56% 44% 44%"></div>
+            <div style="position:absolute;top:15px;left:22px;width:8px;height:3px;background:#141414;border-radius:3px;transform:rotate(-22deg)"></div>
+            <div style="position:absolute;top:15px;left:61px;width:8px;height:3px;background:#141414;border-radius:3px;transform:rotate(22deg)"></div>
+            <div style="position:absolute;top:24px;left:22px;width:17px;height:17px;background:#fff;border:2px solid #141414;border-radius:50%;overflow:hidden;animation:blink 5.5s infinite"><div style="position:absolute;top:4px;left:5px;width:8px;height:8px;background:#141414;border-radius:50%"></div></div>
+            <div style="position:absolute;top:24px;left:54px;width:17px;height:17px;background:#fff;border:2px solid #141414;border-radius:50%;overflow:hidden;animation:blink 5.5s infinite"><div style="position:absolute;top:4px;left:5px;width:8px;height:8px;background:#141414;border-radius:50%"></div></div>
+            <div style="position:absolute;top:50px;left:35px;width:24px;height:18px;background:#141414;border-radius:0 0 12px 12px"></div>
+            <div style="position:absolute;top:59px;left:41px;width:12px;height:8px;background:#FF7A6E;border-radius:0 0 8px 8px"></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:2.5px solid #141414;border-radius:14px;box-shadow:3px 3px 0 #141414;padding:11px 13px;transform:rotate(-2deg);margin-bottom:14px;flex:1">
+          <div style="font:800 16px 'Bricolage Grotesque',sans-serif;line-height:1.12;color:#141414">{{ quip }}</div>
+        </div>
+      </div>
+
+      <!-- big freeform CTA (rotating label) -->
+      <div onClick="{{ onBrain }}" style="margin-top:16px;background:#FFD23E;border:3px solid #141414;border-radius:16px;box-shadow:4px 4px 0 #141414;padding:15px 18px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;flex-shrink:0" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #141414">
+        <div style="font:800 20px 'Bricolage Grotesque',sans-serif;color:#141414;letter-spacing:-0.3px">{{ ctaLabel }}</div>
+        <div style="font:800 22px 'Bricolage Grotesque',sans-serif;color:#141414">&rarr;</div>
+      </div>
+
+      <!-- pick-one header -->
+      <div style="margin-top:18px;flex-shrink:0">
+        <div style="font:800 13px 'Space Mono',monospace;letter-spacing:0.5px;color:#141414">PICK ONE, GENIUS &darr;</div>
+      </div>
+
+      <!-- 3 category cards -->
+      <div style="margin-top:11px;display:flex;flex-direction:column;gap:11px;flex:1;min-height:0">
+        <sc-for list="{{ cards }}" as="card" hint-placeholder-count="3">
+          <div onClick="{{ card.onTap }}" style="flex:1;min-height:0;background:{{ card.color }};border:3px solid #141414;border-radius:16px;box-shadow:4px 4px 0 #141414;padding:13px 15px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transform:rotate({{ card.rot }}deg)" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #141414">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="background:rgba(0,0,0,.22);font:700 10px 'Space Mono',monospace;letter-spacing:1px;color:#fff;padding:3px 7px;border-radius:6px">{{ card.cat }}</div>
+              <div style="font:700 10px 'Space Mono',monospace;letter-spacing:0.5px;color:rgba(255,255,255,.6)">{{ card.kind }}</div>
+            </div>
+            <div style="font:800 18px 'Bricolage Grotesque',sans-serif;line-height:1.08;color:#fff;margin-top:7px;letter-spacing:-0.2px">{{ card.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- renamed archive -->
+      <div onClick="{{ onHits }}" style="margin-top:13px;background:#141414;border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;cursor:pointer" style-active="transform:scale(.985)">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="font:800 15px 'Bricolage Grotesque',sans-serif;color:#fff">&#9733;</div>
+          <div style="font:800 14px 'Space Mono',monospace;letter-spacing:0.5px;color:#fff">YOUR GREATEST HITS</div>
+        </div>
+        <div style="font:800 13px 'Space Mono',monospace;color:#FFD23E">{{ hitsCount }} BANGERS</div>
+      </div>
+    </div>
+
+    <!-- ============ REPLY (slides in) ============ -->
+    <div ref="{{ replyRef }}" style="position:absolute;inset:0;box-sizing:border-box;padding:58px 18px 24px;display:flex;flex-direction:column;background:{{ paperBg }};will-change:transform;transform:{{ replyTransform }};transition:{{ panelTransition }}">
+
+      <!-- top -->
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div onClick="{{ onHome }}" style="width:40px;height:40px;border-radius:11px;background:#fff;border:2.5px solid #141414;box-shadow:3px 3px 0 #141414;display:flex;align-items:center;justify-content:center;font:800 19px 'Hanken Grotesk',sans-serif;color:#141414;cursor:pointer" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 #141414">&larr;</div>
+        <div style="font:800 13px 'Space Mono',monospace;letter-spacing:1px;color:#141414">{{ replyLabel }}</div>
+      </div>
+
+      <!-- prompt sticker -->
+      <div style="margin-top:16px;background:{{ replyColor }};border:3px solid #141414;border-radius:20px;box-shadow:5px 5px 0 #141414;padding:18px 18px 20px;position:relative;flex-shrink:0">
+        <div style="background:rgba(0,0,0,.22);display:inline-block;font:700 10px 'Space Mono',monospace;letter-spacing:1px;color:#fff;padding:3px 8px;border-radius:6px">{{ replyCat }}</div>
+        <div style="font:800 23px 'Bricolage Grotesque',sans-serif;line-height:1.06;color:{{ replyInk }};margin-top:9px;letter-spacing:-0.3px;max-width:250px">{{ replyText }}</div>
+        <div style="position:absolute;bottom:-15px;right:16px;animation:bobR 3s ease-in-out infinite">
+          <div style="position:relative;width:50px;height:46px">
+            <div style="position:absolute;inset:0;background:{{ replyPeek }};border:2.5px solid #141414;border-radius:50% 50% 47% 47%/56% 56% 44% 44%"></div>
+            <div style="position:absolute;top:15px;left:11px;width:11px;height:11px;background:#fff;border:1.5px solid #141414;border-radius:50%;overflow:hidden;animation:blink 4.5s infinite"><div style="position:absolute;top:3px;left:3px;width:5px;height:5px;background:#141414;border-radius:50%"></div></div>
+            <div style="position:absolute;top:15px;left:29px;width:11px;height:11px;background:#fff;border:1.5px solid #141414;border-radius:50%;overflow:hidden;animation:blink 4.5s infinite"><div style="position:absolute;top:3px;left:3px;width:5px;height:5px;background:#141414;border-radius:50%"></div></div>
+            <div style="position:absolute;top:31px;left:19px;width:13px;height:9px;background:#141414;border-radius:0 0 8px 8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INPUT: rank-and-defend micro-game -->
+      <sc-if value="{{ isRank }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;margin-top:18px;display:flex;flex-direction:column;gap:9px;min-height:0;overflow:auto">
+          <sc-for list="{{ rankSlots }}" as="slot" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:10px;background:#fff;border:3px solid #141414;border-radius:14px;box-shadow:3px 3px 0 #141414;padding:9px 12px;flex-shrink:0">
+              <div style="width:30px;height:30px;flex-shrink:0;background:{{ slot.medal }};border:2.5px solid #141414;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 15px 'Bricolage Grotesque',sans-serif;color:#141414">{{ slot.n }}</div>
+              <input placeholder="{{ slot.ph }}" style="border:none;outline:none;flex:1;background:transparent;font:600 16px 'Hanken Grotesk',sans-serif;color:#141414;min-width:0">
+            </div>
+          </sc-for>
+          <div style="flex:1;min-height:64px;background:#FFF6D6;border:3px solid #141414;border-radius:14px;box-shadow:3px 3px 0 #141414;padding:11px 13px;display:flex;flex-direction:column">
+            <div style="font:700 10px 'Space Mono',monospace;letter-spacing:1px;color:#141414;flex-shrink:0">DEFEND YOUR #1</div>
+            <textarea placeholder="no scoring. just commit to the bit." style="border:none;outline:none;resize:none;width:100%;flex:1;margin-top:5px;background:transparent;font-size:16px;line-height:1.4;color:#141414"></textarea>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- INPUT: freeform / text prompt -->
+      <sc-if value="{{ isText }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;margin-top:18px;background:#fff;border:3px solid #141414;border-radius:16px;box-shadow:4px 4px 0 #141414;padding:15px;display:flex;min-height:0">
+          <textarea ref="{{ inputRef }}" onInput="{{ onType }}" placeholder="{{ inputPh }}" style="border:none;outline:none;resize:none;width:100%;height:100%;background:transparent;font-size:18px;line-height:1.45;color:#141414"></textarea>
+        </div>
+      </sc-if>
+
+      <!-- send -->
+      <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-shrink:0">
+        <div ref="{{ countRef }}" style="font:13px 'Space Mono',monospace;color:#9b988c;flex:1">{{ countLabel }}</div>
+        <div onClick="{{ onSave }}" style="background:#FFD23E;border:3px solid #141414;border-radius:14px;box-shadow:4px 4px 0 #141414;padding:13px 24px;display:flex;align-items:center;gap:8px;cursor:pointer" style-active="transform:translate(2px,2px);box-shadow:2px 2px 0 #141414">
+          <div style="font:800 18px 'Bricolage Grotesque',sans-serif;color:#141414">{{ sendLabel }}</div>
+          <div style="font:800 18px 'Bricolage Grotesque',sans-serif;color:#141414">&rarr;</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ GREATEST HITS (slides up) ============ -->
+    <div ref="{{ hitsRef }}" style="position:absolute;inset:0;box-sizing:border-box;padding:58px 18px 20px;display:flex;flex-direction:column;background:{{ paperBg }};will-change:transform;transform:{{ hitsTransform }};transition:{{ panelTransition }}">
+
+      <!-- top -->
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div onClick="{{ onHome }}" style="width:40px;height:40px;border-radius:11px;background:#fff;border:2.5px solid #141414;box-shadow:3px 3px 0 #141414;display:flex;align-items:center;justify-content:center;font:800 19px 'Hanken Grotesk',sans-serif;color:#141414;cursor:pointer" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 #141414">&larr;</div>
+      </div>
+
+      <!-- header -->
+      <div style="margin-top:14px;flex-shrink:0">
+        <div style="font:800 31px 'Bricolage Grotesque',sans-serif;line-height:0.96;color:#141414;letter-spacing:-0.8px">Your Greatest Hits</div>
+        <div style="font:14px 'Hanken Grotesk',sans-serif;color:#86847d;margin-top:5px">Your finest nonsense. Hold one to inflict it on a friend.</div>
+      </div>
+
+      <!-- filter chips -->
+      <div ref="{{ chipsRef }}" onScroll="{{ onChipScroll }}" style="margin-top:14px;display:flex;gap:8px;overflow-x:auto;flex-shrink:0;-webkit-mask-image:linear-gradient(to right,#000 87%,transparent);mask-image:linear-gradient(to right,#000 87%,transparent)">
+        <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="5">
+          <div onClick="{{ chip.onTap }}" style="flex-shrink:0;font:700 11px 'Space Mono',monospace;letter-spacing:0.5px;padding:7px 12px;border-radius:999px;border:2.5px solid #141414;background:{{ chip.bg }};color:{{ chip.fg }};cursor:pointer;white-space:nowrap">{{ chip.label }}</div>
+        </sc-for>
+      </div>
+
+      <!-- list -->
+      <div style="flex:1;margin-top:10px;overflow:auto;display:flex;flex-direction:column;gap:13px;min-height:0;padding:6px 9px 16px 6px">
+        <sc-for list="{{ visibleHits }}" as="hit" hint-placeholder-count="3">
+          <div onPointerDown="{{ hit.onDown }}" onPointerMove="{{ hit.onMove }}" onPointerUp="{{ hit.onUp }}" onPointerLeave="{{ hit.onUp }}" onPointerCancel="{{ hit.onUp }}" style="background:#fff;border:2.5px solid #141414;border-radius:16px;box-shadow:4px 4px 0 #141414;transform:rotate({{ hit.rot }}deg);padding:13px 14px;flex-shrink:0;cursor:pointer;user-select:none;-webkit-touch-callout:none;touch-action:pan-y" style-active="transform:scale(.985)">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div style="background:{{ hit.color }};font:700 10px 'Space Mono',monospace;letter-spacing:1px;color:{{ hit.chipFg }};padding:3px 8px;border-radius:6px">{{ hit.cat }}</div>
+              <div style="font:700 11px 'Space Mono',monospace;color:#b6b3a6">{{ hit.when }}</div>
+            </div>
+            <sc-if value="{{ hit.hasPrompt }}" hint-placeholder-val="{{ true }}">
+              <div style="font:600 13px 'Hanken Grotesk',sans-serif;line-height:1.3;color:#9b988c;margin-top:9px">{{ hit.prompt }}</div>
+            </sc-if>
+            <sc-if value="{{ hit.isText }}" hint-placeholder-val="{{ true }}">
+              <div style="font:600 16px 'Hanken Grotesk',sans-serif;line-height:1.42;color:#141414;margin-top:7px">{{ hit.answer }}</div>
+            </sc-if>
+            <sc-if value="{{ hit.isRank }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ hit.items }}" as="it" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div style="width:20px;height:20px;flex-shrink:0;background:{{ it.medal }};border:2px solid #141414;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 11px 'Bricolage Grotesque',sans-serif;color:#141414">{{ it.n }}</div>
+                    <div style="font:600 15px 'Hanken Grotesk',sans-serif;color:#141414">{{ it.text }}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:10px;background:#FFF6D6;border:2px solid #141414;border-radius:10px;padding:9px 11px">
+                <div style="font:700 9px 'Space Mono',monospace;letter-spacing:1px;color:#141414">DEFENSE</div>
+                <div style="font:600 14px 'Hanken Grotesk',sans-serif;line-height:1.35;color:#141414;margin-top:3px">{{ hit.defense }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ hitsEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:34px;text-align:center;padding:0 20px">
+            <div style="font:800 19px 'Bricolage Grotesque',sans-serif;color:#141414">Nothing here. Shocking.</div>
+            <div style="font:14px 'Hanken Grotesk',sans-serif;color:#86847d;margin-top:6px">No bangers in this category yet. Go be interesting.</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <!-- saved toast -->
+    <sc-if value="{{ saved }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;left:50%;bottom:64px;background:#141414;border:3px solid #141414;border-radius:16px;padding:13px 20px;display:flex;align-items:center;gap:11px;box-shadow:6px 6px 0 rgba(0,0,0,.25);animation:popin .42s cubic-bezier(.34,1.56,.64,1);z-index:30">
+        <div style="position:relative;width:30px;height:28px;flex-shrink:0">
+          <div style="position:absolute;inset:0;background:#FF4438;border:2px solid #fff;border-radius:50% 50% 47% 47%/56% 56% 44% 44%"></div>
+          <div style="position:absolute;top:10px;left:7px;width:5px;height:5px;background:#fff;border-radius:50%"></div>
+          <div style="position:absolute;top:10px;left:17px;width:5px;height:5px;background:#fff;border-radius:50%"></div>
+          <div style="position:absolute;top:17px;left:10px;width:9px;height:4px;background:#fff;border-radius:0 0 5px 5px"></div>
+        </div>
+        <div style="font:800 14px 'Space Mono',monospace;letter-spacing:0.5px;color:#fff">{{ savedMsg }}</div>
+      </div>
+    </sc-if>
+
+    <!-- share sheet -->
+    <sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;z-index:50;display:flex;flex-direction:column;justify-content:flex-end">
+        <div onClick="{{ onCloseShare }}" style="position:absolute;inset:0;background:rgba(20,20,20,.45);animation:fade .2s ease-out"></div>
+        <div style="position:relative;background:#FBFAF3;border-top:3px solid #141414;border-radius:26px 26px 0 0;padding:14px 18px 32px;animation:sheetup .34s cubic-bezier(.34,1.4,.5,1)">
+          <div style="width:44px;height:5px;border-radius:99px;background:#141414;opacity:.22;margin:0 auto 16px"></div>
+
+          <!-- mascot + line -->
+          <div style="display:flex;align-items:flex-end;gap:11px;margin-bottom:20px">
+            <div style="animation:bob 3s ease-in-out infinite;flex-shrink:0">
+              <div style="position:relative;width:64px;height:58px">
+                <div style="position:absolute;inset:0;background:#FF4438;border:3px solid #141414;border-radius:50% 50% 47% 47%/56% 56% 44% 44%"></div>
+                <div style="position:absolute;top:10px;left:14px;width:6px;height:2.5px;background:#141414;border-radius:3px;transform:rotate(-22deg)"></div>
+                <div style="position:absolute;top:10px;left:42px;width:6px;height:2.5px;background:#141414;border-radius:3px;transform:rotate(22deg)"></div>
+                <div style="position:absolute;top:17px;left:14px;width:13px;height:13px;background:#fff;border:2px solid #141414;border-radius:50%;overflow:hidden;animation:blink 5.5s infinite"><div style="position:absolute;top:3px;left:4px;width:6px;height:6px;background:#141414;border-radius:50%"></div></div>
+                <div style="position:absolute;top:17px;left:36px;width:13px;height:13px;background:#fff;border:2px solid #141414;border-radius:50%;overflow:hidden;animation:blink 5.5s infinite"><div style="position:absolute;top:3px;left:4px;width:6px;height:6px;background:#141414;border-radius:50%"></div></div>
+                <div style="position:absolute;top:35px;left:23px;width:18px;height:13px;background:#141414;border-radius:0 0 9px 9px"></div>
+                <div style="position:absolute;top:42px;left:27px;width:9px;height:6px;background:#FF7A6E;border-radius:0 0 6px 6px"></div>
+              </div>
+            </div>
+            <div style="background:#fff;border:2.5px solid #141414;border-radius:14px;box-shadow:3px 3px 0 #141414;padding:11px 14px;transform:rotate(-2deg);margin-bottom:10px;flex:1">
+              <div style="font:700 9px 'Space Mono',monospace;letter-spacing:1px;color:#9b988c">SHARE IT, THEN</div>
+              <div style="font:800 17px 'Bricolage Grotesque',sans-serif;line-height:1.12;color:#141414;margin-top:3px">{{ shareLine }}</div>
+            </div>
+          </div>
+
+          <!-- targets -->
+          <div style="display:flex;gap:10px">
+            <sc-for list="{{ shareTargets }}" as="t" hint-placeholder-count="4">
+              <div onClick="{{ t.onTap }}" style="flex:1;background:#fff;border:2.5px solid #141414;border-radius:14px;box-shadow:3px 3px 0 #141414;padding:13px 6px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 #141414">
+                <div style="width:30px;height:30px;border-radius:50%;border:2.5px solid #141414;background:{{ t.circ }};color:{{ t.fg }};display:flex;align-items:center;justify-content:center;font:800 14px 'Bricolage Grotesque',sans-serif">{{ t.initial }}</div>
+                <div style="font:700 10px 'Space Mono',monospace;letter-spacing:0.5px;color:#141414">{{ t.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;402px&quot;,&quot;height&quot;:&quot;874px&quot;},&quot;paper&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cream&quot;,&quot;Paper White&quot;,&quot;Mint&quot;,&quot;Bubblegum&quot;],&quot;default&quot;:&quot;Cream&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;wonky&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.replyRef = React.createRef();
+    this.countRef = React.createRef();
+    this.inputRef = React.createRef();
+    this.hitsRef = React.createRef();
+    this.chipsRef = React.createRef();
+
+    // category palette — all dark enough for white text (yellow stays the CTA)
+    this.CATS = {
+      reflect: { cat: 'REFLECT', kind: 'introspect', color: '#2E5BFF' },
+      tea:     { cat: 'HOT TEA', kind: 'gossip',     color: '#FF4438' },
+      rank:    { cat: 'RANK + DEFEND', kind: 'micro-game', color: '#15A150' },
+      confess: { cat: 'CONFESS', kind: 'off the record', color: '#8B3DF5' },
+      take:    { cat: 'HOT TAKE', kind: 'opinion',   color: '#FF7A1A' }
+    };
+
+    this.POOL = [
+      { c: 'reflect', text: 'A smell that instantly teleports you somewhere. Go.' },
+      { c: 'reflect', text: 'If your boredom had a sound, what is it?' },
+      { c: 'reflect', text: 'Describe your entire day as one movie title.' },
+      { c: 'tea', text: "What's a lie you tell every single week?" },
+      { c: 'tea', text: "Whose business are you minding that isn't yours?" },
+      { c: 'tea', text: "A rumor you'd happily start about yourself?" },
+      { c: 'confess', text: 'The most pointless thing you did today?' },
+      { c: 'confess', text: "A text you're too scared to send. Draft it here." },
+      { c: 'confess', text: 'Something you pretend to understand but do not.' },
+      { c: 'take', text: 'A food everyone loves that is actually mid. Name it.' },
+      { c: 'take', text: 'Pineapple on pizza: deliver your closing argument.' },
+      { c: 'take', text: 'An "unpopular" opinion that is just objectively correct.' },
+      { c: 'rank', text: 'Rank your last 3 snacks. Defend #1.', slots: ['your undisputed #1…', 'the runner-up…', 'third place, sorry…'] },
+      { c: 'rank', text: 'Rank 3 people you would trust with your phone.', slots: ['most trusted…', 'probably fine…', 'risky but ok…'] },
+      { c: 'rank', text: 'Rank 3 ways to waste a perfectly good afternoon.', slots: ['the elite waste…', 'solid filler…', 'desperate measures…'] }
+    ];
+
+    this.CTAS = ['DUMP A THOUGHT', 'CLEAR THE BRAIN TUBES', 'UNLOAD THE NOGGIN', 'EMPTY THE SKULL', 'OFFLOAD SOMETHING', 'SPILL IT, FRIEND'];
+
+    // Seeded saved entries (prototype only — real app reads these from storage).
+    // ts = real Date so the weekday/date label is computed live (see fmtWhen).
+    var mk = (dAgo, H, M) => { var d = new Date(); d.setDate(d.getDate() - dAgo); d.setHours(H, M, 0, 0); return d; };
+    this.HITS = [
+      { c: 'confess', type: 'text', ts: mk(0, 2, 14), prompt: 'The most pointless thing you did today?', answer: 'Reorganized my entire camera roll by vibe. Took two hours. Looks identical.' },
+      { c: 'tea', type: 'text', ts: mk(1, 23, 47), prompt: "What's a lie you tell every single week?", answer: '"Yeah, I\u2019m five minutes away." I am never five minutes away.' },
+      { c: 'rank', type: 'rank', ts: mk(3, 16, 3), prompt: 'Rank your last 3 snacks. Defend #1.', items: ['cold leftover pizza', 'a fistful of dry cereal', 'one sad clementine'], defense: 'Pizza asks nothing of me and gives everything. That, my friend, is intimacy.' },
+      { c: 'brain', type: 'brain', ts: mk(5, 1, 32), answer: 'what if doors were just really tall cats. anyway. goodnight.' },
+      { c: 'take', type: 'text', ts: mk(9, 21, 12), prompt: 'Pineapple on pizza: deliver your closing argument.', answer: 'Sweet, salty, acidic, hot. That is simply good food math. The defense rests.' },
+      { c: 'reflect', type: 'text', ts: mk(16, 8, 50), prompt: 'Describe your entire day as one movie title.', answer: '"Gone Girl," but it is just me looking for my other sock for 40 minutes.' }
+    ];
+
+    this.CHIPS = [
+      ['ALL', 'ALL', '#141414'], ['reflect', 'REFLECT', '#2E5BFF'], ['tea', 'HOT TEA', '#FF4438'],
+      ['rank', 'RANK', '#15A150'], ['confess', 'CONFESS', '#8B3DF5'], ['take', 'HOT TAKE', '#FF7A1A'], ['brain', 'BRAIN', '#FFD23E', '#141414']
+    ];
+
+    var w = ['rain', 'sun', 'cloud', 'cold'][Math.floor(Math.random() * 4)];
+    this.weatherQuip = {
+      rain: "It's pouring out. Perfect. Stay in. Rot with me.",
+      sun: "Sun's out and you're in here. With me. Bleak.",
+      cloud: 'Grey out there, grey in here. We match.',
+      cold: 'Too cold to exist. Good. Entertain me indoors.'
+    }[w];
+
+    this.state = {
+      screen: 'home',
+      hitsFilter: 'ALL',
+      share: null,
+      cards: this.pick3(),
+      reply: this.POOL[0],
+      isBrain: false,
+      ctaI: 0,
+      quipI: 0,
+      saved: false,
+      ready: false
+    };
+  }
+
+  quips() {
+    var t = this.nowStr();
+    return [
+      'Ugh. FINALLY. Entertain me.',
+      "Back already? Not surprised. Not impressed.",
+      "It's " + t + " and you're bored. Predictable.",
+      this.weatherQuip,
+      'Make it good this time. Low bar. Clear it.',
+      'I was busy. Doing nothing. You interrupted.',
+      "Dazzle me. Or don't. I've stopped hoping."
+    ];
+  }
+
+  nowStr() {
+    var d = new Date(), h = d.getHours(), m = d.getMinutes();
+    var ap = h >= 12 ? 'pm' : 'am'; h = h % 12; if (h === 0) h = 12;
+    return h + ':' + (m < 10 ? '0' + m : m) + ap;
+  }
+
+  pick3() {
+    // One prompt per category, max — never two of the same category on screen.
+    var cats = Object.keys(this.CATS);
+    for (var i = cats.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = cats[i]; cats[i] = cats[j]; cats[j] = t; }
+    return cats.slice(0, 3).map(c => {
+      var pool = this.POOL.filter(p => p.c === c);
+      return pool[Math.floor(Math.random() * pool.length)];
+    });
+  }
+
+  updateChipFade() {
+    var el = this.chipsRef && this.chipsRef.current;
+    if (!el) return;
+    var atStart = el.scrollLeft <= 2;
+    var atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 2;
+    var l = atStart ? '#000' : 'transparent';
+    var r = atEnd ? '#000' : 'transparent';
+    var m = 'linear-gradient(to right, ' + l + ' 0%, #000 13%, #000 87%, ' + r + ' 100%)';
+    el.style.webkitMaskImage = m; el.style.maskImage = m;
+  }
+
+  componentDidMount() {
+    requestAnimationFrame(() => { this.setState({ ready: true }); this.updateChipFade(); });
+    this._rot = setInterval(() => {
+      if (this.state.screen !== 'home') return;
+      this.setState(s => ({ ctaI: (s.ctaI + 1) % this.CTAS.length, quipI: (s.quipI + 1) % this.quips().length }));
+    }, 4600);
+  }
+  componentWillUnmount() { clearInterval(this._rot); clearTimeout(this._snapT); }
+
+  componentDidUpdate(prev) {
+    if (this.state.screen === prev.screen) return;
+    if (this.state.screen === 'reply' && !this.state.isRankMode && this.inputRef.current) {
+      try { this.inputRef.current.focus({ preventScroll: true }); } catch (_) {}
+    }
+    clearTimeout(this._snapT);
+    var rEl = this.replyRef.current, hEl = this.hitsRef.current;
+    var rTarget = this.state.screen === 'reply' ? 'translateX(0%)' : 'translateX(100%)';
+    var hTarget = this.state.screen === 'hits' ? 'translateY(0%)' : 'translateY(100%)';
+    this._snapT = setTimeout(function () {
+      [[rEl, rTarget], [hEl, hTarget]].forEach(function (p) {
+        if (p[0]) { p[0].style.transition = 'none'; p[0].style.transform = p[1]; void p[0].offsetWidth; p[0].style.transition = ''; }
+      });
+    }, 520);
+  }
+
+  shuffle() {
+    this.setState({ cards: this.pick3(), quipI: (this.state.quipI + 1) % this.quips().length });
+  }
+
+  openReply(prompt, brain) {
+    if (this.inputRef.current) this.inputRef.current.value = '';
+    if (this.countRef.current) this.countRef.current.textContent = '0 words. bold of you.';
+    this.setState({ screen: 'reply', reply: prompt, isBrain: !!brain, isRankMode: !brain && prompt.c === 'rank' });
+  }
+  goHome() { this.setState({ screen: 'home' }); }
+
+  onType(e) {
+    var v = e.target.value.trim();
+    var n = v ? v.split(/\s+/).length : 0;
+    var lab = '0 words. bold of you.';
+    if (n >= 41) lab = "okay, you're writing a memoir";
+    else if (n >= 16) lab = "now you're cooking";
+    else if (n >= 1) lab = 'a start, technically';
+    if (this.countRef.current) this.countRef.current.textContent = lab;
+  }
+
+  fmtWhen(ts) {
+    var now = new Date(), dayMs = 86400000;
+    var h = ts.getHours(), m = ts.getMinutes();
+    var ap = h >= 12 ? 'pm' : 'am', hh = h % 12; if (hh === 0) hh = 12;
+    var time = hh + ':' + (m < 10 ? '0' + m : m) + ap;
+    if (now - ts < 7 * dayMs) {
+      return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][ts.getDay()] + ' · ' + time;
+    }
+    var mo = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'][ts.getMonth()];
+    return mo + ' ' + ts.getDate() + ' · ' + time;
+  }
+
+  pressDown(hit, e) {
+    this._press = { x: e.clientX, y: e.clientY };
+    clearTimeout(this._lp);
+    this._lp = setTimeout(() => this.shareHit(hit), 480);
+  }
+  pressMove(e) {
+    if (!this._press) return;
+    if (Math.abs(e.clientX - this._press.x) > 10 || Math.abs(e.clientY - this._press.y) > 10) {
+      clearTimeout(this._lp); this._press = null;
+    }
+  }
+  pressEnd() { clearTimeout(this._lp); this._press = null; }
+  shareHit(hit) {
+    this._press = null;
+    var lines = [
+      'Screenshot bait, honestly.',
+      'Share it. Start some drama.',
+      'Make it the group chat\u2019s problem.',
+      'Too good to keep. Unfortunately.',
+      'Go on. Ruin a friendship.',
+      'Let the people riot.',
+      'Inflict this on someone you love.',
+      'Watch the comments turn feral.'
+    ];
+    this.setState({ share: { line: lines[Math.floor(Math.random() * lines.length)] } });
+  }
+  closeShare() { this.setState({ share: null }); }
+  shareTo() {
+    var msgs = ['Off it goes. No takebacks.', 'Shared. They didn\u2019t ask for this.', 'Sent. Inflicted. Done.'];
+    clearTimeout(this._shareT);
+    this.setState({ share: null, saved: true, savedMsg: msgs[Math.floor(Math.random() * msgs.length)] });
+    this._shareT = setTimeout(() => this.setState({ saved: false }), 1300);
+  }
+
+  save() {
+    var msgs = ['SAVED. POINTLESS. PERFECT.', 'FILED UNDER NONSENSE.', 'ANOTHER BANGER. ALLEGEDLY.', 'NOBODY ASKED. SAVED ANYWAY.'];
+    this.setState({ saved: true, savedMsg: msgs[Math.floor(Math.random() * msgs.length)] });
+    setTimeout(() => { this.setState({ saved: false, screen: 'home', cards: this.pick3() }); }, 1250);
+  }
+
+  renderVals() {
+    var paperMap = { 'Cream': '#FBFAF3', 'Paper White': '#FFFFFF', 'Mint': '#EAF7EE', 'Bubblegum': '#FCEAF2' };
+    var paperBg = paperMap[this.props.paper] || '#FBFAF3';
+    var wonky = this.props.wonky !== false;
+    var rots = wonky ? [-1.5, 1.2, -1] : [0, 0, 0];
+
+    var cards = this.state.cards.map((p, i) => {
+      var meta = this.CATS[p.c];
+      return { cat: meta.cat, kind: meta.kind, color: meta.color, text: p.text, rot: rots[i] || 0, onTap: () => this.openReply(p, false) };
+    });
+
+    var rp = this.state.reply, rmeta = this.CATS[rp.c], brain = this.state.isBrain;
+    var isRank = !brain && rp.c === 'rank';
+    var medals = ['#FFD23E', '#E6E6E6', '#E8B074'];
+    var slots = (rp.slots || ['', '', '']).map((ph, i) => ({ n: String(i + 1), ph: ph, medal: medals[i] }));
+
+    // Greatest Hits — filtered + display-shaped
+    var f = this.state.hitsFilter;
+    var hitList = this.HITS.filter(h => f === 'ALL' ? true : (f === 'brain' ? h.type === 'brain' : h.c === f));
+    var hitRots = [-1, 0.9, -0.7, 0.8, -1.1, 0.6];
+    var visibleHits = hitList.map((h, i) => {
+      var meta = h.type === 'brain' ? { cat: 'BRAIN DUMP', color: '#FFD23E' } : this.CATS[h.c];
+      return {
+        cat: meta.cat, color: meta.color, chipFg: h.type === 'brain' ? '#141414' : '#fff', when: this.fmtWhen(h.ts),
+        rot: wonky ? hitRots[i % hitRots.length] : 0,
+        hasPrompt: h.type !== 'brain', prompt: h.prompt,
+        isText: h.type !== 'rank', isRank: h.type === 'rank',
+        answer: h.answer, defense: h.defense,
+        items: (h.items || []).map((t, i) => ({ n: String(i + 1), medal: medals[i], text: t })),
+        onDown: (e) => this.pressDown(h, e), onMove: (e) => this.pressMove(e), onUp: () => this.pressEnd()
+      };
+    });
+    var chips = this.CHIPS.map(d => {
+      var active = this.state.hitsFilter === d[0];
+      return { label: d[1], bg: active ? d[2] : '#fff', fg: active ? (d[3] || '#fff') : '#141414', onTap: () => this.setState({ hitsFilter: d[0] }) };
+    });
+    var shareTargets = [
+      { label: 'COPY', initial: 'C', circ: '#FFD23E', fg: '#141414' },
+      { label: 'MESSAGE', initial: 'M', circ: '#2E5BFF', fg: '#fff' },
+      { label: 'STORY', initial: 'S', circ: '#FF4438', fg: '#fff' },
+      { label: 'MORE', initial: '···', circ: '#141414', fg: '#fff' }
+    ].map(t => Object.assign({}, t, { onTap: () => this.shareTo() }));
+
+    return {
+      paperBg: paperBg,
+      quip: this.quips()[this.state.quipI],
+      ctaLabel: this.CTAS[this.state.ctaI],
+      hitsCount: 37,
+      cards: cards,
+
+      replyColor: brain ? '#FFD23E' : rmeta.color,
+      replyInk: brain ? '#141414' : '#fff',
+      replyPeek: brain ? '#FF4438' : '#FFD23E',
+      replyCat: brain ? 'BRAIN DUMP' : rmeta.cat,
+      replyText: brain ? 'Say literally anything. Nobody is reading. Probably.' : rp.text,
+      replyLabel: brain ? 'POINTLESS, BUT OK' : 'FINE. ANSWERING.',
+      inputPh: brain ? 'empty the skull here…' : 'type here, genius…',
+      countLabel: '0 words. bold of you.',
+      sendLabel: brain ? 'DUMP IT' : 'SEND IT',
+      isRank: isRank,
+      isText: !isRank,
+      rankSlots: slots,
+
+      saved: this.state.saved,
+      savedMsg: this.state.savedMsg,
+
+      hitsRef: this.hitsRef,
+      hitsTransform: this.state.screen === 'hits' ? 'translateY(0%)' : 'translateY(100%)',
+      chips: chips,
+      chipsRef: this.chipsRef,
+      onChipScroll: () => this.updateChipFade(),
+      visibleHits: visibleHits,
+      hitsEmpty: visibleHits.length === 0,
+      shareOpen: !!this.state.share,
+      shareLine: this.state.share ? this.state.share.line : '',
+      shareTargets: shareTargets,
+      onCloseShare: () => this.closeShare(),
+
+      replyTransform: this.state.screen === 'reply' ? 'translateX(0%)' : 'translateX(100%)',
+      panelTransition: this.state.ready ? 'transform .42s cubic-bezier(.34,1.4,.5,1)' : 'none',
+      replyRef: this.replyRef,
+      countRef: this.countRef,
+      inputRef: this.inputRef,
+
+      onShuffle: () => this.shuffle(),
+      onBrain: () => this.openReply(this.state.reply, true),
+      onHome: () => this.goHome(),
+      onSave: () => this.save(),
+      onType: (e) => this.onType(e),
+      onHits: () => this.setState({ screen: 'hits' })
+    };
+  }
+}
+</script>
+</body>
+</html>

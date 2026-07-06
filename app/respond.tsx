@@ -20,7 +20,7 @@ import {
   DEFAULT_RANK_SLOTS, RANK_SLOT_COUNT, parseRankConfig, renderRankResponseText,
 } from '../src/games/rank';
 import {
-  FONTS, INK, DEFEND_PAD, KEYLINE_HEAVY, SHADOW_STICKER, SHADOW_SM, CHIP_SCRIM, CATEGORY_STYLES,
+  FONTS, INK, DEFEND_PAD, KEYLINE_HEAVY, SHADOW_STICKER, SHADOW_SM, CHIP_SCRIM,
 } from '../src/theme/tokens';
 import { REPLY_COPY, wordCounterLine, DISCARD_COPY, DISCARD_WARN_MIN_WORDS } from '../src/theme/copy';
 import { Sticker } from '../src/components/ui/Sticker';
@@ -43,7 +43,7 @@ const CHIP_KEYS: (keyof PromptModifiers)[] = ['place', 'time', 'weather', 'memor
 const RANK_TILTS = [-6, 5, -4];
 
 export default function RespondScreen() {
-  const { colors } = useTheme();
+  const { colors, categoryStyles } = useTheme();
   const { showToast } = useToast();
   const navigation = useNavigation();
   // Set right before a successful save navigates away, so the unsaved-content
@@ -276,7 +276,7 @@ export default function RespondScreen() {
     }
   }
 
-  const catStyle = activePrompt ? CATEGORY_STYLES[activePrompt.category] : null;
+  const catStyle = activePrompt ? categoryStyles[activePrompt.category] : null;
   // Help Me Write prompts are chip-driven, not tied to the homescreen's
   // observe/reflect/personal/creative taxonomy — swap the pill label (but
   // keep the card's hue for visual variety) so it never reads as a home card.
