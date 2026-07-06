@@ -1,17 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, Alert, Keyboard, LayoutAnimation, Platform, Image, SafeAreaView,
+  ScrollView, Alert, Keyboard, LayoutAnimation, Platform, SafeAreaView,
 } from 'react-native';
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { getDb } from '../src/db/database';
 import { createEntry } from '../src/db/entries';
-import { createMedia } from '../src/db/media';
 import { getNextPrompt } from '../src/prompts/next';
 import { getContextualPrompt, forceRefreshContextualPrompt } from '../src/prompts/contextual';
 import { getSetting, setSetting } from '../src/db/settings';
 import { captureLocation, queuePendingGeocode } from '../src/location/location';
-import { pickPhoto, takePhoto } from '../src/media/capture';
 import { useTheme } from '../src/theme/ThemeContext';
 import { checkEntryAgainstPlaces } from '../src/db/places';
 import { DEFAULT_MODIFIERS } from '../src/types';
@@ -71,7 +69,6 @@ export default function RespondScreen() {
   const [defense, setDefense] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [helpMeWriteOpen, setHelpMeWriteOpen] = useState(false);
   const [prompt, setPrompt] = useState<CurrentPrompt | null>(null);
@@ -194,40 +191,6 @@ export default function RespondScreen() {
     }
   }
 
-  async function handleAddLocation() {
-    const loc = await captureLocation();
-    if (loc) {
-      setLocationLabel(loc.label ?? '');
-      setLocationCoords({ lat: loc.lat, lng: loc.lng });
-    }
-  }
-
-  async function handlePickPhoto() {
-    try {
-      const uri = await pickPhoto();
-      if (uri) setPhotoUri(uri);
-    } catch (e) {
-      if (e instanceof Error && e.message === 'permission_denied') {
-        Alert.alert('Permission needed', 'Please allow photo library access in Settings to attach photos.');
-      } else {
-        Alert.alert('Photo error', 'Could not attach the photo. Please try again.');
-      }
-    }
-  }
-
-  async function handleTakePhoto() {
-    try {
-      const uri = await takePhoto();
-      if (uri) setPhotoUri(uri);
-    } catch (e) {
-      if (e instanceof Error && e.message === 'permission_denied') {
-        Alert.alert('Permission needed', 'Please allow camera access in Settings to take photos.');
-      } else {
-        Alert.alert('Camera error', 'Could not attach the photo. Please try again.');
-      }
-    }
-  }
-
   async function handleSubmit() {
     const rankData = { items: rankItems.map(i => i.trim()), defense: defense.trim() };
     const rankComplete = rankData.items.every(i => i !== '') && rankData.defense !== '';
@@ -265,7 +228,6 @@ export default function RespondScreen() {
           console.warn('checkEntryAgainstPlaces failed:', e);
         }
       }
-      if (photoUri) await createMedia(db, entryId, 'photo', photoUri);
       await getNextPrompt(db);
       savedRef.current = true;
       showToast();
@@ -399,37 +361,19 @@ export default function RespondScreen() {
           </Sticker>
           )}
 
-          {photoUri && (
-            <View style={styles.photoPreview}>
-              <Image source={{ uri: photoUri }} style={[styles.photoImg, { borderColor: colors.border }]} />
-              <TouchableOpacity onPress={() => setPhotoUri(null)}>
-                <Text style={styles.removeTxt}>REMOVE PHOTO ✕</Text>
+          {locationLabel !== '' && (
+            <View style={styles.locationRow}>
+              <TextInput
+                style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
+                value={locationLabel}
+                onChangeText={setLocationLabel}
+                placeholder="Edit place name"
+                placeholderTextColor={colors.when}
+              />
+              <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }} hitSlop={8}>
+                <Text style={styles.removeTxt}>✕</Text>
               </TouchableOpacity>
             </View>
-          )}
-
-          <View style={styles.attachRow}>
-            <Chip label="+ PHOTO" onPress={handlePickPhoto} />
-            <Chip label="+ CAMERA" onPress={handleTakePhoto} />
-            <Chip
-              label={locationLabel ? `◉ ${locationLabel.toUpperCase()}` : '◉ PLACE'}
-              active={locationLabel !== ''}
-              onPress={handleAddLocation}
-            />
-            {locationLabel !== '' && (
-              <TouchableOpacity onPress={() => { setLocationLabel(''); setLocationCoords(null); }} hitSlop={8}>
-                <Text style={[styles.removeTxt, { alignSelf: 'center' }]}>✕</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-          {locationLabel !== '' && (
-            <TextInput
-              style={[styles.locationInput, { color: colors.textPrimary, borderBottomColor: colors.border }]}
-              value={locationLabel}
-              onChangeText={setLocationLabel}
-              placeholder="Edit place name"
-              placeholderTextColor={colors.when}
-            />
           )}
 
           {/* Footer scrolls with the content (no opaque overlay bar). The
@@ -487,11 +431,9 @@ const styles = StyleSheet.create({
     flex: 1, fontFamily: FONTS.body, fontSize: 18, lineHeight: 26, minHeight: 150,
     textAlignVertical: 'top',
   },
-  photoPreview: { gap: 6 },
-  photoImg: { width: '100%', height: 180, borderRadius: 12, borderWidth: KEYLINE_HEAVY },
   removeTxt: { color: '#FF4438', fontFamily: FONTS.label, fontSize: 11, letterSpacing: 0.5 },
-  attachRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
-  locationInput: { fontFamily: FONTS.body, fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  locationInput: { flex: 1, fontFamily: FONTS.body, fontSize: 14, borderBottomWidth: 1, paddingVertical: 4 },
   footerRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 },
   counter: { fontFamily: FONTS.labelRegular, fontSize: 13, flex: 1 },
 });
