@@ -69,14 +69,17 @@ async function _getContextualPrompt(
       ? recentEntries.slice(0, 3).map(e => e.response_text.slice(0, 40).replace(/\n/g, ' '))
       : [];
 
+    // Note: `selected.category` is only used below to store a homescreen-taxonomy
+    // category on the entry (for Greatest Hits pills / library repeat-avoidance).
+    // It is deliberately NOT passed to generateAiPrompt — Help Me Write prompts
+    // are chip-driven (place/time/weather/memory), not tied to observe/reflect/etc.
     const context = await gatherContext();
     const aiText = await generateAiPrompt(
       {
-        category: selected.category,
         depth: selected.depth,
         recentTopics,
         context,
-        modifiers: { time: modifiers.time, place: modifiers.place, weather: modifiers.weather },
+        modifiers,
       },
       API_KEY
     );

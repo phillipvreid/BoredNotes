@@ -1,7 +1,8 @@
 import React from 'react';
 import { Text, View, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { Sticker } from './Sticker';
-import { ACTION, INK, FONTS, KEYLINE_HEAVY, SHADOW_CARD } from '../../theme/tokens';
+import { useTheme } from '../../theme/ThemeContext';
+import { FONTS, KEYLINE_HEAVY, SHADOW_CARD } from '../../theme/tokens';
 
 interface ActionButtonProps {
   label: string;
@@ -13,13 +14,14 @@ interface ActionButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-// The CTA. Yellow is reserved: this is the only thing that gets to be yellow.
+// The CTA. The action color is reserved: this is the only thing that gets it.
 export function ActionButton({ label, onPress, arrow = true, size = 'md', disabled, block, style }: ActionButtonProps) {
+  const { colors } = useTheme();
   const lg = size === 'lg';
   return (
     <Sticker
-      color={ACTION}
-      borderColor={INK}
+      color={colors.action}
+      borderColor={colors.actionInk}
       borderWidth={KEYLINE_HEAVY}
       shadow={SHADOW_CARD}
       radius={lg ? 16 : 14}
@@ -33,8 +35,8 @@ export function ActionButton({ label, onPress, arrow = true, size = 'md', disabl
         style,
       ]}
     >
-      <Text style={[styles.label, { fontSize: lg ? 20 : 18 }]}>{label}</Text>
-      {arrow && <Text style={[styles.label, { fontSize: lg ? 22 : 18 }]}>→</Text>}
+      <Text style={[styles.label, { fontSize: lg ? 20 : 18, color: colors.actionInk }]}>{label}</Text>
+      {arrow && <Text style={[styles.label, { fontSize: lg ? 22 : 18, color: colors.actionInk }]}>→</Text>}
     </Sticker>
   );
 }
@@ -45,5 +47,5 @@ const styles = StyleSheet.create({
   lg: { paddingVertical: 15, paddingHorizontal: 18 },
   block: { alignSelf: 'stretch' },
   disabled: { opacity: 0.45 },
-  label: { fontFamily: FONTS.display, color: INK, letterSpacing: -0.3 },
+  label: { fontFamily: FONTS.display, letterSpacing: -0.3 },
 });

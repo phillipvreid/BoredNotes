@@ -2,18 +2,22 @@ import type { PromptCategory, PromptModifiers } from '../types';
 import type { PromptContext } from '../context/types';
 
 export interface AiPromptInput {
-  category: PromptCategory;
+  // Homescreen/contextual prompts pass a category to stay within the library's
+  // taxonomy. Help Me Write omits it — those prompts are chip-driven instead
+  // (see buildTopicInstruction) and shouldn't be tied to observe/reflect/etc.
+  category?: PromptCategory;
   depth: 1 | 2 | 3;
   recentTopics: string[];
   context?: PromptContext;
-  modifiers?: Pick<PromptModifiers, 'time' | 'place' | 'weather'>;
+  modifiers?: PromptModifiers;
 }
 
 const TIMEOUT_MS = 2000;
-const DEFAULT_CONTEXT_MODIFIERS: Pick<PromptModifiers, 'time' | 'place' | 'weather'> = {
+const DEFAULT_CONTEXT_MODIFIERS: PromptModifiers = {
   time: true,
   place: true,
   weather: true,
+  memory: true,
 };
 
 function buildContextLine(
@@ -47,6 +51,43 @@ function buildContextLine(
   return `It's ${ctx.weatherCondition}, ${ctx.temperatureCelsius}°C.`;
 }
 
+// Help Me Write has no homescreen category to anchor to — the active chips
+// are the only signal for what the prompt should actually be about, so each
+// one gets a concrete angle (with an example) rather than a vague topic name.
+// The place angle is deliberately forceful: it must produce a place-specific
+// question, naming the user's actual location when we have it.
+function buildTopicInstruction(modifiers: PromptModifiers, context?: PromptContext): string {
+  const angles: string[] = [];
+  if (modifiers.place) {
+    const loc = context?.locationLabel;
+    angles.push(
+      loc
+        ? `a specific place — it MUST be about a place, never abstract. Either ask about where they are right now (${loc}) by name, or ask them to name and talk about a favorite spot. Keep it concrete and place-specific, e.g. "What's your favorite bar in ${loc}?" or "What's the best-kept secret of ${loc}?"`
+        : `a specific place — it MUST be about a place, never abstract. Ask them to name and talk about a favorite spot: a bar, a park, a café, a neighborhood. Keep it concrete, e.g. "What's your favorite bar in your city?" or "What's a place near you that never gets old?"`
+    );
+  }
+  if (modifiers.weather) {
+    angles.push(
+      'the weather right now and how it\'s nudging their mood, plans, or energy'
+    );
+  }
+  if (modifiers.time) {
+    angles.push(
+      'this specific time of day, day of week, or season, and what that stretch of time usually means for them'
+    );
+  }
+  if (modifiers.memory) {
+    angles.push(
+      'something they touched on recently, inviting them to go further without just repeating it'
+    );
+  }
+
+  if (angles.length === 0) {
+    return 'a broad, low-stakes writing spark — something anyone could answer regardless of time, place, or mood, meant purely to get them writing something, anything';
+  }
+  return angles.join('; and ');
+}
+
 export async function generateAiPrompt(
   input: AiPromptInput,
   apiKey: string
@@ -61,12 +102,16 @@ export async function generateAiPrompt(
     ? " Don't force every detail into one short question — only use what makes it feel timely or personal."
     : '';
 
+  const topicInstruction = input.category
+    ? `in the "${input.category}" category`
+    : `about ${buildTopicInstruction(modifiers, input.context)}`;
+
   const body = JSON.stringify({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 80,
     messages: [{
       role: 'user',
-      content: `${contextLine ? contextLine + ' ' : ''}Generate one ${depthLabel} journaling prompt in the "${input.category}" category.${steeringLine} ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
+      content: `${contextLine ? contextLine + ' ' : ''}Generate one ${depthLabel} journaling prompt ${topicInstruction}.${steeringLine} ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
     }],
   });
 

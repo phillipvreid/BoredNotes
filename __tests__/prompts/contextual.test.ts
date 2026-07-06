@@ -77,14 +77,26 @@ describe('getContextualPrompt', () => {
     );
   });
 
-  it('passes time/place/weather modifiers through to the AI call', async () => {
+  it('passes the full modifiers object through to the AI call', async () => {
     const db = makeMockDb();
     mockGenerateAiPrompt.mockResolvedValue('A prompt');
 
     await getContextualPrompt(db as any, { time: true, place: false, weather: false, memory: true });
 
     expect(mockGenerateAiPrompt).toHaveBeenCalledWith(
-      expect.objectContaining({ modifiers: { time: true, place: false, weather: false } }),
+      expect.objectContaining({ modifiers: { time: true, place: false, weather: false, memory: true } }),
+      expect.any(String)
+    );
+  });
+
+  it('never passes a homescreen category to the AI call — Help Me Write is chip-driven', async () => {
+    const db = makeMockDb();
+    mockGenerateAiPrompt.mockResolvedValue('A prompt');
+
+    await getContextualPrompt(db as any, DEFAULT_MODIFIERS);
+
+    expect(mockGenerateAiPrompt).toHaveBeenCalledWith(
+      expect.not.objectContaining({ category: expect.anything() }),
       expect.any(String)
     );
   });

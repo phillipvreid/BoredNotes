@@ -7,7 +7,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { getDb } from '../db/database';
 import { getAllEntries, searchEntries } from '../db/entries';
 import { useTheme } from '../theme/ThemeContext';
-import { ACTION, CAT_HUES, CATEGORY_STYLES, DEFEND_PAD, FONTS, INK, MEDALS, SHADOW_CARD } from '../theme/tokens';
+import { DEFEND_PAD, FONTS, INK, MEDALS, SHADOW_CARD } from '../theme/tokens';
 import { HITS_COPY } from '../theme/copy';
 import { Sticker } from '../components/ui/Sticker';
 import { parseRankData } from '../games/rank';
@@ -41,7 +41,7 @@ function groupByDate(entries: Entry[]): { date: string; items: Entry[] }[] {
 }
 
 export function FeedTab() {
-  const { colors } = useTheme();
+  const { colors, catHues, categoryStyles } = useTheme();
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
 
@@ -92,9 +92,9 @@ export function FeedTab() {
             {group.items.map((entry, i) => {
               const freeform = entry.entry_mode === 'freeform';
               const rank = entry.entry_kind === 'rank' ? parseRankData(entry.game_data) : null;
-              const catStyle = !freeform && !rank && entry.category ? CATEGORY_STYLES[entry.category] : null;
-              const pillBg = rank ? CAT_HUES.rank : freeform ? ACTION : catStyle ? catStyle.color : colors.badgeBg;
-              const pillFg = rank ? '#fff' : freeform ? INK : catStyle ? '#fff' : colors.badgeFg;
+              const catStyle = !freeform && !rank && entry.category ? categoryStyles[entry.category] : null;
+              const pillBg = rank ? catHues.rank : freeform ? colors.action : catStyle ? catStyle.color : colors.badgeBg;
+              const pillFg = rank ? '#fff' : freeform ? colors.actionInk : catStyle ? '#fff' : colors.badgeFg;
               const pillLabel = rank ? 'RANK + DEFEND' : freeform ? 'BRAIN DUMP' : catStyle ? catStyle.label : 'PROMPTED';
               return (
                 <Sticker

@@ -39,6 +39,17 @@ export const REPLY_COPY = {
   freeformSend: 'DUMP IT',
 };
 
+// Shown when bailing out of a half-written entry. Warn only past this many
+// words, so a stray letter or two doesn't nag.
+export const DISCARD_WARN_MIN_WORDS = 8;
+
+export const DISCARD_COPY = {
+  title: 'Bailing already?',
+  body: 'You actually wrote something. Throw it out?',
+  keep: 'Keep going',
+  discard: 'Trash it',
+};
+
 // Live word-counter heckles, keyed by word-count thresholds (>=), checked highest first.
 const WORD_COUNTER: Array<[number, string]> = [
   [41, "okay, you're writing a memoir"],

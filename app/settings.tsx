@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useTheme } from '../src/theme/ThemeContext';
-import { PAPERS, FONTS } from '../src/theme/tokens';
+import { THEMES, FONTS } from '../src/theme/tokens';
 import { IconSticker } from '../src/components/ui/IconSticker';
 import { getDb } from '../src/db/database';
 import { getSetting, setSetting } from '../src/db/settings';
@@ -14,7 +14,7 @@ import { exportEntriesToCsv } from '../src/export/share';
 const version = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
-  const { colors, paper, isDark, setPaper, setDarkMode } = useTheme();
+  const { colors, theme, isDark, setTheme, setDarkMode } = useTheme();
   const [offlineMode, setOfflineMode] = useState(false);
   const [toggling, setToggling] = useState(false);
 
@@ -84,20 +84,25 @@ export default function SettingsScreen() {
         <Text style={[styles.sectionHead, { color: colors.textMuted }]}>APPEARANCE</Text>
 
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
-          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Paper</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Theme</Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>{theme.label}</Text>
+          </View>
           <View style={styles.swatches}>
-            {PAPERS.map(swatch => (
+            {THEMES.map(t => (
               <TouchableOpacity
-                key={swatch.id}
+                key={t.id}
                 style={[styles.swatch, {
-                  backgroundColor: isDark ? swatch.dark : swatch.light,
+                  backgroundColor: isDark ? t.paper.dark : t.paper.light,
                   borderColor: colors.border,
-                  borderWidth: paper.id === swatch.id ? 2.5 : 1,
+                  borderWidth: theme.id === t.id ? 2.5 : 1,
                 }]}
-                onPress={() => setPaper(swatch.id)}
+                onPress={() => setTheme(t.id)}
               >
-                {paper.id === swatch.id && (
+                {theme.id === t.id ? (
                   <Feather name="check" size={14} color={colors.textPrimary} />
+                ) : (
+                  <View style={[styles.swatchDot, { backgroundColor: t.action }]} />
                 )}
               </TouchableOpacity>
             ))}
@@ -193,9 +198,10 @@ const styles = StyleSheet.create({
   rowValue: { fontSize: 15 },
   rowTextBlock: { flex: 1 },
   rowSubLabel: { fontSize: 12, marginTop: 2 },
-  swatches: { flexDirection: 'row', gap: 10 },
+  swatches: { flexDirection: 'row', gap: 8 },
   swatch: {
     width: 28, height: 28, borderRadius: 14,
     alignItems: 'center', justifyContent: 'center',
   },
+  swatchDot: { width: 10, height: 10, borderRadius: 5 },
 });

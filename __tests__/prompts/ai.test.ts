@@ -121,7 +121,7 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: false, place: false, weather: true },
+        modifiers: { time: false, place: false, weather: true, memory: false },
       },
       MOCK_KEY
     );
@@ -147,7 +147,7 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: false, place: true, weather: false },
+        modifiers: { time: false, place: true, weather: false, memory: false },
       },
       MOCK_KEY
     );
@@ -172,7 +172,7 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: true, place: false, weather: false },
+        modifiers: { time: true, place: false, weather: false, memory: false },
       },
       MOCK_KEY
     );
@@ -196,7 +196,7 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: true, place: false, weather: true },
+        modifiers: { time: true, place: false, weather: true, memory: false },
       },
       MOCK_KEY
     );
@@ -221,7 +221,7 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: false, place: false, weather: false },
+        modifiers: { time: false, place: false, weather: false, memory: false },
       },
       MOCK_KEY
     );
@@ -246,12 +246,113 @@ describe('generateAiPrompt', () => {
           timeOfDay: 'evening', dayOfWeek: 'Thursday', season: 'autumn',
           locationLabel: 'Edinburgh, Scotland', weatherCondition: 'rainy', temperatureCelsius: 11,
         },
-        modifiers: { time: true, place: false, weather: false },
+        modifiers: { time: true, place: false, weather: false, memory: false },
       },
       MOCK_KEY
     );
 
     const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
     expect(body.messages[0].content).toContain('only use what makes it feel timely or personal');
+  });
+
+  describe('Help Me Write (no category — chip-driven)', () => {
+    it('never mentions a homescreen category when category is omitted', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'What do you notice around you?' }] }),
+      } as any);
+
+      await generateAiPrompt(
+        { depth: 1, recentTopics: [], modifiers: { time: false, place: true, weather: false, memory: false } },
+        MOCK_KEY
+      );
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).not.toContain('category');
+    });
+
+    it('builds a place-forcing instruction when only the place chip is active', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+      } as any);
+
+      await generateAiPrompt(
+        { depth: 1, recentTopics: [], modifiers: { time: false, place: true, weather: false, memory: false } },
+        MOCK_KEY
+      );
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).toContain('MUST be about a place');
+      expect(body.messages[0].content).not.toContain('weather right now');
+      expect(body.messages[0].content).not.toContain('time of day');
+    });
+
+    it('names the actual location in the place instruction when context has one', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+      } as any);
+
+      await generateAiPrompt(
+        {
+          depth: 1,
+          recentTopics: [],
+          context: {
+            timeOfDay: 'evening', dayOfWeek: 'Friday', season: 'summer',
+            locationLabel: 'San Francisco', weatherCondition: 'clear', temperatureCelsius: 20,
+          },
+          modifiers: { time: false, place: true, weather: false, memory: false },
+        },
+        MOCK_KEY
+      );
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).toContain('MUST be about a place');
+      expect(body.messages[0].content).toContain("favorite bar in San Francisco");
+    });
+
+    it('combines multiple active chips into one instruction', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+      } as any);
+
+      await generateAiPrompt(
+        { depth: 1, recentTopics: [], modifiers: { time: false, place: true, weather: true, memory: false } },
+        MOCK_KEY
+      );
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).toContain('MUST be about a place');
+      expect(body.messages[0].content).toContain('weather right now');
+    });
+
+    it('falls back to a broad spark instruction when no chips are active', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+      } as any);
+
+      await generateAiPrompt(
+        { depth: 1, recentTopics: [], modifiers: { time: false, place: false, weather: false, memory: false } },
+        MOCK_KEY
+      );
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).toContain('low-stakes writing spark');
+    });
+
+    it('uses the homescreen-category instruction when category is provided (unchanged homescreen path)', async () => {
+      global.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+      } as any);
+
+      await generateAiPrompt({ category: 'creative', depth: 1, recentTopics: [] }, MOCK_KEY);
+
+      const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+      expect(body.messages[0].content).toContain('in the "creative" category');
+    });
   });
 });
