@@ -10,7 +10,6 @@ Pulled from `TODO.md` as of 2026-07-06. Run via `npx expo run:ios` on simulator/
 
 ## New from this test pass (2026-07-06)
 
-- [ ] Blue Raspberry ActionButton orange → now `#3FB2FF` blue. Verify on device; tune the hex in `src/theme/tokens.ts` if it reads wrong next to REFLECT blue.
 - [ ] App icon — parked: design it in the claude.ai/design Arcade Sticker project first, then wire `assets/icon.png` + the `icon` field in `app.json` and re-run prebuild.
 
 ## Polish / known gaps
@@ -22,6 +21,7 @@ Pulled from `TODO.md` as of 2026-07-06. Run via `npx expo run:ios` on simulator/
 
 ## Fixed, confirmed on device
 
+- [x] Blue Raspberry ActionButton is `#3FB2FF` blue (verified 2026-07-06, reads well next to REFLECT blue).
 - [x] Respond screen: Send button no longer hidden below keyboard (verified 2026-07-06; keyboard-aware padding collapse + smaller input min-heights). Rank & Defend may still scroll (by design).
 - [x] Photo/Camera/Place chips removed from respond screen (verified 2026-07-06). PLACE returns later with a more streamlined approach (see TODO).
 - [x] Home screen jagged sticker keylines — tilted stickers now rasterize on iOS (verified 2026-07-06 on the tilted Home cards).
