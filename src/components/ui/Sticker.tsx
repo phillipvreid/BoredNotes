@@ -48,8 +48,12 @@ export function Sticker({
     style,
   ];
 
+  // Rotated layers don't edge-anti-alias on iOS; rasterizing the tilted
+  // sticker keeps its keyline crisp. Untilted stickers skip the memory cost.
+  const rasterize = tilt !== 0;
+
   if (!onPress && !onLongPress) {
-    return <View style={surface}>{children}</View>;
+    return <View style={surface} shouldRasterizeIOS={rasterize}>{children}</View>;
   }
 
   return (
@@ -60,6 +64,7 @@ export function Sticker({
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
       style={surface}
+      shouldRasterizeIOS={rasterize}
     >
       {children}
     </Pressable>
