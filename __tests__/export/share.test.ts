@@ -54,7 +54,7 @@ describe('exportEntriesToCsv', () => {
     const { File } = require('expo-file-system/next') as { File: jest.Mock };
     const fileInstance = File.mock.results[0].value as { write: jest.Mock; uri: string };
     expect(fileInstance.write).toHaveBeenCalledWith(
-      'id,created_at,entry_mode,prompt_text,response_text,location_label,location_lat,location_lng'
+      'id,created_at,entry_mode,prompt_text,response_text,location_label,location_lat,location_lng,category,entry_kind,game_data'
     );
     expect(Sharing.shareAsync).toHaveBeenCalled();
   });

@@ -14,7 +14,7 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [ ] Review flat offset shadows and ink keylines on smaller iPhone screens (SE-class) for cramping/overlap.
 - [ ] Confirm Mascot bob/blink animation doesn't drain battery or jank on older devices.
 - [ ] Sanity-check the global Toast doesn't stack or overlap with the Share sheet.
-- [ ] Re-check CSV export and search still work with `entry_kind`/`game_data` for game entries (response_text plain-text fallback).
+- [x] Re-check CSV export and search still work with `entry_kind`/`game_data` for game entries (response_text plain-text fallback). Verified: search already matched game entries because rank entries store `renderRankResponseText()` output in `response_text` (locked in with searchEntries tests). CSV now also exports `category`/`entry_kind`/`game_data` columns and rebuilds response_text from `game_data` if it's ever empty.
 
 ## Housekeeping
 - [ ] Write/save a design spec + plan doc for the Arcade Sticker rollout under `docs/superpowers/specs` and `docs/superpowers/plans` (all other features have one; this one doesn't yet).

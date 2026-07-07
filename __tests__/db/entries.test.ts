@@ -1,4 +1,4 @@
-import { createEntry, getYearsWithEntries } from '../../src/db/entries';
+import { createEntry, getYearsWithEntries, searchEntries } from '../../src/db/entries';
 import { openDatabaseAsync } from 'expo-sqlite';
 
 describe('createEntry', () => {
@@ -77,6 +77,39 @@ describe('createEntry', () => {
     });
     const callArgs = db.runAsync.mock.calls[0][1];
     expect(callArgs[8]).toBeNull();
+  });
+});
+
+describe('searchEntries', () => {
+  let db: any;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    db = await openDatabaseAsync('test.db');
+  });
+
+  it('matches response_text, prompt_text, and location_label with a wildcarded term', async () => {
+    db.getAllAsync.mockResolvedValueOnce([]);
+    await searchEntries(db, 'pizza');
+    const [sql, params] = db.getAllAsync.mock.calls[0];
+    expect(sql).toContain('response_text LIKE ?');
+    expect(sql).toContain('prompt_text LIKE ?');
+    expect(sql).toContain('location_label LIKE ?');
+    expect(params).toEqual(['%pizza%', '%pizza%', '%pizza%']);
+  });
+
+  it('finds game entries via their plain-text response_text rendering', async () => {
+    // Rank entries store renderRankResponseText() output in response_text,
+    // so the ranked items and defense are searchable without touching game_data.
+    const rankEntry = {
+      id: 7,
+      entry_kind: 'rank',
+      response_text: '1. pizza\n2. cereal\n3. clementine\n\nDefend #1: it asks nothing of me',
+      game_data: '{"items":["pizza","cereal","clementine"],"defense":"it asks nothing of me"}',
+    };
+    db.getAllAsync.mockResolvedValueOnce([rankEntry]);
+    const results = await searchEntries(db, 'clementine');
+    expect(results).toEqual([rankEntry]);
   });
 });
 
