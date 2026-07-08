@@ -5,8 +5,8 @@ export type MediaType = 'photo' | 'voice';
 // Micro-game plumbing: a prompt's kind selects the reply UI, its game_config
 // (JSON) parameterizes it; the entry stores structured game_data (JSON) plus a
 // plain-text rendering in response_text so search/export/share keep working.
-export type PromptKind = 'text' | 'rank';
-export type EntryKind = 'text' | 'rank';
+export type PromptKind = 'text' | 'rank' | 'loveHate';
+export type EntryKind = 'text' | 'rank' | 'loveHate';
 
 export interface RankGameConfig {
   slots: string[];   // placeholder text per rank slot, best first
@@ -15,6 +15,16 @@ export interface RankGameConfig {
 export interface RankGameData {
   items: string[];   // what the user ranked, best first
   defense: string;   // the defense of #1
+}
+
+export interface LoveHateGameConfig {
+  themes: string[];  // theme pool; one is dealt at random when the game opens
+}
+
+export interface LoveHateGameData {
+  theme: string;     // the dealt theme
+  love: string;
+  hate: string;
 }
 
 export interface Entry {
