@@ -18,6 +18,9 @@ import {
   DEFAULT_RANK_SLOTS, RANK_SLOT_COUNT, parseRankConfig, renderRankResponseText,
 } from '../src/games/rank';
 import {
+  LOVE_HATE_FRAMING, parseLoveHateConfig, pickLoveHateTheme, renderLoveHateResponseText,
+} from '../src/games/loveHate';
+import {
   FONTS, INK, DEFEND_PAD, KEYLINE_HEAVY, SHADOW_STICKER, SHADOW_SM, CHIP_SCRIM,
 } from '../src/theme/tokens';
 import { REPLY_COPY, wordCounterLine, DISCARD_COPY, DISCARD_WARN_MIN_WORDS } from '../src/theme/copy';
@@ -41,7 +44,7 @@ const CHIP_KEYS: (keyof PromptModifiers)[] = ['place', 'time', 'weather', 'memor
 const RANK_TILTS = [-6, 5, -4];
 
 export default function RespondScreen() {
-  const { colors, categoryStyles } = useTheme();
+  const { colors, categoryStyles, catHues } = useTheme();
   const { showToast } = useToast();
   const navigation = useNavigation();
   // Set right before a successful save navigates away, so the unsaved-content
@@ -60,6 +63,7 @@ export default function RespondScreen() {
       }
     : null;
   const isRank = cardPrompt?.kind === 'rank';
+  const isLoveHate = cardPrompt?.kind === 'loveHate';
   const rankSlots = isRank
     ? (parseRankConfig(cardPrompt?.game_config)?.slots ?? DEFAULT_RANK_SLOTS)
     : DEFAULT_RANK_SLOTS;
@@ -67,6 +71,12 @@ export default function RespondScreen() {
   const [response, setResponse] = useState('');
   const [rankItems, setRankItems] = useState<string[]>(Array(RANK_SLOT_COUNT).fill(''));
   const [defense, setDefense] = useState('');
+  // Deal the theme once per screen life — re-renders never reshuffle it.
+  const [dealtTheme] = useState(() =>
+    isLoveHate ? pickLoveHateTheme(parseLoveHateConfig(cardPrompt?.game_config)?.themes) : ''
+  );
+  const [love, setLove] = useState('');
+  const [hate, setHate] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -109,7 +119,9 @@ export default function RespondScreen() {
   const responseWordCount = response.trim() === '' ? 0 : response.trim().split(/\s+/).length;
   const hasUnsavedContent = isRank
     ? rankItems.some(i => i.trim() !== '') || defense.trim() !== ''
-    : responseWordCount >= DISCARD_WARN_MIN_WORDS;
+    : isLoveHate
+      ? love.trim() !== '' || hate.trim() !== ''
+      : responseWordCount >= DISCARD_WARN_MIN_WORDS;
 
   // Guard every exit path when there's meaningful unsaved input. beforeRemove
   // covers the back button and Android hardware back; disabling the swipe
@@ -194,10 +206,14 @@ export default function RespondScreen() {
   async function handleSubmit() {
     const rankData = { items: rankItems.map(i => i.trim()), defense: defense.trim() };
     const rankComplete = rankData.items.every(i => i !== '') && rankData.defense !== '';
-    if (isRank ? !rankComplete : !response.trim()) {
+    const loveHateData = { theme: dealtTheme, love: love.trim(), hate: hate.trim() };
+    const loveHateComplete = loveHateData.love !== '' && loveHateData.hate !== '';
+    if (isRank ? !rankComplete : isLoveHate ? !loveHateComplete : !response.trim()) {
       Alert.alert('Write something first', isRank
         ? 'Fill all three slots and defend your #1.'
-        : 'Your response cannot be empty.');
+        : isLoveHate
+          ? 'One love, one hate. Both. That\'s the game.'
+          : 'Your response cannot be empty.');
       return;
     }
     setSubmitting(true);
@@ -205,13 +221,21 @@ export default function RespondScreen() {
       const db = await getDb();
       const entryId = await createEntry(db, {
         prompt_text: activePrompt?.text ?? '',
-        response_text: isRank ? renderRankResponseText(rankData) : response.trim(),
+        response_text: isRank
+          ? renderRankResponseText(rankData)
+          : isLoveHate
+            ? renderLoveHateResponseText(loveHateData)
+            : response.trim(),
         location_label: locationLabel || undefined,
         location_lat: locationCoords?.lat,
         location_lng: locationCoords?.lng,
         entry_mode: prompted ? 'prompted' : 'freeform',
-        entry_kind: isRank ? 'rank' : 'text',
-        game_data: isRank ? JSON.stringify(rankData) : null,
+        entry_kind: isRank ? 'rank' : isLoveHate ? 'loveHate' : 'text',
+        game_data: isRank
+          ? JSON.stringify(rankData)
+          : isLoveHate
+            ? JSON.stringify(loveHateData)
+            : null,
         category: prompted ? activePrompt?.category ?? null : null,
       });
       if (locationCoords && !locationLabel) {
@@ -244,12 +268,13 @@ export default function RespondScreen() {
   // keep the card's hue for visual variety) so it never reads as a home card.
   const activeChipLabels = CHIP_KEYS.filter(k => modifiers[k]).map(k => CHIP_LABELS[k]);
   const promptPillLabel = cardPrompt
-    ? catStyle?.label
+    ? (isLoveHate ? 'LOVE IT / HATE IT' : catStyle?.label)
     : (activeChipLabels.length > 0 ? activeChipLabels.join(' + ') : 'SPARK');
   const headerLabel = prompted ? REPLY_COPY.promptedLabel : REPLY_COPY.freeformLabel;
   const sendLabel = prompted ? REPLY_COPY.promptedSend : REPLY_COPY.freeformSend;
   const rankFilled = rankItems.every(i => i.trim() !== '') && defense.trim() !== '';
-  const sendDisabled = (isRank ? !rankFilled : !response.trim())
+  const loveHateFilled = love.trim() !== '' && hate.trim() !== '';
+  const sendDisabled = (isRank ? !rankFilled : isLoveHate ? !loveHateFilled : !response.trim())
     || submitting || (helpMeWriteOpen && promptLoading);
 
   return (
@@ -289,9 +314,16 @@ export default function RespondScreen() {
                   </View>
                 )}
               </View>
-              <Text style={styles.promptTxt}>
-                {promptLoading ? '…' : activePrompt.text}
-              </Text>
+              {isLoveHate ? (
+                <>
+                  <Text style={styles.lhTheme}>{dealtTheme}</Text>
+                  <Text style={styles.lhFraming}>{LOVE_HATE_FRAMING}</Text>
+                </>
+              ) : (
+                <Text style={styles.promptTxt}>
+                  {promptLoading ? '…' : activePrompt.text}
+                </Text>
+              )}
               {/* Help Me Write can be dismissed from the corner; rerolling is
                   done by toggling a chip below, so no ANOTHER button needed. */}
               {!cardPrompt && (
@@ -351,6 +383,34 @@ export default function RespondScreen() {
                 />
               </Sticker>
             </View>
+          ) : isLoveHate ? (
+            <View style={styles.lhStack}>
+              <Sticker borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.lhRow}>
+                <View style={[styles.lhTag, { backgroundColor: catHues.rank }]}>
+                  <Text style={styles.lhTagTxt}>LOVE IT</Text>
+                </View>
+                <TextInput
+                  style={[styles.lhInput, { color: colors.textPrimary }]}
+                  placeholder="the one you'd defend in court…"
+                  placeholderTextColor={colors.when}
+                  autoFocus
+                  value={love}
+                  onChangeText={setLove}
+                />
+              </Sticker>
+              <Sticker borderWidth={KEYLINE_HEAVY} shadow={SHADOW_SM} radius={14} style={styles.lhRow}>
+                <View style={[styles.lhTag, { backgroundColor: catHues.gossip }]}>
+                  <Text style={styles.lhTagTxt}>HATE IT</Text>
+                </View>
+                <TextInput
+                  style={[styles.lhInput, { color: colors.textPrimary }]}
+                  placeholder="the one that should apologize…"
+                  placeholderTextColor={colors.when}
+                  value={hate}
+                  onChangeText={setHate}
+                />
+              </Sticker>
+            </View>
           ) : (
           <Sticker borderWidth={KEYLINE_HEAVY} shadow={4} radius={16} style={styles.inputCard}>
             <TextInput
@@ -385,7 +445,7 @@ export default function RespondScreen() {
               keyboard is up, so the send button still lands above it. */}
           <View style={styles.footerRow}>
             <Text style={[styles.counter, { color: colors.textMuted }]}>
-              {isRank ? (rankFilled ? 'committed to the bit' : 'no scoring. just commit.') : wordCounterLine(response)}
+              {isLoveHate ? '' : isRank ? (rankFilled ? 'committed to the bit' : 'no scoring. just commit.') : wordCounterLine(response)}
             </Text>
             <ActionButton
               label={submitting ? 'SAVING…' : sendLabel}
@@ -426,6 +486,25 @@ const styles = StyleSheet.create({
     height: 52, paddingHorizontal: 13, overflow: 'visible',
   },
   rankInput: { flex: 1, fontFamily: FONTS.bodySemiBold, fontSize: 16, paddingVertical: 0 },
+  lhStack: { gap: 12 },
+  lhRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    height: 52, paddingHorizontal: 13,
+  },
+  lhTag: {
+    borderWidth: 2, borderColor: INK, borderRadius: 7,
+    paddingVertical: 4, paddingHorizontal: 7,
+  },
+  lhTagTxt: { fontFamily: FONTS.label, fontSize: 9, letterSpacing: 0.5, color: '#fff' },
+  lhInput: { flex: 1, fontFamily: FONTS.bodySemiBold, fontSize: 16, paddingVertical: 0 },
+  lhTheme: {
+    fontFamily: FONTS.display, fontSize: 30, lineHeight: 33, letterSpacing: -0.3,
+    color: '#fff', marginTop: 8,
+  },
+  lhFraming: {
+    fontFamily: FONTS.body, fontSize: 13, lineHeight: 17, color: 'rgba(255,255,255,.9)',
+    marginTop: 3, maxWidth: 220,
+  },
   defendPad: { minHeight: 110, paddingVertical: 11, paddingHorizontal: 13 },
   defendLabel: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#141414' },
   defendInput: {

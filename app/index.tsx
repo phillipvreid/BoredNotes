@@ -89,6 +89,7 @@ export default function HomeScreen() {
         <View style={styles.cardStack}>
           {cards.map((prompt, i) => {
             const cat = categoryStyles[prompt.category];
+            const pillLabel = prompt.kind === 'loveHate' ? 'LOVE IT / HATE IT' : cat.label;
             return (
               <Sticker
                 key={prompt.id}
@@ -103,7 +104,7 @@ export default function HomeScreen() {
               >
                 <View style={styles.cardMeta}>
                   <View style={styles.catPill}>
-                    <Text style={styles.catPillTxt}>{cat.label}</Text>
+                    <Text style={styles.catPillTxt}>{pillLabel}</Text>
                   </View>
                   <Text style={styles.catKind}>{cat.kind}</Text>
                 </View>
