@@ -49,7 +49,9 @@ export function Mascot({ size = 96, variant = 'red', bob = true, bobDirection = 
   const kl = Math.max(1.5, 3 * s);
 
   return (
-    <Animated.View style={{ width: size, height: h, transform: bob ? [{ translateY }, { rotate }] : [] }}>
+    // A transform whose op list changes shape crashes Fabric's LayoutAnimation
+    // interpolator, so keep both ops present and neutralize them when not bobbing.
+    <Animated.View style={{ width: size, height: h, transform: [{ translateY: bob ? translateY : 0 }, { rotate: bob ? rotate : '0deg' }] }}>
       <View style={[styles.body, {
         backgroundColor: body, borderWidth: kl,
         borderTopLeftRadius: size * 0.5, borderTopRightRadius: size * 0.5,
