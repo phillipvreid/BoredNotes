@@ -9,6 +9,7 @@ interface LibraryPrompt {
   depth: number;
   kind?: string;
   slots?: string[];
+  themes?: string[];
 }
 
 // Top-up seeding: insert any library prompt whose text isn't in the DB yet,
@@ -26,7 +27,11 @@ export async function seedLibraryIfNeeded(db: SQLiteDatabase): Promise<void> {
       prompt.depth as 1 | 2 | 3,
       'library',
       (prompt.kind ?? 'text') as PromptKind,
-      prompt.slots ? JSON.stringify({ slots: prompt.slots }) : null
+      prompt.slots
+        ? JSON.stringify({ slots: prompt.slots })
+        : prompt.themes
+          ? JSON.stringify({ themes: prompt.themes })
+          : null
     );
   }
 }

@@ -24,6 +24,18 @@ describe('seedLibraryIfNeeded', () => {
     }
   });
 
+  it('seeds the loveHate prompt with a themes config', async () => {
+    db.getAllAsync.mockResolvedValueOnce([]);
+    await seedLibraryIfNeeded(db);
+
+    const lhCalls = db.runAsync.mock.calls.filter((c: any[]) => c[1][4] === 'loveHate');
+    expect(lhCalls).toHaveLength(1);
+    expect(lhCalls[0][1][1]).toBe('game'); // category
+    const config = JSON.parse(lhCalls[0][1][5]);
+    expect(config.themes.length).toBeGreaterThanOrEqual(20);
+    expect(config.themes.every((t: unknown) => typeof t === 'string')).toBe(true);
+  });
+
   it('tops up only missing prompts on an already-seeded DB', async () => {
     const existing = (library as Array<{ text: string }>).slice(0, library.length - 3);
     db.getAllAsync.mockResolvedValueOnce(existing.map(p => ({ text: p.text })));

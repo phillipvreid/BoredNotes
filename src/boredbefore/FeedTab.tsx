@@ -11,6 +11,7 @@ import { DEFEND_PAD, FONTS, INK, MEDALS, SHADOW_CARD } from '../theme/tokens';
 import { HITS_COPY } from '../theme/copy';
 import { Sticker } from '../components/ui/Sticker';
 import { parseRankData } from '../games/rank';
+import { parseLoveHateData } from '../games/loveHate';
 import type { Entry } from '../types';
 
 const CARD_TILTS = [-1, 0.9, -0.7];
@@ -92,10 +93,11 @@ export function FeedTab() {
             {group.items.map((entry, i) => {
               const freeform = entry.entry_mode === 'freeform';
               const rank = entry.entry_kind === 'rank' ? parseRankData(entry.game_data) : null;
-              const catStyle = !freeform && !rank && entry.category ? categoryStyles[entry.category] : null;
-              const pillBg = rank ? catHues.rank : freeform ? colors.action : catStyle ? catStyle.color : colors.badgeBg;
-              const pillFg = rank ? '#fff' : freeform ? colors.actionInk : catStyle ? '#fff' : colors.badgeFg;
-              const pillLabel = rank ? 'RANK + DEFEND' : freeform ? 'BRAIN DUMP' : catStyle ? catStyle.label : 'PROMPTED';
+              const loveHate = entry.entry_kind === 'loveHate' ? parseLoveHateData(entry.game_data) : null;
+              const catStyle = !freeform && !rank && !loveHate && entry.category ? categoryStyles[entry.category] : null;
+              const pillBg = loveHate ? catHues.nostalgia : rank ? catHues.rank : freeform ? colors.action : catStyle ? catStyle.color : colors.badgeBg;
+              const pillFg = loveHate || rank ? '#fff' : freeform ? colors.actionInk : catStyle ? '#fff' : colors.badgeFg;
+              const pillLabel = loveHate ? 'LOVE + HATE' : rank ? 'RANK + DEFEND' : freeform ? 'BRAIN DUMP' : catStyle ? catStyle.label : 'PROMPTED';
               return (
                 <Sticker
                   key={entry.id}
@@ -136,6 +138,26 @@ export function FeedTab() {
                         <Text style={styles.defenseTxt} numberOfLines={3}>{rank.defense}</Text>
                       </View>
                     </>
+                  ) : loveHate ? (
+                    <View style={styles.lhList}>
+                      <Text style={[styles.lhTheme, { color: colors.textPrimary }]}>{loveHate.theme}</Text>
+                      <View style={styles.lhRow}>
+                        <View style={[styles.lhTag, { backgroundColor: catHues.rank }]}>
+                          <Text style={styles.lhTagTxt}>LOVE IT</Text>
+                        </View>
+                        <Text style={[styles.lhItem, { color: colors.textPrimary }]} numberOfLines={1}>
+                          {loveHate.love}
+                        </Text>
+                      </View>
+                      <View style={styles.lhRow}>
+                        <View style={[styles.lhTag, { backgroundColor: catHues.gossip }]}>
+                          <Text style={styles.lhTagTxt}>HATE IT</Text>
+                        </View>
+                        <Text style={[styles.lhItem, { color: colors.textPrimary }]} numberOfLines={1}>
+                          {loveHate.hate}
+                        </Text>
+                      </View>
+                    </View>
                   ) : (
                   <Text style={[styles.cardResponse, { color: colors.textPrimary }]} numberOfLines={3}>
                     {entry.response_text}
@@ -190,6 +212,12 @@ const styles = StyleSheet.create({
   medal: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8 },
   medalTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#fff' },
   rankItem: { fontFamily: FONTS.bodySemiBold, fontSize: 15, flex: 1 },
+  lhList: { gap: 6, marginTop: 3 },
+  lhTheme: { fontFamily: FONTS.bodyExtraBold, fontSize: 15 },
+  lhRow: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  lhTag: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8 },
+  lhTagTxt: { fontFamily: FONTS.label, fontSize: 10, letterSpacing: 1, color: '#fff' },
+  lhItem: { fontFamily: FONTS.bodySemiBold, fontSize: 15, flex: 1 },
   defenseBox: {
     backgroundColor: DEFEND_PAD, borderWidth: 2, borderColor: INK,
     borderRadius: 10, paddingVertical: 9, paddingHorizontal: 11, marginTop: 3,
