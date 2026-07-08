@@ -7,6 +7,7 @@ import { getMediaForEntry } from '../../src/db/media';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { DEFEND_PAD, FONTS, INK, MEDALS } from '../../src/theme/tokens';
 import { parseRankData } from '../../src/games/rank';
+import { parseLoveHateData } from '../../src/games/loveHate';
 import type { Entry, MediaItem } from '../../src/types';
 import * as Haptics from 'expo-haptics';
 import { PlaceNameSheet } from '../../src/components/PlaceNameSheet';
@@ -20,7 +21,7 @@ function formatDateTime(iso: string): string {
 }
 
 export default function EntryDetailScreen() {
-  const { colors } = useTheme();
+  const { colors, catHues } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -41,6 +42,7 @@ export default function EntryDetailScreen() {
   if (!entry) return null;
 
   const rank = entry.entry_kind === 'rank' ? parseRankData(entry.game_data) : null;
+  const loveHate = entry.entry_kind === 'loveHate' ? parseLoveHateData(entry.game_data) : null;
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: colors.bg }]}>
@@ -95,6 +97,22 @@ export default function EntryDetailScreen() {
               <Text style={styles.defenseTxt}>{rank.defense}</Text>
             </View>
           </View>
+        ) : loveHate ? (
+          <View style={styles.lhBlock}>
+            <Text style={[styles.lhTheme, { color: colors.textPrimary }]}>{loveHate.theme}</Text>
+            <View style={styles.lhRow}>
+              <View style={[styles.lhTag, { backgroundColor: catHues.rank }]}>
+                <Text style={styles.lhTagTxt}>LOVE IT</Text>
+              </View>
+              <Text style={[styles.lhItem, { color: colors.textPrimary }]}>{loveHate.love}</Text>
+            </View>
+            <View style={styles.lhRow}>
+              <View style={[styles.lhTag, { backgroundColor: catHues.gossip }]}>
+                <Text style={styles.lhTagTxt}>HATE IT</Text>
+              </View>
+              <Text style={[styles.lhItem, { color: colors.textPrimary }]}>{loveHate.hate}</Text>
+            </View>
+          </View>
         ) : (
         <Text style={[styles.response, { color: colors.textPrimary }]}>{entry.response_text}</Text>
         )}
@@ -139,6 +157,12 @@ const styles = StyleSheet.create({
   medal: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 9 },
   medalTxt: { fontFamily: FONTS.label, fontSize: 11, letterSpacing: 1, color: '#fff' },
   rankItem: { fontFamily: FONTS.bodySemiBold, fontSize: 17, flex: 1 },
+  lhBlock: { gap: 10 },
+  lhTheme: { fontFamily: FONTS.display, fontSize: 24, letterSpacing: -0.3 },
+  lhRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  lhTag: { borderRadius: 6, paddingVertical: 3, paddingHorizontal: 9 },
+  lhTagTxt: { fontFamily: FONTS.label, fontSize: 11, letterSpacing: 1, color: '#fff' },
+  lhItem: { fontFamily: FONTS.bodySemiBold, fontSize: 17, flex: 1 },
   defenseBox: {
     backgroundColor: DEFEND_PAD, borderWidth: 2, borderColor: INK,
     borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12, marginTop: 4,
