@@ -73,5 +73,19 @@
   {"text": "Describe the version of yourself you're becoming.", "category": "creative", "depth": 3},
   {"text": "Rank your last 3 snacks. Defend #1.", "category": "game", "depth": 1, "kind": "rank", "slots": ["your undisputed #1…", "the runner-up…", "third place, sorry…"]},
   {"text": "Rank 3 people you would trust with your phone.", "category": "game", "depth": 1, "kind": "rank", "slots": ["most trusted…", "probably fine…", "risky but ok…"]},
-  {"text": "Rank 3 ways to waste a perfectly good afternoon.", "category": "game", "depth": 1, "kind": "rank", "slots": ["the elite waste…", "solid filler…", "desperate measures…"]}
+  {"text": "Rank 3 ways to waste a perfectly good afternoon.", "category": "game", "depth": 1, "kind": "rank", "slots": ["the elite waste…", "solid filler…", "desperate measures…"]},
+  {
+    "text": "Love it / Hate it. The theme decides, you commit.",
+    "category": "game",
+    "depth": 1,
+    "kind": "loveHate",
+    "themes": [
+      "Fruit", "Condiments", "Weather", "Breakfast foods", "Small talk topics",
+      "Pizza toppings", "Cereal", "Coffee orders", "Sandwiches", "Soup",
+      "Ice cream flavors", "Vegetables", "Candy", "Road trip snacks", "Cheese",
+      "Household chores", "Sounds", "Smells", "Textures", "Apps on your phone",
+      "Kitchen gadgets", "Holidays", "Karaoke songs", "Exercise", "Shoes",
+      "Airport rituals", "Group chat behavior", "Salad ingredients"
+    ]
+  }
 ]
