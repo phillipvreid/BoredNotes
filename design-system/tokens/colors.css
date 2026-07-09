@@ -1,0 +1,76 @@
+/* Borednotes — color tokens.
+   "Arcade Sticker" palette: one ink, paper neutrals, a single reserved action
+   yellow, eight saturated category hues (all dark enough to carry WHITE text),
+   plus supporting values. Category fills NEVER carry the action color; yellow
+   only ever means "the action". */
+
+:root {
+  /* — Ink & outline — the single near-black used for text, borders, shadows — */
+  --bn-ink: #141414;
+  --bn-ink-soft: #1c1b18;      /* headings on paper */
+
+  /* — Paper surfaces (4 themes; Cream is default) — */
+  --bn-paper: #FBFAF3;         /* Cream (default app background) */
+  --bn-paper-white: #FFFFFF;
+  --bn-paper-mint: #EAF7EE;
+  --bn-paper-bubblegum: #FCEAF2;
+
+  /* — The action color. Reserved. Means "do the thing". — */
+  --bn-action: #FFD23E;        /* yellow */
+
+  /* — Eight category hues (each owns one prompt category) — */
+  --bn-cat-reflect: #2E5BFF;   /* REFLECT  · introspect */
+  --bn-cat-observe: #06B6C9;   /* OBSERVE  · notice */
+  --bn-cat-confess: #8B3DF5;   /* CONFESS  · off the record */
+  --bn-cat-rank:    #15A150;   /* RANK     · micro-game */
+  --bn-cat-take:    #FF7A1A;   /* HOT TAKE · opinion */
+  --bn-cat-nostalgia: #F5468C; /* NOSTALGIA· rewind */
+  --bn-cat-gossip:  #FF4438;   /* HOT TEA  · gossip */
+  --bn-cat-imagine: #6C5CE7;   /* IMAGINE  · what if */
+
+  /* — Mascot — */
+  --bn-mascot: #FF4438;
+  --bn-mascot-mouth: #FF7A6E;
+
+  /* — Supporting surfaces — */
+  --bn-defend-pad: #FFF6D6;    /* soft yellow "defend" textarea */
+  --bn-chip-scrim: rgba(0,0,0,.22); /* category chip pill on a colored card */
+
+  /* — Medals (rank slots) — */
+  --bn-medal-gold: #FFD23E;
+  --bn-medal-silver: #E6E6E6;
+  --bn-medal-bronze: #E8B074;
+
+  /* — Muted text ramp (light → lighter) — */
+  --bn-text-muted: #86847d;
+  --bn-text-muted-2: #9b988c;
+  --bn-text-placeholder: #b6b3a6;
+  --bn-hairline: #efece3;
+
+  /* — Semantic aliases — */
+  --bn-text: var(--bn-ink);
+  --bn-surface-card: var(--bn-paper-white);
+  --bn-surface-app: var(--bn-paper);
+  --bn-border: var(--bn-ink);
+}
+
+/* — Dark mode. Category hues, action yellow, mascot, medals, and the defend pad
+     stay IDENTICAL; only neutrals invert. Opt in by adding .bn-dark to a scope. — */
+.bn-dark {
+  --bn-ink: #F4EEDF;           /* text becomes light */
+  --bn-ink-soft: #F4EEDF;
+  --bn-paper: #1A1813;         /* Cream dark */
+  --bn-paper-white: #141414;
+  --bn-paper-mint: #10201A;
+  --bn-paper-bubblegum: #221620;
+  --bn-surface: #262320;       /* raised dark surface (cards) */
+  --bn-surface-sheet: #1F1D18; /* bottom sheet */
+  --bn-text: #F4EEDF;
+  --bn-text-muted: #86847d;
+  --bn-text-muted-2: #9b988c;
+  --bn-border: #E8E2D2;        /* light keyline on dark surfaces */
+  --bn-shadow-ink: #000;       /* hard shadow goes pure black */
+  --bn-scrim: rgba(0,0,0,.6);
+  --bn-surface-card: #262320;
+  --bn-surface-app: #1A1813;
+}

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Surface" viewport="700x230" subtitle="One recipe: black keyline + flat offset shadow. Press = translate into the shadow." name="Sticker press" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; padding:24px; background:var(--bn-paper); font-family:var(--bn-font-label); display:flex; align-items:center; gap:40px; }
+  .demo { width:120px; height:70px; background:var(--bn-action); border:3px solid var(--bn-ink); border-radius:14px; }
+  .rest { box-shadow:5px 5px 0 var(--bn-ink); }
+  .pressed { box-shadow:2px 2px 0 var(--bn-ink); transform:translate(3px,3px); }
+  .lab { font:700 10px/1.4 var(--bn-font-label); letter-spacing:1px; color:#9a958a; text-align:center; margin-top:14px; }
+  .arr { font:800 30px var(--bn-font-display); color:#b6b3a6; }
+</style>
+</head>
+<body>
+  <div style="text-align:center"><div class="demo rest"></div><div class="lab">RESTING<br>shadow 5px</div></div>
+  <div class="arr">→</div>
+  <div style="text-align:center"><div class="demo pressed"></div><div class="lab">PRESSED<br>+3,+3 · shadow 2px</div></div>
+  <div style="max-width:230px;font:500 13px/1.5 var(--bn-font-body);color:#6a665d">A 2.5–3px black keyline plus a flat, un-blurred offset shadow (3–5px). Tap → the surface slides by its shadow distance and the shadow shrinks.</div>
+</body>
+</html>

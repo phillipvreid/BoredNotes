@@ -1,0 +1,33 @@
+<!-- @dsCard group="Surface" viewport="700x190" subtitle="Hand-placed ±0.5–1.5° tilt for character. On by default, togglable off for a11y." name="Wonky tilt" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; padding:26px 24px; background:var(--bn-paper); font-family:var(--bn-font-label); display:flex; gap:40px; align-items:center; }
+  .stack { display:flex; flex-direction:column; gap:10px; width:230px; }
+  .card { background:var(--bn-paper-white); border:2.5px solid var(--bn-ink); box-shadow:4px 4px 0 var(--bn-ink); border-radius:14px; height:34px; }
+  .lab { font:700 10px/1.4 var(--bn-font-label); letter-spacing:1px; color:#9a958a; }
+</style>
+</head>
+<body>
+  <div>
+    <div class="lab" style="margin-bottom:12px">WONKY ON (default)</div>
+    <div class="stack">
+      <div class="card" style="transform:rotate(-1.5deg)"></div>
+      <div class="card" style="transform:rotate(1.2deg)"></div>
+      <div class="card" style="transform:rotate(-1deg)"></div>
+    </div>
+  </div>
+  <div>
+    <div class="lab" style="margin-bottom:12px">WONKY OFF</div>
+    <div class="stack">
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+    </div>
+  </div>
+  <div style="max-width:160px;font:500 13px/1.5 var(--bn-font-body);color:#6a665d">Cards land at deliberate small rotations — never random. The mascot bubble's −2° tilt is constant.</div>
+</body>
+</html>

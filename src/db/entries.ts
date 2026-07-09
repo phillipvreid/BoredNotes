@@ -67,13 +67,6 @@ export async function searchEntries(db: SQLiteDatabase, query: string): Promise<
   );
 }
 
-export async function getEntriesForDate(db: SQLiteDatabase, dateStr: string): Promise<Entry[]> {
-  return db.getAllAsync<Entry>(
-    `SELECT * FROM entries WHERE date(created_at) = ? ORDER BY created_at ASC`,
-    [dateStr]
-  );
-}
-
 export async function getEntriesForMonthDay(db: SQLiteDatabase, month: number, day: number): Promise<Entry[]> {
   return db.getAllAsync<Entry>(
     `SELECT * FROM entries
@@ -90,15 +83,6 @@ export async function getEntriesInRange(db: SQLiteDatabase, from: string, to: st
   );
 }
 
-export async function getDatesWithEntries(db: SQLiteDatabase, yearMonth: string): Promise<string[]> {
-  const rows = await db.getAllAsync<{ d: string }>(
-    `SELECT DISTINCT date(created_at) as d FROM entries
-     WHERE strftime('%Y-%m', created_at) = ? ORDER BY d`,
-    [yearMonth]
-  );
-  return rows.map(r => r.d);
-}
-
 export async function updateEntryLocation(
   db: SQLiteDatabase,
   id: number,
@@ -107,10 +91,10 @@ export async function updateEntryLocation(
   await db.runAsync('UPDATE entries SET location_label = ? WHERE id = ?', [label, id]);
 }
 
-export async function getYearsWithEntries(db: SQLiteDatabase): Promise<number[]> {
-  const rows = await db.getAllAsync<{ y: string }>(
-    `SELECT DISTINCT strftime('%Y', created_at) as y FROM entries ORDER BY y DESC`,
+export async function getMonthsWithEntries(db: SQLiteDatabase): Promise<string[]> {
+  const rows = await db.getAllAsync<{ ym: string }>(
+    `SELECT DISTINCT strftime('%Y-%m', created_at) as ym FROM entries ORDER BY ym DESC`,
     []
   );
-  return rows.map(r => parseInt(r.y, 10));
+  return rows.map(r => r.ym);
 }

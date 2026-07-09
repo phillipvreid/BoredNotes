@@ -1,0 +1,31 @@
+/* Borednotes — typography tokens.
+   Three families, each with one job:
+   • DISPLAY  Bricolage Grotesque (800) — headlines, prompts, button labels, numbers
+   • BODY     Hanken Grotesk (400–800)  — answers, input text, supporting copy
+   • LABEL    Space Mono (700)          — wordmark, chips, status labels, counters, timestamps (UPPERCASE) */
+
+:root {
+  --bn-font-display: "Bricolage Grotesque", system-ui, sans-serif;
+  --bn-font-body: "Hanken Grotesk", system-ui, sans-serif;
+  --bn-font-label: "Space Mono", ui-monospace, monospace;
+
+  /* Display scale (weight 800, tight tracking) */
+  --bn-display-hero: 800 31px/0.96 var(--bn-font-display);   /* Greatest Hits title */
+  --bn-display-lg: 800 23px/1.06 var(--bn-font-display);     /* prompt sticker question */
+  --bn-display-md: 800 20px/1.05 var(--bn-font-display);     /* primary CTA */
+  --bn-display-sm: 800 18px/1.08 var(--bn-font-display);     /* card question / send */
+  --bn-display-tracking: -0.3px;
+
+  /* Body scale */
+  --bn-body-lg: 600 18px/1.45 var(--bn-font-body);   /* textarea input */
+  --bn-body-md: 600 16px/1.42 var(--bn-font-body);   /* saved answers */
+  --bn-body-sm: 600 13px/1.3 var(--bn-font-body);    /* prompt recall line */
+  --bn-body-note: 400 14px/1.5 var(--bn-font-body);  /* subtitles */
+
+  /* Label scale (UPPERCASE, letter-spacing) */
+  --bn-label-lg: 700 14px/1 var(--bn-font-label);    /* status labels, bar label */
+  --bn-label-md: 700 13px/1 var(--bn-font-label);    /* wordmark, counters */
+  --bn-label-sm: 700 11px/1 var(--bn-font-label);    /* chips */
+  --bn-label-xs: 700 10px/1 var(--bn-font-label);    /* card chips, section labels */
+  --bn-label-tracking: 1px;
+}

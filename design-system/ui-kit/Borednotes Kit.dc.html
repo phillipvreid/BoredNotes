@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&amp;family=Hanken+Grotesk:wght@400..800&amp;family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
+</helmet>
+
+<div style="padding:48px 56px 64px;background:#EFEAD9;font-family:'Hanken Grotesk',sans-serif;display:inline-block;min-width:100%;box-sizing:border-box">
+
+  <!-- title -->
+  <div style="margin-bottom:36px">
+    <div style="display:inline-block;background:#141414;color:#fff;font:700 14px 'Space Mono',monospace;letter-spacing:2px;padding:7px 12px;border-radius:9px;box-shadow:4px 4px 0 #FFD23E">BOREDNOTES</div>
+    <div style="font:800 36px 'Bricolage Grotesque',sans-serif;letter-spacing:-1px;color:#1c1b18;margin-top:16px">UI Kit — Core Screens</div>
+    <div style="font:700 12px 'Space Mono',monospace;letter-spacing:1px;color:#7a766c;margin-top:7px">RENDERED FROM MDFrame — THE SHIPPING FRAME. THIS IS THE FINAL CONSTRUCTION.</div>
+  </div>
+
+  <!-- LIGHT ROW -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <div style="width:14px;height:14px;border-radius:50%;background:#FBFAF3;border:2px solid #141414"></div>
+    <div style="font:800 22px 'Bricolage Grotesque',sans-serif;color:#1c1b18;letter-spacing:-0.4px">Light Mode</div>
+    <div style="font:700 12px 'Space Mono',monospace;letter-spacing:1px;color:#9a958a">CREAM PAPER · #FBFAF3</div>
+  </div>
+  <div style="display:flex;gap:34px;margin-bottom:56px">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">HOME</div>
+      <dc-import name="MDFrame" mode="light" type="home" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">REPLY · TEXT PROMPT</div>
+      <dc-import name="MDFrame" mode="light" type="replyText" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">REPLY · RANK &amp; DEFEND</div>
+      <dc-import name="MDFrame" mode="light" type="replyRank" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">GREATEST HITS</div>
+      <dc-import name="MDFrame" mode="light" type="hits" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">SHARE SHEET</div>
+      <dc-import name="MDFrame" mode="light" type="share" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">SAVED TOAST</div>
+      <dc-import name="MDFrame" mode="light" type="toast" hint-size="420px,892px"></dc-import>
+    </div>
+  </div>
+
+  <!-- DARK ROW -->
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px">
+    <div style="width:14px;height:14px;border-radius:50%;background:#1A1813;border:2px solid #E8E2D2"></div>
+    <div style="font:800 22px 'Bricolage Grotesque',sans-serif;color:#1c1b18;letter-spacing:-0.4px">Dark Mode</div>
+    <div style="font:700 12px 'Space Mono',monospace;letter-spacing:1px;color:#9a958a">WARM CHARCOAL · #1A1813</div>
+  </div>
+  <div style="display:flex;gap:34px">
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">HOME</div>
+      <dc-import name="MDFrame" mode="dark" type="home" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">REPLY · TEXT PROMPT</div>
+      <dc-import name="MDFrame" mode="dark" type="replyText" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">REPLY · RANK &amp; DEFEND</div>
+      <dc-import name="MDFrame" mode="dark" type="replyRank" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">GREATEST HITS</div>
+      <dc-import name="MDFrame" mode="dark" type="hits" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">SHARE SHEET</div>
+      <dc-import name="MDFrame" mode="dark" type="share" hint-size="420px,892px"></dc-import>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:11px">
+      <div style="font:700 11px 'Space Mono',monospace;letter-spacing:1.5px;color:#7a766c">SAVED TOAST</div>
+      <dc-import name="MDFrame" mode="dark" type="toast" hint-size="420px,892px"></dc-import>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
