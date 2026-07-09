@@ -19,9 +19,13 @@ function toYMD(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-function formatYMD(ymd: string): string {
+function parseYMD(ymd: string): Date {
   const [y, m, d] = ymd.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+  return new Date(y, m - 1, d);
+}
+
+function formatYMD(ymd: string): string {
+  return parseYMD(ymd).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
   });
 }
@@ -33,6 +37,11 @@ export function FilterSheet({ filters, onChange }: FilterSheetProps) {
 
   const count = activeFilterCount(filters);
   const active = count > 0;
+
+  function closeSheet() {
+    setOpen(false);
+    setEditing(null);
+  }
 
   function toggleFormat(token: FormatToken) {
     const has = filters.formats.includes(token);
@@ -55,8 +64,8 @@ export function FilterSheet({ filters, onChange }: FilterSheetProps) {
   }
 
   const editingValue = editing === 'end'
-    ? (filters.endDate ? new Date(filters.endDate) : new Date())
-    : (filters.startDate ? new Date(filters.startDate) : new Date());
+    ? (filters.endDate ? parseYMD(filters.endDate) : new Date())
+    : (filters.startDate ? parseYMD(filters.startDate) : new Date());
 
   return (
     <>
@@ -73,8 +82,8 @@ export function FilterSheet({ filters, onChange }: FilterSheetProps) {
         </Text>
       </TouchableOpacity>
 
-      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={() => setOpen(false)}>
+      <Modal visible={open} transparent animationType="fade" onRequestClose={closeSheet}>
+        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={closeSheet}>
           <TouchableOpacity
             activeOpacity={1}
             style={[styles.sheet, { backgroundColor: colors.surface, borderColor: colors.border }]}
