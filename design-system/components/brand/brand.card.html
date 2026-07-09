@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components" viewport="780x360" name="Brand" subtitle="Mascot placeholder · wordmark · speech bubble" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin:0; padding:30px; background:var(--bn-paper); font-family:var(--bn-font-label); }
+  .lab { font:700 10px/1 var(--bn-font-label); letter-spacing:1px; color:#9a958a; margin:0 0 16px; }
+  .row { display:flex; gap:46px; align-items:flex-start; flex-wrap:wrap; }
+  .cell { display:flex; flex-direction:column; align-items:center; gap:14px; }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="../_loader.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/x-demo" data-deps="../brand/Mascot.jsx,../brand/Wordmark.jsx,../brand/SpeechBubble.jsx">
+  function Demo() {
+    return (
+      <div>
+        <div className="lab">MASCOT (BORED · PEEK · FLAT) — PLACEHOLDER, BOBS & BLINKS</div>
+        <div className="row" style={{ marginBottom: 34, alignItems:"flex-end" }}>
+          <Mascot size={96} />
+          <Mascot size={64} mood="peek" color="var(--bn-action)" />
+          <Mascot size={80} mood="flat" animate={false} />
+        </div>
+        <div className="row">
+          <div className="cell" style={{ alignItems:"flex-start" }}>
+            <div className="lab">WORDMARK</div>
+            <Wordmark size="md" />
+            <div style={{ background:"var(--bn-cat-reflect)", padding:"8px 12px", borderRadius:8 }}><Wordmark size="sm" color="#fff" /></div>
+          </div>
+          <div className="cell" style={{ alignItems:"flex-start" }}>
+            <div className="lab">SPEECH BUBBLE + MASCOT</div>
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"flex-start", gap:14 }}>
+              <SpeechBubble tail="left">Ugh. FINALLY. Entertain me.</SpeechBubble>
+              <div style={{ marginLeft: 18 }}><Mascot size={72} /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(Demo));
+</script>
+</body>
+</html>

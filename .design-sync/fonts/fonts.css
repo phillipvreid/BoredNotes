@@ -1,0 +1,12 @@
+/* BoredNotes app fonts for browser previews. Family names match the
+   expo-google-fonts runtime names exactly — react-native-web passes
+   fontFamily straight through to CSS. */
+@font-face { font-family: "BricolageGrotesque_700Bold"; src: url("./BricolageGrotesque_700Bold.ttf") format("truetype"); }
+@font-face { font-family: "BricolageGrotesque_800ExtraBold"; src: url("./BricolageGrotesque_800ExtraBold.ttf") format("truetype"); }
+@font-face { font-family: "HankenGrotesk_400Regular"; src: url("./HankenGrotesk_400Regular.ttf") format("truetype"); }
+@font-face { font-family: "HankenGrotesk_500Medium"; src: url("./HankenGrotesk_500Medium.ttf") format("truetype"); }
+@font-face { font-family: "HankenGrotesk_600SemiBold"; src: url("./HankenGrotesk_600SemiBold.ttf") format("truetype"); }
+@font-face { font-family: "HankenGrotesk_700Bold"; src: url("./HankenGrotesk_700Bold.ttf") format("truetype"); }
+@font-face { font-family: "HankenGrotesk_800ExtraBold"; src: url("./HankenGrotesk_800ExtraBold.ttf") format("truetype"); }
+@font-face { font-family: "SpaceMono_400Regular"; src: url("./SpaceMono_400Regular.ttf") format("truetype"); }
+@font-face { font-family: "SpaceMono_700Bold"; src: url("./SpaceMono_700Bold.ttf") format("truetype"); }

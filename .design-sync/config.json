@@ -1,0 +1,42 @@
+{
+  "projectId": "17609275-fc16-4aa4-a3a3-8f550d138ee8",
+  "shape": "package",
+  "pkg": "borednotes",
+  "globalName": "BoredNotes",
+  "srcDir": "src/components/ui",
+  "tsconfig": "tsconfig.design-sync.json",
+  "componentSrcMap": {
+    "Sticker": "src/components/ui/Sticker.tsx",
+    "ActionButton": "src/components/ui/ActionButton.tsx",
+    "Chip": "src/components/ui/Chip.tsx",
+    "IconSticker": "src/components/ui/IconSticker.tsx",
+    "Mascot": "src/components/ui/Mascot.tsx",
+    "OutlinedNumber": "src/components/ui/OutlinedNumber.tsx",
+    "SpeechBubble": "src/components/ui/SpeechBubble.tsx",
+    "ToastProvider": "src/components/ui/Toast.tsx"
+  },
+  "extraEntries": ["./.design-sync/support.tsx"],
+  "extraFonts": [".design-sync/fonts/fonts.css"],
+  "readmeHeader": ".design-sync/conventions.md",
+  "guidelinesGlob": ["docs/theme-palettes.md", "docs/voice-guide.md"],
+  "docsMap": {
+    "Sticker": ".design-sync/docs-stubs/Sticker.md",
+    "OutlinedNumber": ".design-sync/docs-stubs/OutlinedNumber.md",
+    "ActionButton": ".design-sync/docs-stubs/ActionButton.md",
+    "IconSticker": ".design-sync/docs-stubs/IconSticker.md",
+    "Chip": ".design-sync/docs-stubs/Chip.md",
+    "ToastProvider": ".design-sync/docs-stubs/ToastProvider.md",
+    "Mascot": ".design-sync/docs-stubs/Mascot.md",
+    "SpeechBubble": ".design-sync/docs-stubs/SpeechBubble.md"
+  },
+  "overrides": {
+    "ActionButton": { "cardMode": "column" },
+    "SpeechBubble": { "cardMode": "column" },
+    "ToastProvider": { "cardMode": "column" }
+  },
+  "provider": {
+    "component": "ThemeProvider",
+    "props": { "db": { "$ref": "fakeDb" } },
+    "inner": { "component": "ToastProvider" }
+  }
+}

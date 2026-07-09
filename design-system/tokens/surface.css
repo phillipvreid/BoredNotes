@@ -1,0 +1,45 @@
+/* Borednotes — surface, shadow, radius, spacing & motion tokens.
+   The whole system is ONE recipe: a 2.5–3px black keyline + a flat, un-blurred
+   offset shadow. Pressing translates the surface into its own shadow. */
+
+:root {
+  /* Keyline borders */
+  --bn-border-w: 3px;        /* cards, CTAs, prompt sticker */
+  --bn-border-w-thin: 2.5px; /* chips, hit cards, back/menu buttons */
+
+  /* Hard offset shadows (no blur) */
+  --bn-shadow-ink: var(--bn-ink);
+  --bn-shadow-sm: 3px 3px 0 var(--bn-shadow-ink);   /* small buttons / rows */
+  --bn-shadow-card: 4px 4px 0 var(--bn-shadow-ink); /* cards / CTA / send */
+  --bn-shadow-sticker: 5px 5px 0 var(--bn-shadow-ink); /* prompt sticker */
+  /* Pressed = halve the offset + translate(2px,2px). */
+  --bn-shadow-card-pressed: 2px 2px 0 var(--bn-shadow-ink);
+  --bn-press-shift: translate(2px, 2px);
+
+  /* Radius scale */
+  --bn-radius-chip: 6px;     /* meta chips */
+  --bn-radius-btn: 11px;     /* icon buttons */
+  --bn-radius-card: 16px;    /* cards / inputs */
+  --bn-radius-card-sm: 14px; /* send button, rows */
+  --bn-radius-sticker: 20px; /* prompt sticker */
+  --bn-radius-pill: 999px;   /* filter chips */
+  /* The mascot blob shape */
+  --bn-blob: 50% 50% 47% 47% / 56% 56% 44% 44%;
+
+  /* Spacing (the screen rhythm) */
+  --bn-pad-screen: 58px 18px 24px; /* outer screen padding (top clears notch) */
+  --bn-gap-cards: 11px;
+  --bn-gap-list: 13px;
+
+  /* "Wonky" tilt — hand-placed, NEVER random. On by default; off for a11y. */
+  --bn-tilt-1: -1.5deg;
+  --bn-tilt-2: 1.2deg;
+  --bn-tilt-3: -1deg;
+  --bn-tilt-bubble: -2deg; /* speech bubble, constant */
+
+  /* Motion */
+  --bn-ease-spring: cubic-bezier(.34, 1.4, .5, 1);
+  --bn-ease-pop: cubic-bezier(.34, 1.56, .64, 1);
+  --bn-dur-slide: .42s;
+  --bn-dur-sheet: .34s;
+}

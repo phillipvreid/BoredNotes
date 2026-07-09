@@ -7,11 +7,10 @@ import { HITS_COPY } from '../src/theme/copy';
 import { IconSticker } from '../src/components/ui/IconSticker';
 import { Chip } from '../src/components/ui/Chip';
 import { FeedTab } from '../src/boredbefore/FeedTab';
-import { CalendarTab } from '../src/boredbefore/CalendarTab';
 import { MapTab } from '../src/boredbefore/MapTab';
 
-type Tab = 'Feed' | 'Calendar' | 'Map';
-const TABS: Tab[] = ['Feed', 'Calendar', 'Map'];
+type Tab = 'Feed' | 'Map';
+const TABS: Tab[] = ['Feed', 'Map'];
 
 export default function BoredBeforeScreen() {
   const { colors } = useTheme();
@@ -43,7 +42,6 @@ export default function BoredBeforeScreen() {
 
       <View style={styles.content}>
         {activeTab === 'Feed' && <FeedTab />}
-        {activeTab === 'Calendar' && <CalendarTab />}
         {activeTab === 'Map' && <MapTab />}
       </View>
     </SafeAreaView>

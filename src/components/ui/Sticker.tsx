@@ -27,9 +27,14 @@ export function Sticker({
   const [pressed, setPressed] = useState(false);
 
   const offset = pressed ? Math.round(shadow / 2) : shadow;
+  // Fabric's LayoutAnimation interpolates transforms op-by-op and aborts if the
+  // op list changes length or order mid-animation (e.g. pressing a sticker while
+  // the respond screen's keyboard LayoutAnimation runs). Keep the op sequence
+  // fixed and vary only the values.
   const transform: ViewStyle['transform'] = [
-    ...(pressed ? [{ translateX: 2 }, { translateY: 2 }] as const : []),
-    ...(tilt !== 0 ? [{ rotate: `${tilt}deg` }] as const : []),
+    { translateX: pressed ? 2 : 0 },
+    { translateY: pressed ? 2 : 0 },
+    { rotate: `${tilt}deg` },
   ];
 
   const surface: StyleProp<ViewStyle> = [

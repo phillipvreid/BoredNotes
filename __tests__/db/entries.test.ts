@@ -1,4 +1,4 @@
-import { createEntry, getYearsWithEntries, searchEntries } from '../../src/db/entries';
+import { createEntry, getMonthsWithEntries, searchEntries } from '../../src/db/entries';
 import { openDatabaseAsync } from 'expo-sqlite';
 
 describe('createEntry', () => {
@@ -113,7 +113,7 @@ describe('searchEntries', () => {
   });
 });
 
-describe('getYearsWithEntries', () => {
+describe('getMonthsWithEntries', () => {
   let db: any;
 
   beforeEach(async () => {
@@ -121,17 +121,26 @@ describe('getYearsWithEntries', () => {
     db = await openDatabaseAsync('test.db');
   });
 
-  it('returns distinct years in descending order', async () => {
+  it('returns distinct year-months in descending order', async () => {
     db.getAllAsync.mockResolvedValueOnce([
-      { y: '2026' }, { y: '2025' }, { y: '2024' },
+      { ym: '2026-07' }, { ym: '2026-06' }, { ym: '2025-12' },
     ]);
-    const result = await getYearsWithEntries(db);
-    expect(result).toEqual([2026, 2025, 2024]);
+    const result = await getMonthsWithEntries(db);
+    expect(result).toEqual(['2026-07', '2026-06', '2025-12']);
+  });
+
+  it('queries distinct months newest-first', async () => {
+    db.getAllAsync.mockResolvedValueOnce([]);
+    await getMonthsWithEntries(db);
+    const [sql] = db.getAllAsync.mock.calls[0];
+    expect(sql).toContain("strftime('%Y-%m', created_at)");
+    expect(sql).toContain('DISTINCT');
+    expect(sql).toContain('ORDER BY ym DESC');
   });
 
   it('returns empty array when no entries exist', async () => {
     db.getAllAsync.mockResolvedValueOnce([]);
-    const result = await getYearsWithEntries(db);
+    const result = await getMonthsWithEntries(db);
     expect(result).toEqual([]);
   });
 });

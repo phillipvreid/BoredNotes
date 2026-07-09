@@ -1,0 +1,18 @@
+<!-- @dsCard group="Surface" viewport="700x160" subtitle="Flat offset shadows, no blur — 3px rows, 4px cards, 5px stickers" name="Shadow scale" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; padding:24px 30px; background:var(--bn-paper); font-family:var(--bn-font-label); display:flex; gap:38px; align-items:flex-start; }
+  .box { width:96px; height:52px; background:var(--bn-paper-white); border:3px solid var(--bn-ink); border-radius:14px; }
+  .lab { font:700 9px/1.3 var(--bn-font-label); color:#6a665d; margin-top:14px; text-align:center; }
+</style>
+</head>
+<body>
+  <div><div class="box" style="box-shadow:var(--bn-shadow-sm)"></div><div class="lab">3px · rows / icon btn</div></div>
+  <div><div class="box" style="box-shadow:var(--bn-shadow-card)"></div><div class="lab">4px · cards / CTA / send</div></div>
+  <div><div class="box" style="box-shadow:var(--bn-shadow-sticker)"></div><div class="lab">5px · prompt sticker</div></div>
+</body>
+</html>

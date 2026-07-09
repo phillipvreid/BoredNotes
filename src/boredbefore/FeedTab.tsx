@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import {
-  View, Text, FlatList,
+  View, Text, FlatList, TouchableOpacity,
   StyleSheet, TextInput,
 } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
@@ -13,6 +13,8 @@ import { Sticker } from '../components/ui/Sticker';
 import { parseRankData } from '../games/rank';
 import { parseLoveHateData } from '../games/loveHate';
 import type { Entry } from '../types';
+import { FilterSheet } from './FilterSheet';
+import { FeedFilters, EMPTY_FILTERS, filterEntries } from './filterEntries';
 
 const CARD_TILTS = [-1, 0.9, -0.7];
 
@@ -45,10 +47,12 @@ export function FeedTab() {
   const { colors, catHues, categoryStyles } = useTheme();
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
+  const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS);
 
   useFocusEffect(
     useCallback(() => {
       setQuery('');
+      setFilters(EMPTY_FILTERS);
       loadEntries('');
     }, [])
   );
@@ -66,22 +70,27 @@ export function FeedTab() {
     loadEntries(q);
   }
 
-  const grouped = groupByDate(entries);
+  const visible = filterEntries(entries, filters);
+  const grouped = groupByDate(visible);
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={[styles.search, {
-          backgroundColor: colors.surface,
-          borderColor: colors.border,
-          color: colors.textPrimary,
-        }]}
-        placeholder="search the nonsense…"
-        placeholderTextColor={colors.when}
-        value={query}
-        onChangeText={handleSearch}
-        clearButtonMode="while-editing"
-      />
+      <View style={styles.searchRow}>
+        <FilterSheet filters={filters} onChange={setFilters} />
+        <TextInput
+          style={[styles.search, {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+            color: colors.textPrimary,
+          }]}
+          placeholder="It's down there somewhere…"
+          placeholderTextColor={colors.when}
+          value={query}
+          onChangeText={handleSearch}
+          clearButtonMode="while-editing"
+        />
+      </View>
+
       <FlatList
         data={grouped}
         keyExtractor={g => g.date}
@@ -98,6 +107,7 @@ export function FeedTab() {
               const pillBg = loveHate ? catHues.nostalgia : rank ? catHues.rank : freeform ? colors.action : catStyle ? catStyle.color : colors.badgeBg;
               const pillFg = loveHate || rank ? '#fff' : freeform ? colors.actionInk : catStyle ? '#fff' : colors.badgeFg;
               const pillLabel = loveHate ? 'LOVE + HATE' : rank ? 'RANK + DEFEND' : freeform ? 'BRAIN DUMP' : catStyle ? catStyle.label : 'PROMPTED';
+              const promptLine = entry.prompt_text.replace(/\s*The theme decides, you commit\.?/i, '').trim();
               return (
                 <Sticker
                   key={entry.id}
@@ -114,9 +124,9 @@ export function FeedTab() {
                     </View>
                     <Text style={[styles.when, { color: colors.when }]}>{formatWhen(entry.created_at)}</Text>
                   </View>
-                  {!freeform && entry.prompt_text !== '' && (
+                  {!freeform && promptLine !== '' && (
                     <Text style={[styles.cardPrompt, { color: colors.textMuted }]} numberOfLines={1}>
-                      {entry.prompt_text}
+                      {promptLine}
                     </Text>
                   )}
                   {rank ? (
@@ -192,10 +202,12 @@ export function FeedTab() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 18 },
+  searchRow: { flexDirection: 'row', alignItems: 'stretch', gap: 8, marginBottom: 13 },
   search: {
+    flex: 1,
     borderRadius: 12, borderWidth: 2.5,
     paddingHorizontal: 14, paddingVertical: 10,
-    fontFamily: FONTS.body, fontSize: 15, marginBottom: 13,
+    fontFamily: FONTS.body, fontSize: 15,
   },
   listContent: { paddingBottom: 32, paddingHorizontal: 6, paddingTop: 4 },
   group: { gap: 13, marginBottom: 24 },

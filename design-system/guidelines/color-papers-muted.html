@@ -1,0 +1,46 @@
+<!-- @dsCard group="Colors" viewport="700x190" subtitle="Three paper themes + the muted text ramp + medal trio" name="Papers, muted text & medals" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; padding:20px; background:var(--bn-paper); font-family:var(--bn-font-label); }
+  .group { display:flex; gap:22px; flex-wrap:wrap; }
+  .col { }
+  .head { font:700 10px/1 var(--bn-font-label); letter-spacing:1px; color:#9a958a; margin-bottom:10px; }
+  .row { display:flex; gap:9px; }
+  .chip { width:54px; height:40px; border-radius:9px; border:2.5px solid var(--bn-ink); }
+  .dot { width:40px; height:40px; border-radius:50%; border:2.5px solid var(--bn-ink); }
+  .lab { font:700 9px/1.3 var(--bn-font-label); color:#56524a; margin-top:6px; text-align:center; }
+</style>
+</head>
+<body>
+  <div class="group">
+    <div class="col">
+      <div class="head">PAPER THEMES (ALT)</div>
+      <div class="row">
+        <div><div class="chip" style="background:var(--bn-paper-white)"></div><div class="lab">WHITE</div></div>
+        <div><div class="chip" style="background:var(--bn-paper-mint)"></div><div class="lab">MINT</div></div>
+        <div><div class="chip" style="background:var(--bn-paper-bubblegum)"></div><div class="lab">BUBBLE</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="head">MEDALS · RANK</div>
+      <div class="row">
+        <div><div class="dot" style="background:var(--bn-medal-gold)"></div><div class="lab">GOLD</div></div>
+        <div><div class="dot" style="background:var(--bn-medal-silver)"></div><div class="lab">SILVER</div></div>
+        <div><div class="dot" style="background:var(--bn-medal-bronze)"></div><div class="lab">BRONZE</div></div>
+      </div>
+    </div>
+    <div class="col">
+      <div class="head">MUTED TEXT RAMP</div>
+      <div style="display:flex;flex-direction:column;gap:3px;font:700 13px var(--bn-font-label)">
+        <span style="color:#86847d">#86847d — subtitle</span>
+        <span style="color:#9b988c">#9b988c — counter / recall</span>
+        <span style="color:#b6b3a6">#b6b3a6 — placeholder</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

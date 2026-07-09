@@ -1,0 +1,58 @@
+<!-- @dsCard group="Components" viewport="800x540" name="Feedback" subtitle="Filter & meta chips · save toast · empty state · share tile" -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  body { margin:0; padding:26px; background:var(--bn-paper); font-family:var(--bn-font-label); }
+  .lab { font:700 10px/1 var(--bn-font-label); letter-spacing:1px; color:#9a958a; margin:0 0 14px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:30px; align-items:start; }
+  .chiprow { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:26px; }
+</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="../_loader.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/x-demo" data-deps="../feedback/Chip.jsx,../feedback/Toast.jsx,../feedback/EmptyState.jsx,../feedback/ShareTile.jsx">
+  function Demo() {
+    const [sel, setSel] = React.useState("ALL");
+    const filters = ["ALL", "REFLECT", "CONFESS", "HOT TAKE", "RANK"];
+    return (
+      <div>
+        <div className="grid">
+          <div>
+            <div className="lab">FILTER CHIPS (TAP)</div>
+            <div className="chiprow">
+              {filters.map(f => <Chip key={f} role="filter" selected={sel===f} onClick={() => setSel(f)}>{f}</Chip>)}
+            </div>
+            <div className="lab">META TAGS</div>
+            <div className="chiprow">
+              <Chip role="meta" color="var(--bn-cat-reflect)">REFLECT</Chip>
+              <Chip role="meta" color="var(--bn-cat-gossip)">HOT TEA</Chip>
+              <Chip role="meta" color="var(--bn-action)" style={{color:"#141414"}}>BRAIN DUMP</Chip>
+            </div>
+            <div className="lab">SAVE TOAST</div>
+            <div style={{ marginBottom: 26 }}><Toast /></div>
+            <div className="lab">SHARE TILE</div>
+            <ShareTile cat="CONFESS" color="var(--bn-cat-confess)"
+              prompt="A thing you pretend to like:"
+              answer="Hiking. It's just walking, but upset." />
+          </div>
+          <div>
+            <div className="lab">EMPTY STATE</div>
+            <div style={{ border:"2.5px dashed var(--bn-hairline)", borderRadius:18 }}>
+              <EmptyState />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(Demo));
+</script>
+</body>
+</html>

@@ -44,3 +44,10 @@ coverage/
 
 # Editor
 .obsidian/
+
+# design-sync (machine state; durable files under .design-sync/ ARE committed)
+.ds-sync/
+ds-bundle/
+.design-sync/.cache/
+.design-sync/learnings/
+.design-sync/node_modules

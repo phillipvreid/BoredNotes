@@ -79,7 +79,7 @@ export const SHARE_LINES = [
 
 export const HITS_COPY = {
   title: 'Your Greatest Hits',
-  subtitle: 'Your finest nonsense. Hold one to inflict it on a friend.',
+  subtitle: 'This is your brain on boredom. Hold to inflict on a friend.',
   emptyTitle: 'Nothing here. Shocking.',
   emptySubtitle: 'No bangers in this category yet. Go be interesting.',
   barLabel: 'YOUR GREATEST HITS',

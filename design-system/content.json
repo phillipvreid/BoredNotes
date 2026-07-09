@@ -1,0 +1,194 @@
+{
+  "_comment": "All copy + seed data for Borednotes, extracted from the prototype (Borednotes B - MAIN DESIGN.dc.html) so it lives in one place instead of inside the component JS. Move this into a real content source (CMS, DB table, or bundled JSON) before launch. Categories drive both the prompt pool and the UI color system.",
+
+  "categories": {
+    "reflect": { "cat": "REFLECT", "kind": "introspect", "color": "#2E5BFF" },
+    "tea": { "cat": "HOT TEA", "kind": "gossip", "color": "#FF4438" },
+    "rank": { "cat": "RANK + DEFEND", "kind": "micro-game", "color": "#15A150" },
+    "confess": { "cat": "CONFESS", "kind": "off the record", "color": "#8B3DF5" },
+    "take": { "cat": "HOT TAKE", "kind": "opinion", "color": "#FF7A1A" },
+    "brain": { "cat": "BRAIN DUMP", "kind": "freeform", "color": "#FFD23E", "chipFg": "#141414" }
+  },
+
+  "prompts": [
+    { "c": "reflect", "text": "A smell that instantly teleports you somewhere. Go." },
+    { "c": "reflect", "text": "If your boredom had a sound, what is it?" },
+    { "c": "reflect", "text": "Describe your entire day as one movie title." },
+    { "c": "tea", "text": "What's a lie you tell every single week?" },
+    { "c": "tea", "text": "Whose business are you minding that isn't yours?" },
+    { "c": "tea", "text": "A rumor you'd happily start about yourself?" },
+    { "c": "confess", "text": "The most pointless thing you did today?" },
+    { "c": "confess", "text": "A text you're too scared to send. Draft it here." },
+    { "c": "confess", "text": "Something you pretend to understand but do not." },
+    { "c": "take", "text": "A food everyone loves that is actually mid. Name it." },
+    { "c": "take", "text": "Pineapple on pizza: deliver your closing argument." },
+    { "c": "take", "text": "An \"unpopular\" opinion that is just objectively correct." },
+    { "c": "rank", "text": "Rank your last 3 snacks. Defend #1.", "slots": ["your undisputed #1…", "the runner-up…", "third place, sorry…"] },
+    { "c": "rank", "text": "Rank 3 people you would trust with your phone.", "slots": ["most trusted…", "probably fine…", "risky but ok…"] },
+    { "c": "rank", "text": "Rank 3 ways to waste a perfectly good afternoon.", "slots": ["the elite waste…", "solid filler…", "desperate measures…"] }
+  ],
+
+  "ctaLabels": [
+    "DUMP A THOUGHT",
+    "CLEAR THE BRAIN TUBES",
+    "UNLOAD THE NOGGIN",
+    "EMPTY THE SKULL",
+    "OFFLOAD SOMETHING",
+    "SPILL IT, FRIEND"
+  ],
+
+  "quips": {
+    "_comment": "Home mascot speech bubble. Rotates every 4600ms, Home only. Two entries are dynamic and must be computed at render time, not stored as static strings.",
+    "static": [
+      "Ugh. FINALLY. Entertain me.",
+      "Back already? Not surprised. Not impressed.",
+      "Make it good this time. Low bar. Clear it.",
+      "I was busy. Doing nothing. You interrupted.",
+      "Dazzle me. Or don't. I've stopped hoping."
+    ],
+    "timeTemplate": "It's {time} and you're bored. Predictable.",
+    "weather": {
+      "_comment": "One is chosen at random per session in the prototype. Wire to a real weather lookup or drop the line.",
+      "rain": "It's pouring out. Perfect. Stay in. Rot with me.",
+      "sun": "Sun's out and you're in here. With me. Bleak.",
+      "cloud": "Grey out there, grey in here. We match.",
+      "cold": "Too cold to exist. Good. Entertain me indoors."
+    }
+  },
+
+  "replyMicrocopy": {
+    "text": {
+      "label": "FINE. ANSWERING.",
+      "placeholder": "type here, genius…",
+      "sendLabel": "SEND IT"
+    },
+    "brain": {
+      "label": "POINTLESS, BUT OK",
+      "placeholder": "empty the skull here…",
+      "sendLabel": "DUMP IT",
+      "question": "Say literally anything. Nobody is reading. Probably."
+    },
+    "rankDefendLabel": "DEFEND YOUR #1",
+    "rankDefendPlaceholder": "no scoring. just commit to the bit.",
+    "wordCounter": {
+      "_comment": "Live counter copy keyed by word count thresholds (>=).",
+      "0": "0 words. bold of you.",
+      "1": "a start, technically",
+      "16": "now you're cooking",
+      "41": "okay, you're writing a memoir"
+    }
+  },
+
+  "savedToastMessages": [
+    "SAVED. POINTLESS. PERFECT.",
+    "FILED UNDER NONSENSE.",
+    "ANOTHER BANGER. ALLEGEDLY.",
+    "NOBODY ASKED. SAVED ANYWAY."
+  ],
+
+  "share": {
+    "promptLines": [
+      "Screenshot bait, honestly.",
+      "Share it. Start some drama.",
+      "Make it the group chat's problem.",
+      "Too good to keep. Unfortunately.",
+      "Go on. Ruin a friendship.",
+      "Let the people riot.",
+      "Inflict this on someone you love.",
+      "Watch the comments turn feral."
+    ],
+    "sentMessages": [
+      "Off it goes. No takebacks.",
+      "Shared. They didn't ask for this.",
+      "Sent. Inflicted. Done."
+    ],
+    "targets": [
+      { "label": "COPY", "initial": "C", "circ": "#FFD23E", "fg": "#141414" },
+      { "label": "MESSAGE", "initial": "M", "circ": "#2E5BFF", "fg": "#fff" },
+      { "label": "STORY", "initial": "S", "circ": "#FF4438", "fg": "#fff" },
+      { "label": "MORE", "initial": "···", "circ": "#141414", "fg": "#fff" }
+    ]
+  },
+
+  "greatestHitsCopy": {
+    "title": "Your Greatest Hits",
+    "subtitle": "Your finest nonsense. Hold one to inflict it on a friend.",
+    "emptyTitle": "Nothing here. Shocking.",
+    "emptySubtitle": "No bangers in this category yet. Go be interesting.",
+    "barLabel": "YOUR GREATEST HITS",
+    "barCountSuffix": "BANGERS"
+  },
+
+  "seedHits": {
+    "_comment": "Prototype seed data for the Greatest Hits archive. ts here is days-ago + HH:MM relative to 'now'; in the real app store an absolute ISO timestamp per entry and compute the relative label at display time (see fmtWhen in the prototype). type is one of text | rank | brain.",
+    "entries": [
+      { "c": "confess", "type": "text", "daysAgo": 0, "h": 2, "m": 14, "prompt": "The most pointless thing you did today?", "answer": "Reorganized my entire camera roll by vibe. Took two hours. Looks identical." },
+      { "c": "tea", "type": "text", "daysAgo": 1, "h": 23, "m": 47, "prompt": "What's a lie you tell every single week?", "answer": "\"Yeah, I’m five minutes away.\" I am never five minutes away." },
+      { "c": "rank", "type": "rank", "daysAgo": 3, "h": 16, "m": 3, "prompt": "Rank your last 3 snacks. Defend #1.", "items": ["cold leftover pizza", "a fistful of dry cereal", "one sad clementine"], "defense": "Pizza asks nothing of me and gives everything. That, my friend, is intimacy." },
+      { "c": "brain", "type": "brain", "daysAgo": 5, "h": 1, "m": 32, "answer": "what if doors were just really tall cats. anyway. goodnight." },
+      { "c": "take", "type": "text", "daysAgo": 9, "h": 21, "m": 12, "prompt": "Pineapple on pizza: deliver your closing argument.", "answer": "Sweet, salty, acidic, hot. That is simply good food math. The defense rests." },
+      { "c": "reflect", "type": "text", "daysAgo": 16, "h": 8, "m": 50, "prompt": "Describe your entire day as one movie title.", "answer": "\"Gone Girl,\" but it is just me looking for my other sock for 40 minutes." }
+    ]
+  },
+
+  "filterChips": [
+    { "id": "ALL", "label": "ALL", "activeBg": "#141414", "activeFg": "#fff" },
+    { "id": "reflect", "label": "REFLECT", "activeBg": "#2E5BFF", "activeFg": "#fff" },
+    { "id": "tea", "label": "HOT TEA", "activeBg": "#FF4438", "activeFg": "#fff" },
+    { "id": "rank", "label": "RANK", "activeBg": "#15A150", "activeFg": "#fff" },
+    { "id": "confess", "label": "CONFESS", "activeBg": "#8B3DF5", "activeFg": "#fff" },
+    { "id": "take", "label": "HOT TAKE", "activeBg": "#FF7A1A", "activeFg": "#fff" },
+    { "id": "brain", "label": "BRAIN", "activeBg": "#FFD23E", "activeFg": "#141414" }
+  ],
+
+  "tokens": {
+    "colors": {
+      "ink": "#141414",
+      "paper": { "Cream": "#FBFAF3", "Paper White": "#FFFFFF", "Mint": "#EAF7EE", "Bubblegum": "#FCEAF2" },
+      "accentYellow": "#FFD23E",
+      "mascotRed": "#FF4438",
+      "mascotMouthHighlight": "#FF7A6E",
+      "defendPad": "#FFF6D6",
+      "mutedText": "#9b988c",
+      "placeholderText": "#b6b3a6",
+      "chipBg": "rgba(0,0,0,.22)",
+      "medals": { "gold": "#FFD23E", "silver": "#E6E6E6", "bronze": "#E8B074" }
+    },
+    "fonts": {
+      "display": "Bricolage Grotesque",
+      "body": "Hanken Grotesk",
+      "label": "Space Mono"
+    },
+    "shadows": {
+      "small": "3px 3px 0 #141414",
+      "card": "4px 4px 0 #141414",
+      "sticker": "5px 5px 0 #141414",
+      "pressedRule": "halve the offset (e.g. 4px->2px) and translate(2px,2px)"
+    },
+    "darkMode": {
+      "_comment": "Dark variant (Borednotes B - MAIN DESIGN DARK.dc.html). Category colors, accent yellow, mascot, medals, and the FFF6D6 defend-pad stay IDENTICAL to light mode (they're already dark enough for white/black text). Only the neutral surfaces, text, borders, and shadows invert. Stickers in dark mode keep a #141414 inner border on the colored elements but use a light #E8E2D2 border on dark surfaces, and the hard shadow becomes pure #000.",
+      "paper": { "Cream": "#1A1813", "Paper White": "#141414", "Mint": "#10201A", "Bubblegum": "#221620" },
+      "surface": "#262320",
+      "surfaceSheet": "#1F1D18",
+      "text": "#F4EEDF",
+      "mutedText": "#9b988c",
+      "subtleText": "#9C988A",
+      "timestampText": "#86847d",
+      "border": "#E8E2D2",
+      "shadow": "6px 6px 0 #000 (and 3-5px 0 #000 for the offset scale)",
+      "scrim": "rgba(0,0,0,.6)",
+      "wordmark": { "bg": "#F4EEDF", "text": "#141414", "_comment": "inverts vs light mode" }
+    },
+    "radii": { "chip": 6, "buttonSmall": 11, "card": "14-16", "sticker": 20, "pill": 999 },
+    "motion": {
+      "slide": ".42s cubic-bezier(.34,1.4,.5,1)",
+      "sheetUp": ".34s cubic-bezier(.34,1.4,.5,1)",
+      "toastPopin": ".42s cubic-bezier(.34,1.56,.64,1)",
+      "idleBob": "3s",
+      "blink": "4.5-5.5s",
+      "rotationTimerMs": 4600,
+      "longPressMs": 480,
+      "savedToastMs": 1250
+    }
+  }
+}
