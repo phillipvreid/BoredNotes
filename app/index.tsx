@@ -18,7 +18,7 @@ import { SpeechBubble } from '../src/components/ui/SpeechBubble';
 import type { Prompt } from '../src/types';
 
 export default function HomeScreen() {
-  const { colors, categoryStyles } = useTheme();
+  const { colors, categoryStyles, wonky } = useTheme();
   const [quipIndex, setQuipIndex] = useState(0);
   const [ctaLabel] = useState(() => pick(CTA_LABELS));
   const [cards, setCards] = useState<Prompt[]>([]);
@@ -98,7 +98,7 @@ export default function HomeScreen() {
                 borderWidth={KEYLINE_HEAVY}
                 shadow={SHADOW_CARD}
                 radius={16}
-                tilt={TILTS[i % TILTS.length]}
+                tilt={wonky ? TILTS[i % TILTS.length] : 0}
                 onPress={() => openPrompt(prompt)}
                 style={styles.card}
               >
