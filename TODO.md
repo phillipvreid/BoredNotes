@@ -45,8 +45,8 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [ ] Decide whether photo attachment makes sense for the app's concept, or should be cut.
 
 ## Settings
-- [ ] Add a toggle to disable the "wonky" (tilted box) effect.
-- [ ] Replace the dark mode toggle with a three-way Light / Dark / System selector, defaulting to System, tracking the iOS appearance setting.
+- [x] Add a toggle to disable the "wonky" (tilted box) effect. Shipped via PR #25 (merged 2026-07-10) — `wonky` flag in ThemeContext gates the Home/Feed card stacks only. Confirmed on device.
+- [x] Replace the dark mode toggle with a three-way Light / Dark / System selector, defaulting to System, tracking the iOS appearance setting. Shipped via PR #25 (merged 2026-07-10) — `appearanceMode` + `resolveIsDark`, System tracks live OS scheme; legacy `theme_dark_mode` migrated read-only. Confirmed on device.
 
 ## Boredbefore / Feed
 - [x] Remove the calendar tab entirely; replace with a date search/filter on the Feed page. Done: calendar tab removed (only Feed + Map remain in `app/boredbefore.tsx`) and the Feed Filter menu with format chips + date range shipped via PR #24 (merged 2026-07-09).
