@@ -10,60 +10,57 @@ describe('ThemeContext', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     db = await openDatabaseAsync('test.db');
-    db.getFirstAsync.mockResolvedValue(null);
   });
+
+  // Keyed mock: getSetting reads `SELECT value ... WHERE key = ?` with [key].
+  function mockSettings(store: Record<string, string> = {}) {
+    db.getFirstAsync.mockImplementation((_sql: string, params: any[]) => {
+      const key = params?.[0];
+      return Promise.resolve(key in store ? { value: store[key] } : null);
+    });
+  }
 
   function wrapper({ children }: { children: React.ReactNode }) {
     return <ThemeProvider db={db}>{children}</ThemeProvider>;
   }
 
   it('defaults to classic when no stored value', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     expect(result.current.theme.id).toBe(DEFAULT_THEME_ID);
   });
 
   it('loads stored theme from DB on mount', async () => {
-    db.getFirstAsync
-      .mockResolvedValueOnce({ value: 'grape-soda' })  // theme_id
-      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    mockSettings({ theme_id: 'grape-soda' });
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     expect(result.current.theme.id).toBe('grape-soda');
   });
 
   it('migrates a legacy paper setting to its nearest theme', async () => {
-    db.getFirstAsync
-      .mockResolvedValueOnce(null)                     // theme_id absent
-      .mockResolvedValueOnce({ value: 'mint' })        // legacy theme_paper
-      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    mockSettings({ theme_paper: 'mint' });
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     expect(result.current.theme.id).toBe('sour-apple');
   });
 
   it('stored theme_id wins over any legacy paper setting', async () => {
-    db.getFirstAsync
-      .mockResolvedValueOnce({ value: 'cherry-cola' }) // theme_id
-      .mockResolvedValueOnce(null);                    // theme_dark_mode
+    mockSettings({ theme_id: 'cherry-cola', theme_paper: 'mint' });
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     expect(result.current.theme.id).toBe('cherry-cola');
-    // legacy key never read when theme_id exists: theme_id + dark mode only
-    expect(db.getFirstAsync).toHaveBeenCalledTimes(2);
   });
 
   it('ignores an unknown legacy paper value', async () => {
-    db.getFirstAsync
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ value: 'parchment' })
-      .mockResolvedValueOnce(null);
+    mockSettings({ theme_paper: 'parchment' });
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     expect(result.current.theme.id).toBe(DEFAULT_THEME_ID);
   });
 
   it('setTheme updates theme synchronously', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     act(() => { result.current.setTheme('bubblegum'); });
@@ -71,6 +68,7 @@ describe('ThemeContext', () => {
   });
 
   it('setTheme persists to DB under theme_id', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     await act(async () => { result.current.setTheme('bubblegum'); });
@@ -81,6 +79,7 @@ describe('ThemeContext', () => {
   });
 
   it('categoryStyles and catHues follow the active theme', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     const grape = THEMES.find(t => t.id === 'grape-soda')!;
@@ -90,29 +89,93 @@ describe('ThemeContext', () => {
     expect(result.current.colors.action).toBe(grape.action);
   });
 
-  it('setDarkMode updates isDark synchronously', async () => {
+  // --- Appearance mode ---
+
+  it('appearanceMode defaults to system when nothing stored', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    act(() => { result.current.setDarkMode(true); });
+    expect(result.current.appearanceMode).toBe('system');
+  });
+
+  it('loads a stored appearance_mode', async () => {
+    mockSettings({ appearance_mode: 'dark' });
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.appearanceMode).toBe('dark');
     expect(result.current.isDark).toBe(true);
   });
 
-  it('setDarkMode persists to DB', async () => {
+  it('migrates a legacy dark flag when no appearance_mode is stored', async () => {
+    mockSettings({ theme_dark_mode: 'true' });
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
-    await act(async () => { result.current.setDarkMode(true); });
+    expect(result.current.appearanceMode).toBe('dark');
+  });
+
+  it('stored appearance_mode wins over a legacy dark flag', async () => {
+    mockSettings({ appearance_mode: 'light', theme_dark_mode: 'true' });
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.appearanceMode).toBe('light');
+    expect(result.current.isDark).toBe(false);
+  });
+
+  it('setAppearance updates mode and isDark synchronously', async () => {
+    mockSettings({});
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    act(() => { result.current.setAppearance('dark'); });
+    expect(result.current.appearanceMode).toBe('dark');
+    expect(result.current.isDark).toBe(true);
+  });
+
+  it('setAppearance persists to DB under appearance_mode', async () => {
+    mockSettings({});
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    await act(async () => { result.current.setAppearance('dark'); });
     expect(db.runAsync).toHaveBeenCalledWith(
       expect.stringContaining('INSERT INTO settings'),
-      ['theme_dark_mode', 'true']
+      ['appearance_mode', 'dark']
     );
   });
 
-  it('colors update when dark mode toggles', async () => {
+  it('colors change when appearance flips to dark', async () => {
+    mockSettings({});
     const { result } = renderHook(() => useTheme(), { wrapper });
     await act(async () => {});
     const lightBg = result.current.colors.bg;
-    act(() => { result.current.setDarkMode(true); });
+    act(() => { result.current.setAppearance('dark'); });
     expect(result.current.colors.bg).not.toBe(lightBg);
+  });
+
+  // --- Wonky ---
+
+  it('wonky defaults to true when nothing stored', async () => {
+    mockSettings({});
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.wonky).toBe(true);
+  });
+
+  it('loads a stored wonky_tilt of false', async () => {
+    mockSettings({ wonky_tilt: 'false' });
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    expect(result.current.wonky).toBe(false);
+  });
+
+  it('setWonky updates synchronously and persists', async () => {
+    mockSettings({});
+    const { result } = renderHook(() => useTheme(), { wrapper });
+    await act(async () => {});
+    await act(async () => { result.current.setWonky(false); });
+    expect(result.current.wonky).toBe(false);
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO settings'),
+      ['wonky_tilt', 'false']
+    );
   });
 
   it('throws when useTheme is called outside ThemeProvider', () => {
