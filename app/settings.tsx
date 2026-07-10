@@ -124,7 +124,7 @@ export default function SettingsScreen() {
                     { backgroundColor: active ? colors.action : colors.surface },
                   ]}
                 >
-                  <Text style={[styles.segmentText, { color: active ? colors.bg : colors.textPrimary }]}>
+                  <Text style={[styles.segmentText, { color: active ? colors.actionInk : colors.textPrimary }]}>
                     {mode === 'light' ? 'Light' : mode === 'dark' ? 'Dark' : 'System'}
                   </Text>
                 </TouchableOpacity>
