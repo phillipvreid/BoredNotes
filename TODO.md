@@ -23,7 +23,7 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [x] Open PR for `feat/arcade-sticker-v2` → main once device testing above is done. Done: PRs #19/#17/#18 merged (plus #20 to land the stacked content that missed main); all confirmed on `main` at b7a5a53.
 
 ## Next feature candidates
-- [ ] Second micro-game beyond Rank & Defend, reusing the generic game plumbing (`prompts.kind` / `game_config` / `entry_kind` / `game_data`).
+- [x] Second micro-game beyond Rank & Defend, reusing the generic game plumbing (`prompts.kind` / `game_config` / `entry_kind` / `game_data`). Done: Love it / Hate it (`kind: loveHate`) shipped via PR #23 (merged 2026-07-08).
 - [ ] Extend category hues / IconSticker set if new prompt categories are added.
 - [ ] Bring back a streamlined PLACE (manual location tagging) on the respond screen — the chip was removed 2026-07-06 with Photo/Camera; auto-location still works via Settings.
 - [ ] App icon: design in the claude.ai/design Arcade Sticker project, then wire `assets/icon.png` + `app.json` `icon` field.
@@ -49,4 +49,4 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [ ] Replace the dark mode toggle with a three-way Light / Dark / System selector, defaulting to System, tracking the iOS appearance setting.
 
 ## Boredbefore / Feed
-- [ ] Remove the calendar tab entirely; replace with a date search/filter on the Feed page.
+- [x] Remove the calendar tab entirely; replace with a date search/filter on the Feed page. Done: calendar tab removed (only Feed + Map remain in `app/boredbefore.tsx`) and the Feed Filter menu with format chips + date range shipped via PR #24 (merged 2026-07-09).

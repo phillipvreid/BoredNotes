@@ -44,7 +44,7 @@ function groupByDate(entries: Entry[]): { date: string; items: Entry[] }[] {
 }
 
 export function FeedTab() {
-  const { colors, catHues, categoryStyles } = useTheme();
+  const { colors, catHues, categoryStyles, wonky } = useTheme();
   const [query, setQuery] = useState('');
   const [entries, setEntries] = useState<Entry[]>([]);
   const [filters, setFilters] = useState<FeedFilters>(EMPTY_FILTERS);
@@ -113,7 +113,7 @@ export function FeedTab() {
                   key={entry.id}
                   shadow={SHADOW_CARD}
                   radius={16}
-                  tilt={CARD_TILTS[i % CARD_TILTS.length]}
+                  tilt={wonky ? CARD_TILTS[i % CARD_TILTS.length] : 0}
                   onPress={() => router.push(`/entry/${entry.id}`)}
                   onLongPress={() => router.push(`/share/${entry.id}`)}
                   style={styles.card}
