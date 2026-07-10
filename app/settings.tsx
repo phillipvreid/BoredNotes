@@ -5,6 +5,7 @@ import { Feather } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useTheme } from '../src/theme/ThemeContext';
 import { THEMES, FONTS } from '../src/theme/tokens';
+import type { AppearanceMode } from '../src/theme/appearance';
 import { IconSticker } from '../src/components/ui/IconSticker';
 import { getDb } from '../src/db/database';
 import { getSetting, setSetting } from '../src/db/settings';
@@ -14,7 +15,7 @@ import { exportEntriesToCsv } from '../src/export/share';
 const version = Constants.expoConfig?.version ?? '1.0.0';
 
 export default function SettingsScreen() {
-  const { colors, theme, isDark, setTheme, setDarkMode } = useTheme();
+  const { colors, theme, isDark, setTheme, appearanceMode, wonky, setAppearance, setWonky } = useTheme();
   const [offlineMode, setOfflineMode] = useState(false);
   const [toggling, setToggling] = useState(false);
 
@@ -110,10 +111,36 @@ export default function SettingsScreen() {
         </View>
 
         <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
-          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Dark Mode</Text>
+          <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Appearance</Text>
+          <View style={[styles.segments, { borderColor: colors.border }]}>
+            {(['light', 'dark', 'system'] as AppearanceMode[]).map(mode => {
+              const active = appearanceMode === mode;
+              return (
+                <TouchableOpacity
+                  key={mode}
+                  onPress={() => setAppearance(mode)}
+                  style={[
+                    styles.segment,
+                    { backgroundColor: active ? colors.action : colors.surface },
+                  ]}
+                >
+                  <Text style={[styles.segmentText, { color: active ? colors.bg : colors.textPrimary }]}>
+                    {mode === 'light' ? 'Light' : mode === 'dark' ? 'Dark' : 'System'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={[styles.row, { backgroundColor: colors.surface, borderColor: colors.cardBorder, shadowColor: colors.shadowColor, shadowOpacity: colors.shadowOpacity }]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.rowLabel, { color: colors.textPrimary }]}>Wonky tilt</Text>
+            <Text style={[styles.rowSubtitle, { color: colors.textMuted }]}>Let the cards lean. Off = everything sits up straight.</Text>
+          </View>
           <Switch
-            value={isDark}
-            onValueChange={setDarkMode}
+            value={wonky}
+            onValueChange={setWonky}
             trackColor={{ true: colors.action }}
           />
         </View>
@@ -204,4 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   swatchDot: { width: 10, height: 10, borderRadius: 5 },
+  segments: { flexDirection: 'row', borderWidth: 2, borderRadius: 10, overflow: 'hidden' },
+  segment: { paddingHorizontal: 12, paddingVertical: 7 },
+  segmentText: { fontSize: 13 },
 });
