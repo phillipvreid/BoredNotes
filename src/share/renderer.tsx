@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     shadowRadius: 0,
   },
-  band: { paddingVertical: 14, paddingHorizontal: 18, gap: 4 },
+  band: { paddingVertical: 14, paddingHorizontal: 18, gap: 4, minHeight: 64 },
   kicker: {
     fontFamily: FONTS.label,
     fontSize: 9,
