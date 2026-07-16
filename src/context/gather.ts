@@ -49,13 +49,15 @@ async function reverseGeocode(lat: number, lng: number): Promise<string | null> 
   }
 }
 
-export async function gatherContext(): Promise<PromptContext> {
+export async function gatherContext(allowLocation: boolean): Promise<PromptContext> {
   const now = new Date();
   const timeOfDay = getTimeOfDay(now.getHours());
   const dayOfWeek = DAYS[now.getDay()];
   const season = getSeason(now.getMonth() + 1);
 
-  const coords = await tryGetCoords();
+  // When auto-location is off, never touch the location or weather APIs —
+  // the toggle must gate all location access, not just entry tagging.
+  const coords = allowLocation ? await tryGetCoords() : null;
 
   let locationLabel: string | null = null;
   let weatherCondition: string | null = null;
