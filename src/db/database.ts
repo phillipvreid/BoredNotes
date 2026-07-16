@@ -8,6 +8,9 @@ export async function getDb(): Promise<SQLite.SQLiteDatabase> {
   _db = await SQLite.openDatabaseAsync('borednotes.db');
   await _db.execAsync(CREATE_TABLES_SQL);
   await _db.execAsync('PRAGMA foreign_keys = ON');
+  // Photo attachment was cut (app is text-first). Drop the legacy media table
+  // on older installs; new installs never create it.
+  await _db.execAsync('DROP TABLE IF EXISTS media');
   try {
     await _db.execAsync(
       `ALTER TABLE entries ADD COLUMN entry_mode TEXT NOT NULL DEFAULT 'prompted'`

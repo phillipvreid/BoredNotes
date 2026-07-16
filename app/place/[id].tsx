@@ -25,8 +25,7 @@ export default function PlaceFeedScreen() {
     setPlace(p);
     if (p) {
       const rows = await db.getAllAsync<any>(
-        `SELECT e.*, EXISTS(SELECT 1 FROM media m WHERE m.entry_id = e.id AND m.type = 'photo') as has_photo
-         FROM entries e WHERE e.place_id = ? ORDER BY e.created_at DESC`,
+        `SELECT * FROM entries WHERE place_id = ? ORDER BY created_at DESC`,
         [p.id]
       );
       setEntries(rows.filter(isPinned));

@@ -14,8 +14,6 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.borednotes.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "BoredNotes uses the camera to attach photos to your entries.",
-        "NSPhotoLibraryUsageDescription": "BoredNotes accesses your photo library to attach images to entries.",
         "NSLocationWhenInUseUsageDescription": "BoredNotes can tag your entries with where you wrote them.",
         "ITSAppUsesNonExemptEncryption": false
       },

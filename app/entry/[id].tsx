@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { getDb } from '../../src/db/database';
 import { getEntry } from '../../src/db/entries';
-import { getMediaForEntry } from '../../src/db/media';
 import { useTheme } from '../../src/theme/ThemeContext';
 import { DEFEND_PAD, FONTS, INK, MEDALS } from '../../src/theme/tokens';
 import { parseRankData } from '../../src/games/rank';
 import { parseLoveHateData } from '../../src/games/loveHate';
-import type { Entry, MediaItem } from '../../src/types';
+import type { Entry } from '../../src/types';
 import * as Haptics from 'expo-haptics';
 import { PlaceNameSheet } from '../../src/components/PlaceNameSheet';
 
@@ -24,7 +23,6 @@ export default function EntryDetailScreen() {
   const { colors, catHues } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [entry, setEntry] = useState<Entry | null>(null);
-  const [media, setMedia] = useState<MediaItem[]>([]);
   const [sheetVisible, setSheetVisible] = useState(false);
   const [sheetEntryCount, setSheetEntryCount] = useState(0);
 
@@ -33,11 +31,8 @@ export default function EntryDetailScreen() {
       const db = await getDb();
       const e = await getEntry(db, Number(id));
       setEntry(e);
-      if (e) setMedia(await getMediaForEntry(db, e.id));
     })();
   }, [id]);
-
-  const photo = media.find(m => m.type === 'photo');
 
   if (!entry) return null;
 
@@ -76,10 +71,6 @@ export default function EntryDetailScreen() {
 
         {entry.entry_mode !== 'freeform' && (
           <Text style={[styles.prompt, { color: colors.textSecondary }]}>{entry.prompt_text}</Text>
-        )}
-
-        {photo && (
-          <Image source={{ uri: photo.file_path }} style={styles.photo} resizeMode="cover" />
         )}
 
         {rank ? (
@@ -150,7 +141,6 @@ const styles = StyleSheet.create({
   dateTime: { fontSize: 13 },
   location: { fontSize: 13 },
   prompt: { fontSize: 16, fontFamily: 'Georgia', fontStyle: 'italic', lineHeight: 24 },
-  photo: { width: '100%', height: 220, borderRadius: 12 },
   response: { fontSize: 18, lineHeight: 30, fontFamily: 'Georgia', fontStyle: 'italic' },
   rankBlock: { gap: 9 },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },

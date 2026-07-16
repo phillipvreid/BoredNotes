@@ -173,9 +173,9 @@ export function FeedTab() {
                     {entry.response_text}
                   </Text>
                   )}
-                  {(entry.location_label || !!entry.has_photo) && (
+                  {entry.location_label && (
                     <Text style={[styles.cardMeta, { color: colors.textMuted }]}>
-                      {[entry.location_label ? `◉ ${entry.location_label}` : null, entry.has_photo ? '▣ photo' : null].filter(Boolean).join('  ·  ')}
+                      ◉ {entry.location_label}
                     </Text>
                   )}
                 </Sticker>
