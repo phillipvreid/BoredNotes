@@ -66,6 +66,21 @@ export function wordCounterLine(text: string): string {
   return WORD_COUNTER[WORD_COUNTER.length - 1][1];
 }
 
+// Setup-band labels for freeform (no-prompt) entries on the share card.
+export const FREEFORM_KICKERS = [
+  'NO ONE ASKED, BUT—',
+  'UNPROMPTED THOUGHT',
+  'BRAIN DUMP RECEIPT',
+  'FILED UNDER: WHATEVER',
+] as const;
+
+// Small taglines under the wordmark in the share-card footer.
+export const SHARE_TAGLINES = [
+  'professionally bored',
+  'the anti-scroll journal',
+  'bored on purpose',
+] as const;
+
 export const SHARE_LINES = [
   'Screenshot bait, honestly.',
   'Share it. Start some drama.',
