@@ -31,10 +31,11 @@ describe('getDb', () => {
     jest.isolateModules(() => {
       const sqlite = require('expo-sqlite');
       const mockDb = {
-        execAsync: jest.fn()
-          .mockResolvedValueOnce(undefined)           // CREATE_TABLES_SQL succeeds
-          .mockResolvedValueOnce(undefined)           // PRAGMA foreign_keys = ON succeeds
-          .mockRejectedValueOnce(new Error('duplicate column name: entry_mode')),
+        execAsync: jest.fn().mockImplementation(async (sql: string) => {
+          if (sql.includes('ALTER TABLE') && sql.includes('entry_mode')) {
+            throw new Error('duplicate column name: entry_mode');
+          }
+        }),
         runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
         getAllAsync: jest.fn().mockResolvedValue([]),
         getFirstAsync: jest.fn().mockResolvedValue(null),
@@ -43,6 +44,26 @@ describe('getDb', () => {
       ({ getDb } = require('../../src/db/database'));
     });
     await expect(getDb!()).resolves.not.toThrow();
+  });
+
+  it('drops the legacy media table on init (photo attachment was cut)', async () => {
+    let getDb: () => Promise<any>;
+    let db: any;
+    jest.isolateModules(() => {
+      const sqlite = require('expo-sqlite');
+      const mockDb = {
+        execAsync: jest.fn().mockResolvedValue(undefined),
+        runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 1, changes: 1 }),
+        getAllAsync: jest.fn().mockResolvedValue([]),
+        getFirstAsync: jest.fn().mockResolvedValue(null),
+      };
+      sqlite.openDatabaseAsync.mockResolvedValue(mockDb);
+      db = mockDb;
+      ({ getDb } = require('../../src/db/database'));
+    });
+    await getDb!();
+    const calls: string[] = db.execAsync.mock.calls.map((c: any[]) => c[0] as string);
+    expect(calls.some((sql: string) => /DROP TABLE IF EXISTS media/i.test(sql))).toBe(true);
   });
 
   it('returns the same db instance on repeated calls', async () => {

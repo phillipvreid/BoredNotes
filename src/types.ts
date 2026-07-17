@@ -1,6 +1,5 @@
 export type PromptCategory = 'observational' | 'reflective' | 'personal' | 'creative' | 'game';
 export type PromptSource = 'library' | 'custom';
-export type MediaType = 'photo' | 'voice';
 
 // Micro-game plumbing: a prompt's kind selects the reply UI, its game_config
 // (JSON) parameterizes it; the entry stores structured game_data (JSON) plus a
@@ -40,7 +39,6 @@ export interface Entry {
   entry_mode: 'prompted' | 'freeform';
   place_id: number | null;
   category: PromptCategory | null;
-  has_photo?: number;
 }
 
 export interface PinnedEntry extends Entry {
@@ -54,14 +52,6 @@ export interface Place {
   lat: number;
   lng: number;
   radius_m: number;
-  created_at: string;
-}
-
-export interface MediaItem {
-  id: number;
-  entry_id: number;
-  type: MediaType;
-  file_path: string;
   created_at: string;
 }
 
@@ -97,7 +87,3 @@ export const DEFAULT_MODIFIERS: PromptModifiers = {
   weather: true,
   memory: true,
 };
-
-export interface EntryWithMedia extends Entry {
-  media: MediaItem[];
-}

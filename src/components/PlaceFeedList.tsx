@@ -30,7 +30,6 @@ export function PlaceFeedList({ entries }: Props) {
             {[
               new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
               entry.entry_mode === 'freeform' ? 'freeform' : null,
-              entry.has_photo ? '🖼' : null,
             ].filter(Boolean).join('  ·  ')}
           </Text>
           <Text style={[styles.snippet, { color: colors.textPrimary }]} numberOfLines={2}>
