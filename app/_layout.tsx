@@ -77,7 +77,6 @@ export default function RootLayout() {
         <Stack.Screen name="entry/[id]" />
         <Stack.Screen name="share/[id]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="place/[id]" />
-        <Stack.Screen name="place/cluster" />
         <Stack.Screen name="saved-locations" />
       </Stack>
       </ToastProvider>

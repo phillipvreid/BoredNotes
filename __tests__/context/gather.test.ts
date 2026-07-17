@@ -33,7 +33,7 @@ describe('gatherContext', () => {
     jest.setSystemTime(new Date('2026-06-04T19:30:00'));
     mockGetPermissions.mockResolvedValue({ status: 'denied' });
 
-    const result = await gatherContext();
+    const result = await gatherContext(true);
 
     expect(result.timeOfDay).toBe('evening');
     expect(result.dayOfWeek).toBe('Thursday');
@@ -50,7 +50,7 @@ describe('gatherContext', () => {
     mockReverseGeocode.mockResolvedValue([{ city: 'Edinburgh', region: 'Scotland' }]);
     mockFetchWeather.mockResolvedValue({ condition: 'rainy', temperatureCelsius: 8 });
 
-    const result = await gatherContext();
+    const result = await gatherContext(true);
 
     expect(result.locationLabel).toBe('Edinburgh, Scotland');
     expect(result.weatherCondition).toBe('rainy');
@@ -61,7 +61,7 @@ describe('gatherContext', () => {
     jest.setSystemTime(new Date('2026-01-15T08:00:00'));
     mockGetPermissions.mockResolvedValue({ status: 'denied' });
 
-    const result = await gatherContext();
+    const result = await gatherContext(true);
 
     expect(result.locationLabel).toBeNull();
     expect(result.weatherCondition).toBeNull();
@@ -75,10 +75,32 @@ describe('gatherContext', () => {
     mockReverseGeocode.mockResolvedValue([{ city: 'Edinburgh', region: 'Scotland' }]);
     mockFetchWeather.mockResolvedValue(null);
 
-    const result = await gatherContext();
+    const result = await gatherContext(true);
 
     expect(result.locationLabel).toBe('Edinburgh, Scotland');
     expect(result.weatherCondition).toBeNull();
     expect(result.temperatureCelsius).toBeNull();
+  });
+
+  it('skips all location and weather access when allowLocation is false', async () => {
+    jest.setSystemTime(new Date('2026-01-15T08:00:00'));
+    // Even if permission would be granted, the toggle being off must prevent any access.
+    mockGetPermissions.mockResolvedValue({ status: 'granted' });
+    mockGetLastKnown.mockResolvedValue({ coords: { latitude: 55.95, longitude: -3.19 } });
+    mockReverseGeocode.mockResolvedValue([{ city: 'Edinburgh', region: 'Scotland' }]);
+    mockFetchWeather.mockResolvedValue({ condition: 'rainy', temperatureCelsius: 8 });
+
+    const result = await gatherContext(false);
+
+    // Light signals still populate; location/weather are suppressed.
+    expect(result.timeOfDay).toBe('morning');
+    expect(result.locationLabel).toBeNull();
+    expect(result.weatherCondition).toBeNull();
+    expect(result.temperatureCelsius).toBeNull();
+    // No location or weather APIs should have been touched at all.
+    expect(mockGetPermissions).not.toHaveBeenCalled();
+    expect(mockGetLastKnown).not.toHaveBeenCalled();
+    expect(mockReverseGeocode).not.toHaveBeenCalled();
+    expect(mockFetchWeather).not.toHaveBeenCalled();
   });
 });

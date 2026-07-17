@@ -73,7 +73,8 @@ async function _getContextualPrompt(
     // category on the entry (for Greatest Hits pills / library repeat-avoidance).
     // It is deliberately NOT passed to generateAiPrompt — Help Me Write prompts
     // are chip-driven (place/time/weather/memory), not tied to observe/reflect/etc.
-    const context = await gatherContext();
+    const allowLocation = (await getSetting(db, 'auto_location')) === 'true';
+    const context = await gatherContext(allowLocation);
     const aiText = await generateAiPrompt(
       {
         depth: selected.depth,

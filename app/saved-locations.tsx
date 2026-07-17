@@ -92,7 +92,7 @@ export default function SavedLocationsScreen() {
 
         {places.length === 0 && (
           <Text style={[styles.empty, { color: colors.textMuted }]}>
-            No saved locations yet.{'\n'}Long-press a cluster on the map to name it.
+            No saved locations yet.{'\n'}Open a note with a location and name the place to save it.
           </Text>
         )}
 
