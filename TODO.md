@@ -17,7 +17,7 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 - [x] Re-check CSV export and search still work with `entry_kind`/`game_data` for game entries (response_text plain-text fallback). Verified: search already matched game entries because rank entries store `renderRankResponseText()` output in `response_text` (locked in with searchEntries tests). CSV now also exports `category`/`entry_kind`/`game_data` columns and rebuilds response_text from `game_data` if it's ever empty.
 
 ## Housekeeping
-- [ ] Write/save a design spec + plan doc for the Arcade Sticker rollout under `docs/superpowers/specs` and `docs/superpowers/plans` (all other features have one; this one doesn't yet).
+- [x] Write/save a design spec + plan doc for the Arcade Sticker rollout under `docs/superpowers/specs` and `docs/superpowers/plans` (all other features have one; this one doesn't yet). Done: `docs/superpowers/specs/2026-07-20-arcade-sticker-design.md` + `docs/superpowers/plans/2026-07-20-arcade-sticker.md`, backfilled from current code (tokens, six themes, micro-game plumbing, Help Me Write chips) plus the PR trail and stacked-PR lesson.
 - [x] Delete the stray untracked `Agent` file showing in `git status`.
 - [x] Push branch and confirm it actually landed on remote (per project workflow note — pushes have silently failed before). Confirmed on GitHub: main has c285185.
 - [x] Open PR for `feat/arcade-sticker-v2` → main once device testing above is done. Done: PRs #19/#17/#18 merged (plus #20 to land the stacked content that missed main); all confirmed on `main` at b7a5a53.
