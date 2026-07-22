@@ -30,8 +30,6 @@ export const SAVED_TOASTS = [
 export const SAVED_TOAST_MS = 1250;
 
 export const REPLY_COPY = {
-  promptedLabel: 'FINE. ANSWERING.',
-  freeformLabel: 'POINTLESS, BUT OK',
   promptedPlaceholder: 'type here, genius…',
   freeformPlaceholder: 'empty the skull here…',
   freeformQuestion: 'Say literally anything. Nobody is reading. Probably.',

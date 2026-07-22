@@ -270,7 +270,6 @@ export default function RespondScreen() {
   const promptPillLabel = cardPrompt
     ? (isLoveHate ? 'LOVE IT / HATE IT' : catStyle?.label)
     : (activeChipLabels.length > 0 ? activeChipLabels.join(' + ') : 'SPARK');
-  const headerLabel = prompted ? REPLY_COPY.promptedLabel : REPLY_COPY.freeformLabel;
   const sendLabel = prompted ? REPLY_COPY.promptedSend : REPLY_COPY.freeformSend;
   const rankFilled = rankItems.every(i => i.trim() !== '') && defense.trim() !== '';
   const loveHateFilled = love.trim() !== '' && hate.trim() !== '';
@@ -287,7 +286,6 @@ export default function RespondScreen() {
         >
           <View style={styles.headerRow}>
             <IconSticker glyph="←" onPress={() => router.back()} />
-            <Text style={[styles.headerLabel, { color: colors.textPrimary }]}>{headerLabel}</Text>
           </View>
 
           {/* Freeform gets the option to summon a prompt */}
@@ -465,7 +463,6 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
   containerKeyboard: { paddingBottom: 12 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  headerLabel: { fontFamily: FONTS.label, fontSize: 13, letterSpacing: 1 },
   helpChip: { alignSelf: 'flex-start' },
   promptCard: { padding: 14, paddingBottom: 16, marginBottom: 8 },
   promptMeta: { flexDirection: 'row', gap: 6 },
