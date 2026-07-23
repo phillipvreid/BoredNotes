@@ -14,7 +14,7 @@ export async function requestLocationPermission(): Promise<boolean> {
   return status === 'granted';
 }
 
-export async function captureLocation(): Promise<CapturedLocation | null> {
+export async function getCurrentCoords(): Promise<{ lat: number; lng: number } | null> {
   try {
     const { status } = await Location.requestForegroundPermissionsAsync();
     if (status !== 'granted') return null;
@@ -22,12 +22,17 @@ export async function captureLocation(): Promise<CapturedLocation | null> {
     const loc = await Location.getCurrentPositionAsync({
       accuracy: Location.Accuracy.Balanced,
     });
-    const { latitude: lat, longitude: lng } = loc.coords;
-    const label = await reverseGeocode(lat, lng);
-    return { lat, lng, label };
+    return { lat: loc.coords.latitude, lng: loc.coords.longitude };
   } catch {
     return null;
   }
+}
+
+export async function captureLocation(): Promise<CapturedLocation | null> {
+  const coords = await getCurrentCoords();
+  if (!coords) return null;
+  const label = await reverseGeocode(coords.lat, coords.lng);
+  return { lat: coords.lat, lng: coords.lng, label };
 }
 
 async function reverseGeocode(lat: number, lng: number): Promise<string | null> {
