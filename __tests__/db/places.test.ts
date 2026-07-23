@@ -8,6 +8,7 @@ import {
   syncPlaceToEntries,
   checkEntryAgainstPlaces,
   haversineMeters,
+  sortPlacesByDistance,
 } from '../../src/db/places';
 import { openDatabaseAsync } from 'expo-sqlite';
 import type { Place } from '../../src/types';
@@ -293,5 +294,39 @@ describe('checkEntryAgainstPlaces', () => {
       expect.any(String),
       [2, 'Near', 99]
     );
+  });
+});
+
+describe('sortPlacesByDistance', () => {
+  it('sorts places nearest-first when coords are given', () => {
+    const places = [
+      makePlace({ id: 1, name: 'Far', lat: 0.01, lng: 0 }),   // ~1111m
+      makePlace({ id: 2, name: 'Near', lat: 0.001, lng: 0 }), // ~111m
+      makePlace({ id: 3, name: 'Nearest', lat: 0, lng: 0 }),  // 0m
+    ];
+    const sorted = sortPlacesByDistance(places, { lat: 0, lng: 0 });
+    expect(sorted.map(p => p.name)).toEqual(['Nearest', 'Near', 'Far']);
+  });
+
+  it('does not mutate the input array', () => {
+    const places = [
+      makePlace({ id: 1, name: 'Far', lat: 0.01, lng: 0 }),
+      makePlace({ id: 2, name: 'Near', lat: 0.001, lng: 0 }),
+    ];
+    const original = [...places];
+    sortPlacesByDistance(places, { lat: 0, lng: 0 });
+    expect(places).toEqual(original);
+  });
+
+  it('passes the input order through unchanged when coords is null', () => {
+    const places = [
+      makePlace({ id: 1, name: 'B', lat: 5, lng: 5 }),
+      makePlace({ id: 2, name: 'A', lat: 1, lng: 1 }),
+    ];
+    expect(sortPlacesByDistance(places, null)).toEqual(places);
+  });
+
+  it('returns an empty array for an empty input', () => {
+    expect(sortPlacesByDistance([], { lat: 0, lng: 0 })).toEqual([]);
   });
 });

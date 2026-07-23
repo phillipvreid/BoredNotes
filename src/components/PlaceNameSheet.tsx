@@ -3,6 +3,7 @@ import {
   Modal, View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import type { Place } from '../types';
 import { getDb } from '../db/database';
 import { createPlace, updatePlace, syncPlaceToEntries, getPlace } from '../db/places';
 import { useTheme } from '../theme/ThemeContext';
@@ -13,7 +14,7 @@ interface Props {
   coordinate: { lat: number; lng: number };
   initialName?: string;
   entryCount: number;
-  onSaved: () => void;
+  onSaved: (place: Place) => void;
   onClose: () => void;
 }
 
@@ -42,8 +43,10 @@ export function PlaceNameSheet({
         await updatePlace(db, placeId, { name: trimmed });
         record = await getPlace(db, placeId);
       }
-      if (record) await syncPlaceToEntries(db, record);
-      onSaved();
+      if (record) {
+        await syncPlaceToEntries(db, record);
+        onSaved(record);
+      }
       onClose();
     } catch {
       Alert.alert('Could not save', 'Please try again.');

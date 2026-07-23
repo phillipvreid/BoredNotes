@@ -11,6 +11,18 @@ export function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: 
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+export function sortPlacesByDistance<T extends { lat: number; lng: number }>(
+  places: T[],
+  coords: { lat: number; lng: number } | null
+): T[] {
+  if (!coords) return places;
+  return [...places].sort(
+    (a, b) =>
+      haversineMeters(coords.lat, coords.lng, a.lat, a.lng) -
+      haversineMeters(coords.lat, coords.lng, b.lat, b.lng)
+  );
+}
+
 export async function getPlace(db: SQLiteDatabase, id: number): Promise<Place | null> {
   return db.getFirstAsync<Place>('SELECT * FROM places WHERE id = ?', [id]);
 }
