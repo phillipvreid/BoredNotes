@@ -31,6 +31,7 @@ import { Mascot } from '../src/components/ui/Mascot';
 import { Chip } from '../src/components/ui/Chip';
 import { OutlinedNumber } from '../src/components/ui/OutlinedNumber';
 import { useToast } from '../src/components/ui/Toast';
+import { PlacePickerSheet } from '../src/components/PlacePickerSheet';
 
 const CHIP_LABELS: Record<keyof PromptModifiers, string> = {
   place: 'PLACE',
@@ -79,6 +80,7 @@ export default function RespondScreen() {
   const [hate, setHate] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCoords, setLocationCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [placeSheetOpen, setPlaceSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [helpMeWriteOpen, setHelpMeWriteOpen] = useState(false);
   const [prompt, setPrompt] = useState<CurrentPrompt | null>(null);
@@ -288,10 +290,22 @@ export default function RespondScreen() {
             <IconSticker glyph="←" onPress={() => router.back()} />
           </View>
 
-          {/* Freeform gets the option to summon a prompt */}
-          {!cardPrompt && !helpMeWriteOpen && (
-            <Chip label="HELP ME WRITE" onPress={handleToggleHelpMeWrite} shadow={SHADOW_SM} style={styles.helpChip} />
-          )}
+          {/* Freeform gets the option to summon a prompt; PLACE tagging is
+              always available regardless of prompt state. No "PLACE" text
+              here — the Help Me Write modifiers row below can show its own
+              PLACE context chip, and the two must never look like the same
+              control. */}
+          <View style={styles.topChipRow}>
+            {!cardPrompt && !helpMeWriteOpen && (
+              <Chip label="HELP ME WRITE" onPress={handleToggleHelpMeWrite} shadow={SHADOW_SM} />
+            )}
+            <Chip
+              label={locationLabel ? `◉ ${locationLabel.toUpperCase()}` : '◉'}
+              active={locationLabel !== ''}
+              onPress={() => setPlaceSheetOpen(true)}
+              shadow={SHADOW_SM}
+            />
+          </View>
 
           {activePrompt && (
             <Sticker
@@ -453,6 +467,15 @@ export default function RespondScreen() {
           </View>
         </ScrollView>
       </View>
+      <PlacePickerSheet
+        visible={placeSheetOpen}
+        initialCoords={locationCoords}
+        onPick={(label, lat, lng) => {
+          setLocationLabel(label);
+          setLocationCoords({ lat, lng });
+        }}
+        onClose={() => setPlaceSheetOpen(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -463,7 +486,7 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 40, gap: 16 },
   containerKeyboard: { paddingBottom: 12 },
   headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  helpChip: { alignSelf: 'flex-start' },
+  topChipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', alignSelf: 'flex-start' },
   promptCard: { padding: 14, paddingBottom: 16, marginBottom: 8 },
   promptMeta: { flexDirection: 'row', gap: 6 },
   catPill: { backgroundColor: CHIP_SCRIM, borderRadius: 6, paddingVertical: 3, paddingHorizontal: 8, alignSelf: 'flex-start' },
