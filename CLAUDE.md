@@ -82,8 +82,8 @@ npm run start
 
 ## Git Workflow
 
-- After committing, always verify the push actually succeeded — commits have silently failed to push before.
-- Direct pushes may be blocked by the auto-mode classifier; surface git commands for the user to run manually rather than retrying.
+- After committing, always verify the push actually succeeded — commits have silently failed to push before (e.g. compare local HEAD to `@{u}`).
+- Direct pushes from the session generally work; if one is blocked by the auto-mode classifier, surface the git commands for the user to run manually rather than retrying.
 
 ## Dependencies
 
