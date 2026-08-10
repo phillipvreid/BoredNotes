@@ -12,7 +12,7 @@ Status as of 2026-07-06: everything merged to `main` (b7a5a53) via PRs #19 (v2 +
 
 ## Polish / known gaps
 - [x] Review flat offset shadows and ink keylines on smaller iPhone screens (SE-class) for cramping/overlap. Confirmed clean on iPhone 17e (smallest simulator currently available; no true SE-class simulator on this Xcode install).
-- [ ] Confirm Mascot bob/blink animation doesn't drain battery or jank on older devices.
+- [x] Confirm Mascot bob/blink animation doesn't drain battery or jank on older devices. Checked on device — non-issue.
 - [x] Sanity-check the global Toast doesn't stack or overlap with the Share sheet. Confirmed on device: save → immediately open Share on that entry, toast and the "SEND IT" button don't collide.
 - [x] Re-check CSV export and search still work with `entry_kind`/`game_data` for game entries (response_text plain-text fallback). Verified: search already matched game entries because rank entries store `renderRankResponseText()` output in `response_text` (locked in with searchEntries tests). CSV now also exports `category`/`entry_kind`/`game_data` columns and rebuilds response_text from `game_data` if it's ever empty.
 
