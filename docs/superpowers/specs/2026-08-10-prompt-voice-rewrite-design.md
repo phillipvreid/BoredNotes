@@ -12,6 +12,8 @@ This is not a "define a new voice" problem. `docs/voice-guide.md` already specif
 
 **This project implements `docs/voice-guide.md` against the two places prompts actually get produced.** The guide itself is not being revisited — confirmed with the user that it still reflects the intended voice.
 
+**Future scale note:** the library will grow well past 76 prompts eventually. That doesn't change what this pass does, but it does change what this pass *is* — see "Pattern diversity" under Methodology.
+
 ## Scope
 
 ### In scope
@@ -22,7 +24,7 @@ This is not a "define a new voice" problem. `docs/voice-guide.md` already specif
 
 ### Out of scope
 - Category or depth taxonomy changes (no reviving HOT TAKE/HOT TEA/NOSTALGIA, no merging/splitting categories). If a specific prompt or cluster of prompts turns out to genuinely resist the voice within its current category, that gets flagged as a follow-up decision in the PR description rather than resolved by restructuring here.
-- `docs/voice-guide.md` itself — treated as settled input, not touched.
+- `docs/voice-guide.md`'s rules and voice direction — treated as settled input, not revisited. The one narrow exception: its "reference" section may get 4-6 rewritten prompts appended as calibration examples (see "Pattern diversity" under Methodology) — additive only, no existing guidance in the guide changes.
 - Any UI chrome copy (`src/theme/copy.ts`) — already in voice per the guide's own "reference: existing copy that nails it" section; not part of this pass.
 - Depth-3 toast/chrome softening logic (`docs/voice-guide.md` "Heavy entries" section) — that's an app-behavior feature (detecting depth-3 entries and swapping toast rotation), separate from prompt text itself. Not part of this content rewrite.
 
@@ -37,6 +39,18 @@ Applied per the guide's existing rules, by depth tier:
 Anti-patterns to avoid, per the guide: two jokes stacked in one line, judging what the user might write (vs. judging the act of journaling), exclamation-mark enthusiasm, emoji, name-calling past "genius"/"friend."
 
 `ai.ts` change: the three per-depth style lines from the guide get injected into the generation instruction alongside the existing category/topic/context instructions — additive, not a restructuring of `generateAiPrompt`'s existing category-anchored vs. chip-anchored branches.
+
+### Pattern diversity (calibration set for future growth)
+
+Because the library won't stay at 76, this rewrite is also establishing the reference set that future batches — written by hand, or drafted by the now-voiced `ai.ts` and curated by a human — get pattern-matched against. `voice-guide.md`'s own "reference: existing copy that nails it" section is currently thin (5 UI-copy lines, no prompt-specific range).
+
+To avoid the calibration set collapsing into one shape repeated 76 times, deliberately vary *how* the tag-on-jab lands rather than defaulting to a single "question. quip." rhythm every time:
+- question, then a separate deadpan quip sentence (the guide's own example: *"Sniff the air. Report your findings. Be brave."*)
+- the jab embedded inside the question itself, no separate sentence
+- the question posed as its own dry joke, no separate quip needed
+- a flat, absurd premise stated before the question does its work
+
+This is a wording/rhythm concern only — it doesn't touch category, depth, or the guide's rules above. If a handful of the rewritten depth-1/depth-2 prompts read as strong, varied reference examples, consider pulling 4-6 of them into `voice-guide.md`'s reference section as part of this same pass, so the guide itself gets a fuller prompt-specific calibration set for whoever writes the next batch.
 
 ## Validation
 
