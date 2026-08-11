@@ -72,7 +72,7 @@
   {"text": "If you sent a postcard from this exact moment to your future self, what would it say?", "category": "creative", "depth": 3},
   {"text": "Describe the version of yourself you're becoming.", "category": "creative", "depth": 3},
   {"text": "Rank your last 3 snacks. Defend #1.", "category": "game", "depth": 1, "kind": "rank", "slots": ["your undisputed #1…", "the runner-up…", "third place, sorry…"]},
-  {"text": "Rank 3 people you would trust with your phone.", "category": "game", "depth": 1, "kind": "rank", "slots": ["most trusted…", "probably fine…", "risky but ok…"]},
+  {"text": "Rank 3 people you'd trust with your unlocked phone for five minutes.", "category": "game", "depth": 1, "kind": "rank", "slots": ["most trusted…", "probably fine…", "risky but ok…"]},
   {"text": "Rank 3 ways to waste a perfectly good afternoon.", "category": "game", "depth": 1, "kind": "rank", "slots": ["the elite waste…", "solid filler…", "desperate measures…"]},
   {
     "text": "Love it / Hate it. The theme decides, you commit.",
