@@ -524,13 +524,13 @@ git commit -m "content: rewrite CONFESS category prompts in voice-guide voice"
 
 ```
 OLD: {"text": "If this moment were a movie scene, what genre would it be?", "category": "creative", "depth": 1},
-NEW: {"text": "If this exact moment were a movie scene, what genre are we in?", "category": "creative", "depth": 1},
+NEW: {"text": "If this exact moment were a movie scene, what genre are we in? Nobody consented to this soundtrack.", "category": "creative", "depth": 1},
 
 OLD: {"text": "Give the person nearest to you a superhero name based only on what you can observe.", "category": "creative", "depth": 1},
-NEW: {"text": "Give the person nearest you a superhero name, based only on what you can currently observe.", "category": "creative", "depth": 1},
+NEW: {"text": "Give the person nearest you a superhero name, based only on what you can currently observe. Bonus points if it's embarrassing.", "category": "creative", "depth": 1},
 
 OLD: {"text": "If the sounds around you were a song, what would it be called?", "category": "creative", "depth": 1},
-NEW: {"text": "If the sounds around you right now were a song, what's it called?", "category": "creative", "depth": 1},
+NEW: {"text": "If the sounds around you right now were a song, what's it called? It's probably not a bop.", "category": "creative", "depth": 1},
 
 OLD: {"text": "What animal would best describe your energy right now?", "category": "creative", "depth": 1},
 NEW: {"text": "What animal matches your current energy? Commit to the answer.", "category": "creative", "depth": 1},
