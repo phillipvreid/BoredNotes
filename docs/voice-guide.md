@@ -69,6 +69,17 @@ From `src/theme/copy.ts` — use these as calibration when writing new lines:
 - "Nothing here. Shocking." — empty state done right: dry, two words of judgment aimed at the void.
 - "Inflict this on someone you love." — the share-card register: chaotic but warm.
 
+### Prompt examples (2026-08-10 rewrite)
+
+Pulled from `library.json` as calibration for future prompt-writing — notice these hit the tag-on-jab pattern four different ways, not one repeated shape.
+
+- "Name a sound you've been ignoring. It knows." — separate deadpan quip sentence.
+- "What color is everywhere around you right now? Congratulations, you live inside it." — quip lands as the tag.
+- "What are two people near you doing right now? Narrate it like a nature documentary." — imperative instruction as the jab.
+- "If the sounds around you right now were a song, what's it called? It's probably not a bop." — an absurd premise plus a deflating tag, stacked cleanly without becoming two separate jokes.
+- "What would a stranger clock about this place in five seconds flat that you stopped seeing months ago?" — jab embedded inside the question, one sentence.
+- "What did you mean to do today that just… didn't happen? No follow-up questions." — depth 2, dry deflection lowers the stakes.
+
 ## Line bank
 
 New lines written to spec, by surface. Safe to pull from directly.

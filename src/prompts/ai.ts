@@ -92,7 +92,14 @@ export async function generateAiPrompt(
   input: AiPromptInput,
   apiKey: string
 ): Promise<string | null> {
-  const depthLabel = ['light and quick', 'moderately thoughtful', 'deep and personal'][input.depth - 1];
+  const DEPTH_VOICE = [
+    'Snarky, smug, and silly. Ask a real question, then add a short deadpan jab. No emoji, no exclamation marks. Example register: "Sniff the air. Report your findings. Be brave."',
+    'A sincere question with one dry tag-on quip that lowers the stakes. Example register: "What\'s something you\'re pretending is fine? It can hear you."',
+    'Sincere and direct with a dry undertone. No jokes, no sentimentality — like a deadpan friend asking for real.',
+  ] as const;
+  const voiceInstruction = DEPTH_VOICE[input.depth - 1];
+  const DEPTH_REGISTER = ['light and quick', 'moderately thoughtful', 'deep and personal'] as const;
+  const registerLabel = DEPTH_REGISTER[input.depth - 1];
   const topicsLine = input.recentTopics.length > 0
     ? `Recent topics the user has responded to: ${input.recentTopics.join(', ')}.`
     : '';
@@ -111,7 +118,7 @@ export async function generateAiPrompt(
     max_tokens: 80,
     messages: [{
       role: 'user',
-      content: `${contextLine ? contextLine + ' ' : ''}Generate one ${depthLabel} journaling prompt ${topicInstruction}.${steeringLine} ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
+      content: `${contextLine ? contextLine + ' ' : ''}Generate one ${registerLabel} journaling prompt ${topicInstruction}. Voice: ${voiceInstruction}${steeringLine} ${topicsLine} The prompt should be a single question, under 20 words, written in second person. Return only the prompt text, no quotes, no explanation.`,
     }],
   });
 
