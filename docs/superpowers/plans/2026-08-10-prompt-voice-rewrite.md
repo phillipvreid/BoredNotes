@@ -637,7 +637,7 @@ Pulled from `library.json` as calibration for future prompt-writing — notice t
 - "Name a sound you've been ignoring. It knows." — separate deadpan quip sentence.
 - "What color is everywhere around you right now? Congratulations, you live inside it." — quip lands as the tag.
 - "What are two people near you doing right now? Narrate it like a nature documentary." — imperative instruction as the jab.
-- "If the sounds around you right now were a song, what's it called?" — the premise itself carries the joke, no separate tag needed.
+- "If the sounds around you right now were a song, what's it called? It's probably not a bop." — an absurd premise plus a deflating tag, stacked cleanly without becoming two separate jokes.
 - "What would a stranger clock about this place in five seconds flat that you stopped seeing months ago?" — jab embedded inside the question, one sentence.
 - "What did you mean to do today that just… didn't happen? No follow-up questions." — depth 2, dry deflection lowers the stakes.
 ```
