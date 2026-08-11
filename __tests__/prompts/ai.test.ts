@@ -255,6 +255,43 @@ describe('generateAiPrompt', () => {
     expect(body.messages[0].content).toContain('only use what makes it feel timely or personal');
   });
 
+  it('injects the depth-1 voice instruction (snarky, deadpan jab)', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+    } as any);
+
+    await generateAiPrompt({ category: 'observational', depth: 1, recentTopics: [] }, MOCK_KEY);
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain('Snarky, smug, and silly');
+    expect(body.messages[0].content).toContain('deadpan jab');
+  });
+
+  it('injects the depth-2 voice instruction (sincere question, dry tag-on quip)', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+    } as any);
+
+    await generateAiPrompt({ category: 'reflective', depth: 2, recentTopics: [] }, MOCK_KEY);
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain('dry tag-on quip');
+  });
+
+  it('injects the depth-3 voice instruction (sincere, no jokes)', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ content: [{ type: 'text', text: 'x' }] }),
+    } as any);
+
+    await generateAiPrompt({ category: 'personal', depth: 3, recentTopics: [] }, MOCK_KEY);
+
+    const body = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+    expect(body.messages[0].content).toContain('No jokes, no sentimentality');
+  });
+
   describe('Help Me Write (no category — chip-driven)', () => {
     it('never mentions a homescreen category when category is omitted', async () => {
       global.fetch = jest.fn().mockResolvedValueOnce({
