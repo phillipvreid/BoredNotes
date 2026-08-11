@@ -461,7 +461,7 @@ OLD: {"text": "What's your go-to order at a coffee shop?", "category": "personal
 NEW: {"text": "What's your go-to coffee order? Judge yourself accordingly.", "category": "personal", "depth": 1},
 
 OLD: {"text": "What's something you do differently from how most people do it?", "category": "personal", "depth": 2},
-NEW: {"text": "What's something you do differently from how everyone else seems to do it?", "category": "personal", "depth": 2},
+NEW: {"text": "What's something you do differently from how everyone else seems to do it? Doesn't mean you're right.", "category": "personal", "depth": 2},
 
 OLD: {"text": "What's a goal you had at the start of this year? How's it going?", "category": "personal", "depth": 2},
 NEW: {"text": "What was one goal you had at the start of this year? Status update, please.", "category": "personal", "depth": 2},
@@ -473,7 +473,7 @@ OLD: {"text": "What's a compliment you've received that stuck with you?", "categ
 NEW: {"text": "What's a compliment that's stuck with you longer than it probably should have?", "category": "personal", "depth": 2},
 
 OLD: {"text": "What's a quality you admire in others that you wish you had more of?", "category": "personal", "depth": 2},
-NEW: {"text": "What's a quality you admire in other people that you wish you had more of?", "category": "personal", "depth": 2},
+NEW: {"text": "What's a quality you admire in other people that you wish you had more of? You're allowed to be a little jealous about it.", "category": "personal", "depth": 2},
 
 OLD: {"text": "What does your ideal ordinary Tuesday look like?", "category": "personal", "depth": 3},
 NEW: {"text": "What does your ideal, completely ordinary Tuesday actually look like?", "category": "personal", "depth": 3},
@@ -494,7 +494,8 @@ OLD: {"text": "What's a fear you've gotten better at living with?", "category": 
 NEW: {"text": "What's a fear you've gotten better at living alongside, even if it never left?", "category": "personal", "depth": 3},
 ```
 
-Leave this entry exactly as it is — already in voice, no edit needed: `"What's something you've changed your mind about in the last year?"`
+OLD: {"text": "What's something you've changed your mind about in the last year?", "category": "personal", "depth": 2},
+NEW: {"text": "What's something you've changed your mind about in the last year? You don't have to defend the old opinion.", "category": "personal", "depth": 2},
 
 - [ ] **Step 2: Run the regression guard and full suite**
 
@@ -547,10 +548,10 @@ OLD: {"text": "Write a two-sentence story about a stranger you've seen today.", 
 NEW: {"text": "Write a two-sentence story about a stranger you saw today. They'll never know they're famous.", "category": "creative", "depth": 2},
 
 OLD: {"text": "If you could redesign one thing about where you are right now, what would it be?", "category": "creative", "depth": 2},
-NEW: {"text": "If you could redesign one thing about where you are right now, what's getting fixed first?", "category": "creative", "depth": 2},
+NEW: {"text": "If you could redesign one thing about where you are right now, what's getting fixed first? Be specific. Be a little unreasonable.", "category": "creative", "depth": 2},
 
 OLD: {"text": "What would a documentary crew find interesting about the last hour of your life?", "category": "creative", "depth": 2},
-NEW: {"text": "What would a documentary crew find weirdly interesting about the last hour of your life?", "category": "creative", "depth": 2},
+NEW: {"text": "What would a documentary crew find weirdly interesting about the last hour of your life? They'd probably need a narrator with a very flat voice.", "category": "creative", "depth": 2},
 
 OLD: {"text": "If your past self from five years ago were watching you right now, what would they think?", "category": "creative", "depth": 3},
 NEW: {"text": "If your self from five years ago were watching you right now, what would they think?", "category": "creative", "depth": 3},
